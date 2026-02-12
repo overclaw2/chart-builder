@@ -60,16 +60,24 @@ export class ContainerVisualizationComponent implements OnInit {
   }
 
   getItemPosition(item: Item, compartment: Compartment): { left: string; width: string } {
-    const compartmentWidth = compartment.totalCapacity;
-    const itemStart = item.position;
-    const itemEnd = item.position + item.length;
+    // Use widthindex range (not totalCapacity) for position calculation
+    const compartmentRangeStart = compartment.widthindexStart;
+    const compartmentRangeEnd = compartment.widthindexEnd;
+    const compartmentRangeSize = compartmentRangeEnd - compartmentRangeStart;
     
-    const leftPercent = (itemStart / compartmentWidth) * 100;
-    const widthPercent = ((itemEnd - itemStart) / compartmentWidth) * 100;
+    // Item position is in absolute widthindex coordinates
+    const itemStart = item.position;
+    // Use dimensionMcm for actual item width, scaled to match the compartment range
+    const itemDimension = item.dimensionMcm || 27;
+    const itemEnd = item.position + itemDimension;
+    
+    // Calculate position relative to compartment's widthindex range
+    const leftPercent = ((itemStart - compartmentRangeStart) / compartmentRangeSize) * 100;
+    const widthPercent = ((itemDimension) / compartmentRangeSize) * 100;
 
     return {
-      left: `${leftPercent}%`,
-      width: `${widthPercent}%`,
+      left: `${Math.max(0, leftPercent)}%`,  // Clamp to prevent negative values
+      width: `${Math.max(0, widthPercent)}%`,
     };
   }
 
