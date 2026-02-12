@@ -120,9 +120,14 @@ export class ContainerVisualizationComponent implements OnInit {
       widthPercent = 100 - leftPercent;
     }
     
-    // Ensure width is never 0
+    // Ensure width is never 0 - always show minimum width to prevent invisible items
+    // This is critical: items at the edge (left=100%) would have width=0 otherwise
     if (widthPercent <= 0) {
       widthPercent = 3; // Minimum width to ensure visibility
+      // If we're at the right edge, shift left to accommodate minimum width
+      if (leftPercent > 97) {
+        leftPercent = Math.max(0, 100 - widthPercent);
+      }
     }
 
     return {
