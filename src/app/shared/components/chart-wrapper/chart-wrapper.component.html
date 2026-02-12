@@ -1,0 +1,7 @@
+<div class="chart-wrapper" [class.selected]="isSelected" (click)="chartClick.emit(chart.id)">
+  <div #chartContainer class="chart-container"></div>
+  <div class="chart-info">
+    <span class="chart-title">{{ chart.title }}</span>
+    <span class="chart-type">({{ chart.type }})</span>
+  </div>
+</div>

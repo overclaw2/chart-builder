@@ -1,0 +1,23 @@
+<div class="canvas-container">
+  <div class="toolbar">
+    <h1>Chart Builder</h1>
+    <button (click)="onAddChart()" class="btn-primary">+ Add Chart</button>
+  </div>
+
+  <div class="charts-grid">
+    <div *ngFor="let chart of charts$ | async" class="chart-item">
+      <app-chart-wrapper
+        [chart]="chart"
+        [isSelected]="(selectedChartId$ | async) === chart.id"
+        (chartClick)="onChartSelect(chart.id)"
+      ></app-chart-wrapper>
+      <button
+        class="btn-delete"
+        (click)="onDeleteChart(chart.id)"
+        title="Delete chart"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>

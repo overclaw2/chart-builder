@@ -1,12 +1,10 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { ChartCanvasComponent } from './features/chart-canvas/chart-canvas.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  imports: [ChartCanvasComponent],
+  template: '<app-chart-canvas></app-chart-canvas>',
+  styles: [],
 })
-export class App {
-  protected readonly title = signal('chart-builder');
-}
+export class App {}

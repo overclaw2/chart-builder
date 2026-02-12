@@ -1,0 +1,47 @@
+.chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 100%;
+  min-height: 300px;
+}
+
+.chart-wrapper:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.chart-wrapper.selected {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: #f0f9ff;
+}
+
+.chart-container {
+  flex: 1;
+  min-height: 250px;
+  width: 100%;
+}
+
+.chart-info {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.chart-title {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.chart-type {
+  font-style: italic;
+  color: #9ca3af;
+}
