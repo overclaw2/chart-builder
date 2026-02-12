@@ -18,6 +18,7 @@ export class ContainerVisualizationComponent implements OnInit {
   dragTooltip: { index: number; visible: boolean } = { index: 0, visible: false };
   hoveredItemId: string | null = null;
   isDragging: boolean = false;
+  grabOffset: number = 0; // Offset between mouse position and item's left edge when grab occurs
   contextMenu: { visible: boolean; x: number; y: number; containerId: string; compartmentId: string; itemId: string } = {
     visible: false,
     x: 0,
@@ -151,6 +152,16 @@ export class ContainerVisualizationComponent implements OnInit {
       event.dataTransfer.effectAllowed = 'move';
     }
     this.dragTooltip.visible = true;
+
+    // Calculate grab offset: where on the item (in pixels) the user clicked relative to the item's left edge
+    const itemElement = event.target as HTMLElement;
+    const itemRect = itemElement.getBoundingClientRect();
+    const mouseXInItem = event.clientX - itemRect.left;
+    const itemWidthPixels = itemRect.width;
+    
+    // Store grab offset as a fraction (0 = left edge, 1 = right edge)
+    // This will be used during drop to maintain the exact grab point
+    this.grabOffset = mouseXInItem / itemWidthPixels;
   }
 
   onDragOver(event: DragEvent, compartmentId?: string): void {
@@ -181,14 +192,27 @@ export class ContainerVisualizationComponent implements OnInit {
     const dragX = event.clientX - rect.left;
     const dragPercent = dragX / rect.width;
 
-    // Calculate the index at current mouse position
-    let currentIndex =
-      targetCompartment.widthindexStart +
-      dragPercent * (targetCompartment.widthindexEnd - targetCompartment.widthindexStart);
-
-    // NEW: Clamp tooltip to compartment range (consistent with onDrop behavior)
+    // Get compartment dimensions
     const compartmentStart = targetCompartment.widthindexStart;
     const compartmentEnd = targetCompartment.widthindexEnd;
+    const compartmentWidth = compartmentEnd - compartmentStart;
+    
+    // Get item dimensions
+    const itemWidth = this.draggedItem.item.dimensionMcm || 27;
+    
+    // Calculate the position considering grab offset
+    // The grab offset tells us where on the item the user grabbed it
+    // We need to position the item so that the grabbed point aligns with the mouse position
+    const mouseIndexPosition = compartmentStart + dragPercent * compartmentWidth;
+    
+    // Calculate item's left edge position based on grab offset
+    // If grabOffset is 0.5 (middle), then: itemLeftEdge = mouseIndexPosition - (itemWidth * 0.5)
+    const itemLeftEdgeIndex = mouseIndexPosition - (this.grabOffset * itemWidth);
+    
+    // The tooltip should show the central position of the item (left edge + half width)
+    let currentIndex = itemLeftEdgeIndex + (itemWidth / 2);
+
+    // Clamp tooltip to compartment range (consistent with onDrop behavior)
     currentIndex = Math.max(compartmentStart, Math.min(compartmentEnd, currentIndex));
 
     // Update tooltip with rounded index value
@@ -217,19 +241,19 @@ export class ContainerVisualizationComponent implements OnInit {
       ?.compartments.find((comp) => comp.id === toCompartmentId);
       
     if (targetCompartment) {
-      // Calculate new position based on drop location (Avihai's requirement: stay exactly where mouse released)
-      // Use the exact drop position without rounding
+      // Calculate new position based on drop location while maintaining grab point
       const compartmentStart = targetCompartment.widthindexStart;
       const compartmentEnd = targetCompartment.widthindexEnd;
       const compartmentWidth = compartmentEnd - compartmentStart;
       
-      // Get item dimensions for centering
+      // Get item dimensions
       const itemWidth = this.draggedItem.item.dimensionMcm || 27;
       
-      // FIX: Center the item at the drop position (position represents CENTER of item, not start)
-      // The mouse position shows where the CENTER should be, so subtract half width to get the start position
-      let centerPosition = compartmentStart + dropPercent * compartmentWidth;
-      let newPosition = centerPosition - (itemWidth / 2);
+      // FIX: Maintain the exact grab point throughout the drag
+      // The grab offset tells us where on the item the user grabbed it (0 = left edge, 1 = right edge)
+      // We position the item so that the grabbed point aligns with the mouse release position
+      const mouseIndexPosition = compartmentStart + dropPercent * compartmentWidth;
+      let newPosition = mouseIndexPosition - (this.grabOffset * itemWidth);
       
       // Ensure position stays within target compartment bounds to prevent invisible items
       const minPosition = compartmentStart;
@@ -237,12 +261,12 @@ export class ContainerVisualizationComponent implements OnInit {
       newPosition = Math.max(minPosition, Math.min(newPosition, maxPosition));
 
       // Set displayIndex as rounded value for tooltip/display purposes only
-      // displayIndex should show the center position for consistency with drag tooltip
+      // displayIndex should show the center position of the item
       const displayIndex = Math.round(newPosition + (itemWidth / 2));
 
       // Allow drops within same compartment or to different compartment
       if (this.draggedItem.compartmentId === toCompartmentId) {
-        // Same compartment - just update position (preserves exact drop location)
+        // Same compartment - just update position (preserves exact grab point)
         this.containerService.updateItemPositionInCompartment(
           containerId,
           toCompartmentId,
@@ -251,7 +275,7 @@ export class ContainerVisualizationComponent implements OnInit {
           displayIndex
         );
       } else {
-        // Different compartment - move item with exact position preserved
+        // Different compartment - move item with exact grab point preserved
         this.containerService.moveItemBetweenCompartments(
           this.draggedItem.containerId,
           this.draggedItem.compartmentId,
@@ -267,6 +291,7 @@ export class ContainerVisualizationComponent implements OnInit {
     this.draggedItem = null;
     this.dragTooltip.visible = false;
     this.isDragging = false;
+    this.grabOffset = 0; // Reset grab offset for next drag
     // Clear hovered item after drag completes
     this.hoveredItemId = null;
   }
