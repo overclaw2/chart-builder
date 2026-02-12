@@ -195,7 +195,7 @@ export class ContainerVisualizationComponent implements OnInit {
     const dropZone = event.currentTarget as HTMLElement;
     const rect = dropZone.getBoundingClientRect();
     const dropX = event.clientX - rect.left;
-    const dropPercent = dropX / rect.width;
+    const dropPercent = Math.max(0, Math.min(1, dropX / rect.width)); // Clamp percent to 0-1
 
     // Get target compartment to calculate position
     const targetCompartment = this.shipData?.containers
@@ -203,26 +203,21 @@ export class ContainerVisualizationComponent implements OnInit {
       ?.compartments.find((comp) => comp.id === toCompartmentId);
       
     if (targetCompartment) {
-      // Calculate new position based on drop location (Avihai's requirement: stay where dropped)
-      let newPosition =
-        targetCompartment.widthindexStart +
-        dropPercent * (targetCompartment.widthindexEnd - targetCompartment.widthindexStart);
-
-      // NEW: Ofer's Requirement - Clamp position to compartment range
-      // If user drops outside the axis range, align to nearest available index
+      // Calculate new position based on drop location (Avihai's requirement: stay exactly where mouse released)
+      // Use the exact drop position without rounding
       const compartmentStart = targetCompartment.widthindexStart;
       const compartmentEnd = targetCompartment.widthindexEnd;
+      const compartmentWidth = compartmentEnd - compartmentStart;
       
-      // Clamp the position to stay within compartment bounds
-      newPosition = Math.max(compartmentStart, Math.min(compartmentEnd, newPosition));
+      // Position item at exact drop location
+      let newPosition = compartmentStart + dropPercent * compartmentWidth;
 
-      // For Ofer's requirement: set displayIndex to show below package
-      // Round to nearest integer for clean display
+      // Set displayIndex as rounded value for tooltip/display purposes only
       const displayIndex = Math.round(newPosition);
 
-      // Allow drops within same compartment (Avihai's fix) or to different compartment
+      // Allow drops within same compartment or to different compartment
       if (this.draggedItem.compartmentId === toCompartmentId) {
-        // Same compartment - just update position
+        // Same compartment - just update position (preserves exact drop location)
         this.containerService.updateItemPositionInCompartment(
           containerId,
           toCompartmentId,
@@ -231,7 +226,7 @@ export class ContainerVisualizationComponent implements OnInit {
           displayIndex
         );
       } else {
-        // Different compartment - move item
+        // Different compartment - move item with exact position preserved
         this.containerService.moveItemBetweenCompartments(
           this.draggedItem.containerId,
           this.draggedItem.compartmentId,
