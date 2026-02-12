@@ -6,3 +6,4 @@ Date,Comment_ID,Requester,Task_Summary,Start_Time,End_Time,Duration_Minutes,Dura
 2026-02-12,698e0326ec716a5d8d2419b3,Ofer Rashkes,Add hover tooltips on packages with data,18:42:08,18:43:03,0,55,6327a29,1500,claude-haiku-4-5,0.011
 2026-02-12,698e021944719ce1c9bc6372,Avihai,Fix: Hover tooltip shows everywhere - add boundary checking,19:38,19:40,2,0,9e56a53,2500,claude-haiku-4-5,0.0010
 2026-02-12,698e017081c2bd7bd77be1d6,Avihai,Fix: Tooltip badge not centered on package - improve positioning,19:38,19:40,2,0,9e56a53,2500,claude-haiku-4-5,0.0010
+2026-02-12,698e1dcee648d9b47624b83a,Fallback Todo,Fix drag-to-remove event handling in Placed Items list,20:44:00,20:52:34,8,34,665f1d3,12000,claude-haiku-4-5,0.0042
