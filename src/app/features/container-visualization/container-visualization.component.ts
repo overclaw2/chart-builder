@@ -40,6 +40,9 @@ export class ContainerVisualizationComponent implements OnInit {
   isAvailablePackagesPanelCollapsed: boolean = false;
   draggedAvailablePackage: Item | null = null;
 
+  // Side panel collapse state
+  isSidePanelCollapsed: boolean = false;
+
   constructor(private containerService: ContainerService) {}
 
   ngOnInit(): void {
@@ -717,6 +720,13 @@ export class ContainerVisualizationComponent implements OnInit {
    */
   onToggleAvailablePackagesPanel(): void {
     this.isAvailablePackagesPanelCollapsed = !this.isAvailablePackagesPanelCollapsed;
+  }
+
+  /**
+   * Toggle side panel collapse state
+   */
+  onToggleSidePanel(): void {
+    this.isSidePanelCollapsed = !this.isSidePanelCollapsed;
   }
 
   /**

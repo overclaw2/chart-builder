@@ -1,15 +1,91 @@
 <div class="container-visualization" (click)="closeContextMenu()">
   <!-- Layout wrapper with 3-column structure: available packages (left), main content (center), side panel (right) -->
   <div class="layout-wrapper">
-    <!-- Left Panel: Available Packages (draggable items pool) -->
-    <app-available-packages
-      [isCollapsed]="isAvailablePackagesPanelCollapsed"
-      (toggleCollapse)="onToggleAvailablePackagesPanel()"
-      (dragStart)="onAvailablePackageDragStart($event)"
-    ></app-available-packages>
+    <!-- Left Panel: Item Lists (collapsible) -->
+    <div class="side-panel" [class.collapsed]="isSidePanelCollapsed">
+      <!-- Side Panel Toggle Button (collapse/expand) -->
+      <button class="side-panel-toggle" (click)="onToggleSidePanel()" title="Toggle item lists panel">
+        <span class="toggle-icon">{{ isSidePanelCollapsed ? '▶' : '◀' }}</span>
+        <span class="toggle-label">{{ isSidePanelCollapsed ? 'Items' : 'Hide' }}</span>
+      </button>
 
-    <!-- Main content area with charts -->
-    <div class="main-content">
+      <!-- Available Items List -->
+      <div class="items-list-container" *ngIf="!isSidePanelCollapsed">
+        <div class="list-header">
+          <h3>📦 Available Items</h3>
+          <span class="count-badge">{{ getTotalAvailableItems() }}</span>
+        </div>
+        <div class="items-list"
+          [class.drag-over-remove]="dragOverAvailableZone"
+          (dragover)="onDragOverAvailableZone($event)"
+          (dragleave)="onDragLeaveAvailableZone($event)"
+          (drop)="onDropToAvailable($event)">
+          <div class="list-item" *ngFor="let item of getAvailableItems()">
+            <div class="item-info">
+              <div class="item-label">{{ item.name }}</div>
+              <div class="item-specs">{{ item.dimensionMcm }} Mcm × {{ item.weightKg }} Kg</div>
+            </div>
+            <div class="item-location">
+              <span class="location-badge">{{ item.destination }}</span>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="getTotalAvailableItems() === 0">
+            No items available
+          </div>
+          <div class="remove-hint" *ngIf="getTotalPlacedItems() > 0 && dragOverAvailableZone">
+            Drop here to remove from chart
+          </div>
+        </div>
+      </div>
+
+      <!-- Placed Items List -->
+      <div class="items-list-container" *ngIf="!isSidePanelCollapsed">
+        <div class="list-header">
+          <h3>✅ Placed Items</h3>
+          <span class="count-badge">{{ getTotalPlacedItems() }}</span>
+        </div>
+        <div class="items-list" 
+          [class.drag-over-remove]="dragOverRemoveZone"
+          (dragover)="onDragOverRemoveZone($event)"
+          (dragleave)="onDragLeaveRemoveZone($event)"
+          (drop)="onDropToRemove($event)">
+          <div class="list-item placed" 
+            *ngFor="let item of getPlacedItems()"
+            draggable="true"
+            (dragstart)="onDragStartPlacedItem($event, item)">
+            <div class="item-info">
+              <div class="item-label">{{ item.name }}</div>
+              <div class="item-specs">{{ item.dimensionMcm }} Mcm × {{ item.weightKg }} Kg</div>
+            </div>
+            <div class="item-location">
+              <span class="location-badge">{{ item.location }}</span>
+            </div>
+            <!-- Close button (X icon) to remove item from placed items -->
+            <button class="close-btn" (click)="onRemoveFromPlacedItems(item, $event)" title="Remove from chart">
+              ✕
+            </button>
+          </div>
+          <div class="empty-state" *ngIf="getTotalPlacedItems() === 0">
+            No items placed yet
+          </div>
+          <div class="remove-hint" *ngIf="getTotalPlacedItems() > 0 && dragOverRemoveZone">
+            Drop here to remove from chart
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center + Right: Available Packages and Main Content -->
+    <div class="content-wrapper">
+      <!-- Left Panel: Available Packages (draggable items pool) -->
+      <app-available-packages
+        [isCollapsed]="isAvailablePackagesPanelCollapsed"
+        (toggleCollapse)="onToggleAvailablePackagesPanel()"
+        (dragStart)="onAvailablePackageDragStart($event)"
+      ></app-available-packages>
+
+      <!-- Main content area with charts -->
+      <div class="main-content">
       <div class="header-section">
         <h1 class="title">{{ shipData?.title }}</h1>
     
@@ -179,73 +255,6 @@
         </div>
       </div>
     </div>
-    </div>
-
-    <!-- Side panel with item lists -->
-    <div class="side-panel">
-      <!-- Available Items List -->
-      <div class="items-list-container">
-        <div class="list-header">
-          <h3>📦 Available Items</h3>
-          <span class="count-badge">{{ getTotalAvailableItems() }}</span>
-        </div>
-        <div class="items-list"
-          [class.drag-over-remove]="dragOverAvailableZone"
-          (dragover)="onDragOverAvailableZone($event)"
-          (dragleave)="onDragLeaveAvailableZone($event)"
-          (drop)="onDropToAvailable($event)">
-          <div class="list-item" *ngFor="let item of getAvailableItems()">
-            <div class="item-info">
-              <div class="item-label">{{ item.name }}</div>
-              <div class="item-specs">{{ item.dimensionMcm }} Mcm × {{ item.weightKg }} Kg</div>
-            </div>
-            <div class="item-location">
-              <span class="location-badge">{{ item.destination }}</span>
-            </div>
-          </div>
-          <div class="empty-state" *ngIf="getTotalAvailableItems() === 0">
-            No items available
-          </div>
-          <div class="remove-hint" *ngIf="getTotalPlacedItems() > 0 && dragOverAvailableZone">
-            Drop here to remove from chart
-          </div>
-        </div>
-      </div>
-
-      <!-- Placed Items List -->
-      <div class="items-list-container">
-        <div class="list-header">
-          <h3>✅ Placed Items</h3>
-          <span class="count-badge">{{ getTotalPlacedItems() }}</span>
-        </div>
-        <div class="items-list" 
-          [class.drag-over-remove]="dragOverRemoveZone"
-          (dragover)="onDragOverRemoveZone($event)"
-          (dragleave)="onDragLeaveRemoveZone($event)"
-          (drop)="onDropToRemove($event)">
-          <div class="list-item placed" 
-            *ngFor="let item of getPlacedItems()"
-            draggable="true"
-            (dragstart)="onDragStartPlacedItem($event, item)">
-            <div class="item-info">
-              <div class="item-label">{{ item.name }}</div>
-              <div class="item-specs">{{ item.dimensionMcm }} Mcm × {{ item.weightKg }} Kg</div>
-            </div>
-            <div class="item-location">
-              <span class="location-badge">{{ item.location }}</span>
-            </div>
-            <!-- Close button (X icon) to remove item from placed items -->
-            <button class="close-btn" (click)="onRemoveFromPlacedItems(item, $event)" title="Remove from chart">
-              ✕
-            </button>
-          </div>
-          <div class="empty-state" *ngIf="getTotalPlacedItems() === 0">
-            No items placed yet
-          </div>
-          <div class="remove-hint" *ngIf="getTotalPlacedItems() > 0 && dragOverRemoveZone">
-            Drop here to remove from chart
-          </div>
-        </div>
       </div>
     </div>
   </div>
