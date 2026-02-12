@@ -477,12 +477,24 @@ export class ContainerService {
                 (compartment.widthindexEnd - compartment.widthindexStart) / 2;
             } else {
               // Clamp position to ensure it's within compartment bounds
-              // Leave margin for item width
+              // Leave margin for item width to avoid extending beyond compartment
               const itemDimension = movedItem.dimensionMcm || 27;
               const minPosition = compartment.widthindexStart;
-              const maxPosition = compartment.widthindexEnd - itemDimension;
+              const compartmentEnd = compartment.widthindexEnd;
               
-              finalPosition = Math.max(minPosition, Math.min(finalPosition, maxPosition));
+              // FIX: When item is larger than compartment, allow it to overflow slightly
+              // but keep it mostly within bounds. This prevents invisible items.
+              let maxPosition = compartmentEnd - itemDimension;
+              
+              // If item is larger than compartment, ensure position is reasonable
+              // Position item to start at or near the compartment start
+              if (itemDimension > (compartmentEnd - minPosition)) {
+                // Item is too large for compartment - position at start
+                finalPosition = minPosition;
+              } else {
+                // Normal clamping
+                finalPosition = Math.max(minPosition, Math.min(finalPosition, maxPosition));
+              }
             }
             
             movedItem.position = finalPosition;

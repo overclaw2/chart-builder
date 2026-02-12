@@ -113,22 +113,24 @@ export class ContainerVisualizationComponent implements OnInit {
     // Clamp left position to 0-100%
     leftPercent = Math.max(0, Math.min(100, leftPercent));
     
-    // Ensure minimum width visibility
+    // Ensure minimum width visibility BEFORE edge adjustment
     widthPercent = Math.max(3, Math.min(100, widthPercent));
     
     // Adjust right edge if item extends beyond compartment
     if (leftPercent + widthPercent > 100) {
       widthPercent = 100 - leftPercent;
-    }
-    
-    // Ensure width is never 0 - always show minimum width to prevent invisible items
-    // This is critical: items at the edge (left=100%) would have width=0 otherwise
-    if (widthPercent <= 0) {
-      widthPercent = 3; // Minimum width to ensure visibility
-      // If we're at the right edge, shift left to accommodate minimum width
-      if (leftPercent > 97) {
+      // FIX: If width became 0 or negative after adjustment, restore minimum width
+      // This prevents items from disappearing when positioned at compartment edges
+      if (widthPercent <= 0) {
+        widthPercent = 3;
+        // Shift item left to ensure it stays visible
         leftPercent = Math.max(0, 100 - widthPercent);
       }
+    }
+    
+    // Final safety check: ensure width is never 0
+    if (widthPercent <= 0) {
+      widthPercent = 3;
     }
 
     return {
