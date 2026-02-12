@@ -157,9 +157,14 @@ export class ContainerVisualizationComponent implements OnInit {
     const dragPercent = dragX / rect.width;
 
     // Calculate the index at current mouse position
-    const currentIndex =
+    let currentIndex =
       targetCompartment.widthindexStart +
       dragPercent * (targetCompartment.widthindexEnd - targetCompartment.widthindexStart);
+
+    // NEW: Clamp tooltip to compartment range (consistent with onDrop behavior)
+    const compartmentStart = targetCompartment.widthindexStart;
+    const compartmentEnd = targetCompartment.widthindexEnd;
+    currentIndex = Math.max(compartmentStart, Math.min(compartmentEnd, currentIndex));
 
     // Update tooltip with rounded index value
     this.dragTooltip.index = Math.round(currentIndex);
@@ -188,9 +193,17 @@ export class ContainerVisualizationComponent implements OnInit {
       
     if (targetCompartment) {
       // Calculate new position based on drop location (Avihai's requirement: stay where dropped)
-      const newPosition =
+      let newPosition =
         targetCompartment.widthindexStart +
         dropPercent * (targetCompartment.widthindexEnd - targetCompartment.widthindexStart);
+
+      // NEW: Ofer's Requirement - Clamp position to compartment range
+      // If user drops outside the axis range, align to nearest available index
+      const compartmentStart = targetCompartment.widthindexStart;
+      const compartmentEnd = targetCompartment.widthindexEnd;
+      
+      // Clamp the position to stay within compartment bounds
+      newPosition = Math.max(compartmentStart, Math.min(compartmentEnd, newPosition));
 
       // For Ofer's requirement: set displayIndex to show below package
       // Round to nearest integer for clean display
