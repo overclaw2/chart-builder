@@ -273,41 +273,39 @@
   margin-top: 0.25rem;
 }
 
-/* AVIHAI FIX #2: Central position width index badge - centered on package, not below */
-/* Positioned in the middle of the package itself using item-wrapper's center */
-/* FIX: Position within item-wrapper bounds using top/left positioning relative to wrapper center */
+/* AVIHAI FIX #2: Central position width index badge - small, transparent, non-interfering */
+/* Positioned in the middle of the package but small and semi-transparent */
 .item-central-position-badge {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.6rem;
+  font-weight: 700;
   color: #ffffff;
-  background: rgba(0, 102, 204, 0.9);
-  padding: 0.35rem 0.7rem;
-  border-radius: 3px;
-  border: 1px solid #0052a3;
+  background: rgba(0, 102, 204, 0.6);
+  padding: 0.2rem 0.4rem;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 82, 163, 0.7);
   white-space: nowrap;
-  z-index: 5;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 3;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
   width: fit-content;
   pointer-events: none;
   /* FIX: Ensure badge stays within its item-wrapper container */
-  max-width: 95%;
+  max-width: 90%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .item-central-position-badge:hover {
-  background: rgba(0, 82, 163, 0.95);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  background: rgba(0, 82, 163, 0.7);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* AVIHAI FIX #1: Hover tooltip with package data - positioned above or below based on available space */
-/* TODO 4: Dynamic positioning - default above, switches to below if not enough room */
-/* Hidden by default, shown when hoveredItemId matches using .visible class */
+/* AVIHAI FIX #1: Hover tooltip with package data - positioned below the package shape */
+/* Always shown below the item, below the axis, not interfering with badge */
 .item-hover-tooltip {
   position: absolute;
   background: #ffffff;
@@ -316,7 +314,7 @@
   padding: 0.75rem 1rem;
   font-size: 0.8rem;
   color: #000000;
-  z-index: 1000;
+  z-index: 100;
   box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
   pointer-events: auto;
   min-width: 160px;
@@ -330,12 +328,13 @@
   transform: translateX(-50%);
 }
 
-/* Default: tooltip above the item */
+/* Default: tooltip below the item (per Ofer's requirement) */
 .item-hover-tooltip.tooltip-above {
-  bottom: 102%;
+  top: 102%;
+  bottom: auto;
 }
 
-/* Alternative: tooltip below the item if not enough space above */
+/* Alternative: tooltip below the item (same positioning, always below axis) */
 .item-hover-tooltip.tooltip-below {
   top: 102%;
   bottom: auto;
