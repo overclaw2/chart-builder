@@ -243,33 +243,35 @@
   margin-top: 0.25rem;
 }
 
-/* OFER REQUIREMENT: Central position width index tooltip below each package */
-/* Now positioned inside .item (which has position: relative) for proper centering on package */
-.item-central-position-tooltip {
+/* AVIHAI FIX #2: Central position width index badge - centered on package, not below */
+/* Positioned in the middle of the package itself for better visibility */
+.item-central-position-badge {
   position: absolute;
-  bottom: -2rem;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   font-size: 0.75rem;
   font-weight: 600;
   color: #ffffff;
-  background: #0066cc;
-  padding: 0.3rem 0.6rem;
+  background: rgba(0, 102, 204, 0.9);
+  padding: 0.35rem 0.7rem;
   border-radius: 3px;
   border: 1px solid #0052a3;
   white-space: nowrap;
-  z-index: 10;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
   width: fit-content;
+  pointer-events: none;
 }
 
-.item-central-position-tooltip:hover {
-  background: #0052a3;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+.item-central-position-badge:hover {
+  background: rgba(0, 82, 163, 0.95);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Hover tooltip with package data - positioned above item for visibility */
+/* AVIHAI FIX #1: Hover tooltip with package data - always positioned above, visible on hover */
+/* Hidden by default, shown when hoveredItemId matches using .visible class */
 .item-hover-tooltip {
   position: absolute;
   bottom: 102%;
@@ -283,12 +285,21 @@
   color: #000000;
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
-  animation: tooltip-appear 0.15s ease;
   pointer-events: auto;
   min-width: 160px;
   white-space: normal;
   width: max-content;
   max-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.15s ease;
+}
+
+/* Show tooltip when hovered (via .visible class) */
+.item-hover-tooltip.visible {
+  opacity: 1;
+  visibility: visible;
+  animation: tooltip-appear 0.15s ease;
 }
 
 .item-hover-tooltip .tooltip-title {

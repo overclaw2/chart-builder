@@ -106,14 +106,9 @@
                     />
                   </div>
                 </div>
-                <!-- OFER REQUIREMENT: Show central position width index tooltip below each package (always visible) -->
-                <!-- Moved inside .item to ensure tooltip is centered on package itself -->
-                <div class="item-central-position-tooltip" title="Central position width index">
-                  📍 {{ getCentralPositionIndex(item) }}
-                </div>
-                
-                <!-- Hover tooltip with package data (appears on hover) -->
-                <div class="item-hover-tooltip" *ngIf="hoveredItemId === item.id">
+                <!-- AVIHAI FIX #1: Hover tooltip with package data (appears on hover, not just drag) -->
+                <!-- Positioned above package with higher z-index to ensure visibility during interactions -->
+                <div class="item-hover-tooltip" [class.visible]="hoveredItemId === item.id">
                   <div class="tooltip-title">{{ item.name }}</div>
                   <div class="tooltip-row">
                     <span class="tooltip-label">Width:</span>
@@ -127,6 +122,12 @@
                     <span class="tooltip-label">Destination:</span>
                     <span class="tooltip-value">{{ item.destination }}</span>
                   </div>
+                </div>
+                
+                <!-- AVIHAI FIX #2: Central position width index badge centered on package -->
+                <!-- Positioned in the center of the package, not below it -->
+                <div class="item-central-position-badge" title="Central position width index">
+                  📍 {{ getCentralPositionIndex(item) }}
                 </div>
               </div>
               <!-- Display index below item (legacy) -->
