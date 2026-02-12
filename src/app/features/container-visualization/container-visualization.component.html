@@ -1,6 +1,13 @@
 <div class="container-visualization" (click)="closeContextMenu()">
-  <!-- Layout wrapper for charts and side panels -->
+  <!-- Layout wrapper with 3-column structure: available packages (left), main content (center), side panel (right) -->
   <div class="layout-wrapper">
+    <!-- Left Panel: Available Packages (draggable items pool) -->
+    <app-available-packages
+      [isCollapsed]="isAvailablePackagesPanelCollapsed"
+      (toggleCollapse)="onToggleAvailablePackagesPanel()"
+      (dragStart)="onAvailablePackageDragStart($event)"
+    ></app-available-packages>
+
     <!-- Main content area with charts -->
     <div class="main-content">
       <div class="header-section">
@@ -97,9 +104,9 @@
         <div
           class="container-bar-wrapper"
           [class.drag-over]="dragOverCompartmentId === compartment.id"
-          (dragover)="onDragOver($event, compartment.id)"
+          (dragover)="draggedAvailablePackage ? onDragOverFromAvailable($event, compartment.id) : onDragOver($event, compartment.id)"
           (dragleave)="onDragLeave($event, compartment.id)"
-          (drop)="onDrop($event, container.id, compartment.id)"
+          (drop)="draggedAvailablePackage ? onDropFromAvailablePackages($event, container.id, compartment.id) : onDrop($event, container.id, compartment.id)"
           [style.--compartment-bg]="getCompartmentColor(compartment)"
         >
           <!-- Drag tooltip (shows current index while dragging) -->

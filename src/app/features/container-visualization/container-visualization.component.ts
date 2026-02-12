@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContainerService } from '../../core/services/container.service';
 import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
+import { AvailablePackagesComponent } from '../available-packages/available-packages.component';
 
 @Component({
   selector: 'app-container-visualization',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AvailablePackagesComponent],
   templateUrl: './container-visualization.component.html',
   styleUrls: ['./container-visualization.component.css'],
 })
@@ -34,6 +35,10 @@ export class ContainerVisualizationComponent implements OnInit {
   draggedPlacedItem: { containerId: string; compartmentId: string; item: Item } | null = null;
   dragOverRemoveZone: boolean = false;
   dragOverAvailableZone: boolean = false;
+
+  // Available packages panel state
+  isAvailablePackagesPanelCollapsed: boolean = false;
+  draggedAvailablePackage: Item | null = null;
 
   constructor(private containerService: ContainerService) {}
 
@@ -703,5 +708,148 @@ export class ContainerVisualizationComponent implements OnInit {
 
     this.draggedPlacedItem = null;
     this.dragOverAvailableZone = false;
+  }
+
+  // Available Packages Panel Methods
+
+  /**
+   * Toggle the available packages panel collapse state
+   */
+  onToggleAvailablePackagesPanel(): void {
+    this.isAvailablePackagesPanelCollapsed = !this.isAvailablePackagesPanelCollapsed;
+  }
+
+  /**
+   * Handle drag start from available packages
+   */
+  onAvailablePackageDragStart(event: { item: Item; event: DragEvent }): void {
+    this.draggedAvailablePackage = event.item;
+  }
+
+  /**
+   * Handle drag over compartment when dragging from available packages
+   */
+  onDragOverFromAvailable(dragEvent: DragEvent, compartmentId?: string): void {
+    dragEvent.preventDefault();
+    if (dragEvent.dataTransfer) {
+      dragEvent.dataTransfer.dropEffect = 'copy';
+    }
+    if (compartmentId) {
+      this.dragOverCompartmentId = compartmentId;
+      // Update tooltip with current position during drag
+      this.updateDragTooltip(dragEvent, compartmentId);
+    }
+  }
+
+  /**
+   * Create a new item instance from an available package
+   * Each instance gets a unique ID and is positioned at the drop location
+   */
+  private createItemFromAvailablePackage(
+    availablePackage: Item,
+    containerId: string,
+    compartmentId: string,
+    newPosition: number,
+    displayIndex: number
+  ): Item {
+    // Generate a unique ID for this item instance
+    const timestamp = Date.now();
+    const randomPart = Math.random().toString(36).substr(2, 5);
+    const uniqueId = `item-${timestamp}-${randomPart}`;
+
+    return {
+      id: uniqueId,
+      name: availablePackage.name,
+      dimensionMcm: availablePackage.dimensionMcm,
+      weightKg: availablePackage.weightKg,
+      destination: availablePackage.destination,
+      position: newPosition,
+      length: availablePackage.length,
+      displayIndex,
+      color: availablePackage.color,
+    };
+  }
+
+  /**
+   * Handle drop from available packages into a compartment
+   */
+  onDropFromAvailablePackages(event: DragEvent, containerId: string, toCompartmentId: string): void {
+    event.preventDefault();
+    if (!this.draggedAvailablePackage || !this.shipData) return;
+
+    // Calculate new position based on drop location
+    const dropZone = event.currentTarget as HTMLElement;
+    const rect = dropZone.getBoundingClientRect();
+    const dropX = event.clientX - rect.left;
+    const dropPercent = Math.max(0, Math.min(1, dropX / rect.width));
+
+    // Get target compartment to calculate position
+    const targetCompartment = this.shipData.containers
+      .find((c) => c.id === containerId)
+      ?.compartments.find((comp) => comp.id === toCompartmentId);
+
+    if (targetCompartment) {
+      // Calculate new position based on drop location
+      const compartmentStart = targetCompartment.widthindexStart;
+      const compartmentEnd = targetCompartment.widthindexEnd;
+      const compartmentWidth = compartmentEnd - compartmentStart;
+
+      // Get item dimensions
+      const itemWidth = this.draggedAvailablePackage.dimensionMcm || 27;
+
+      // Calculate position with the same logic as existing items
+      const mouseIndexPosition = compartmentStart + dropPercent * compartmentWidth;
+      let newPosition = mouseIndexPosition - (itemWidth / 2); // Center on drop point
+
+      // Ensure position stays within target compartment bounds
+      const minPosition = compartmentStart;
+      const maxPosition = compartmentEnd - itemWidth;
+      newPosition = Math.max(minPosition, Math.min(newPosition, maxPosition));
+
+      const displayIndex = Math.round(newPosition + (itemWidth / 2));
+
+      // Create a new item instance from the available package
+      const newItem = this.createItemFromAvailablePackage(
+        this.draggedAvailablePackage,
+        containerId,
+        toCompartmentId,
+        newPosition,
+        displayIndex
+      );
+
+      // Get the current container and compartment
+      const container = this.shipData.containers.find((c) => c.id === containerId);
+      if (container) {
+        const compartment = container.compartments.find((comp) => comp.id === toCompartmentId);
+        if (compartment) {
+          // Add the new item to the compartment
+          compartment.items.push(newItem);
+
+          // Recalculate compartment statistics
+          const itemWeight = newItem.weightKg;
+          const newWeight = compartment.weightKg + itemWeight;
+          compartment.weightKg = newWeight;
+          compartment.weightUtilization = parseFloat(
+            ((newWeight / compartment.totalCapacity) * 100).toFixed(2)
+          );
+
+          // Recalculate width utilization
+          const totalPackageWidth = compartment.items.reduce(
+            (sum, item) => sum + (item.dimensionMcm || 27),
+            0
+          );
+          compartment.widthUtilization = parseFloat(
+            ((totalPackageWidth / compartment.widthMcm) * 100).toFixed(1)
+          );
+
+          // Trigger change detection
+          this.shipData = { ...this.shipData };
+        }
+      }
+    }
+
+    this.draggedAvailablePackage = null;
+    this.dragTooltip.visible = false;
+    this.dragOverCompartmentId = null;
   }
 }

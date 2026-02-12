@@ -1,0 +1,62 @@
+<div class="available-packages-panel" [class.collapsed]="isCollapsed">
+  <!-- Panel Header -->
+  <div class="panel-header">
+    <h2 class="panel-title">
+      <span class="icon">📦</span>
+      <span class="title-text">Available Packages</span>
+    </h2>
+    <div class="header-controls">
+      <span class="count-badge">{{ getTotalAvailablePackages() }}</span>
+      <button class="collapse-btn" (click)="onToggleCollapse()" [title]="isCollapsed ? 'Expand' : 'Collapse'">
+        {{ isCollapsed ? '⬅️' : '➡️' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Panel Content (hidden when collapsed) -->
+  <div class="panel-content" *ngIf="!isCollapsed">
+    <!-- Info Text -->
+    <div class="panel-info">
+      <p>📌 Drag items to compartments to add them to the chart</p>
+    </div>
+
+    <!-- Packages List -->
+    <div class="packages-list">
+      <div
+        class="package-item"
+        *ngFor="let pkg of availablePackages"
+        draggable="true"
+        (dragstart)="onDragStart($event, pkg)"
+        (dragend)="onDragEnd()"
+        [class.dragging]="draggedPackage?.id === pkg.id"
+        [attr.data-package-id]="pkg.id"
+      >
+        <!-- Color Indicator -->
+        <div class="color-indicator" [style.backgroundColor]="getPackageColor(pkg)"></div>
+
+        <!-- Package Info -->
+        <div class="package-info">
+          <div class="package-name">{{ pkg.name }}</div>
+          <div class="package-specs">
+            <span class="spec-item">{{ pkg.dimensionMcm }} Mcm</span>
+            <span class="spec-item">{{ pkg.weightKg }} Kg</span>
+            <span class="destination-badge">{{ pkg.destination }}</span>
+          </div>
+        </div>
+
+        <!-- Drag Handle Icon -->
+        <div class="drag-handle">⋮⋮</div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="availablePackages.length === 0">
+        <p>No packages available</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collapsed State Indicator -->
+  <div class="collapse-indicator" *ngIf="isCollapsed">
+    <p>{{ getTotalAvailablePackages() }}</p>
+  </div>
+</div>
