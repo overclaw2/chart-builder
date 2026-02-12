@@ -365,7 +365,7 @@ export class ContainerService {
             });
 
             const newWeight = compartment.weightKg - removedItemWeight;
-            const newUtilization = (newWeight / 17500) * 100;
+            const newUtilization = (newWeight / compartment.totalCapacity) * 100;
             
             // Recalculate widthUtilization using dimensionMcm
             const totalPackageWidth = items.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
@@ -437,7 +437,7 @@ export class ContainerService {
             });
 
             const newWeight = compartment.weightKg - itemWeight;
-            const newUtilization = (newWeight / 17500) * 100;
+            const newUtilization = (newWeight / compartment.totalCapacity) * 100;
             
             // FIX: Recalculate widthUtilization using dimensionMcm instead of length
             const totalPackageWidth = items.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
@@ -483,7 +483,7 @@ export class ContainerService {
 
             const newItems = [...compartment.items, movedItem];
             const newWeight = compartment.weightKg + itemWeight;
-            const newUtilization = (newWeight / 17500) * 100;
+            const newUtilization = (newWeight / compartment.totalCapacity) * 100;
             
             // FIX: Calculate widthUtilization using dimensionMcm (package width) instead of length
             const totalPackageWidth = newItems.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
