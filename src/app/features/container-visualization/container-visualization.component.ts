@@ -221,18 +221,22 @@ export class ContainerVisualizationComponent implements OnInit {
       const compartmentEnd = targetCompartment.widthindexEnd;
       const compartmentWidth = compartmentEnd - compartmentStart;
       
-      // Position item at exact drop location
-      let newPosition = compartmentStart + dropPercent * compartmentWidth;
-      
-      // FIX: Ensure position stays within target compartment bounds to prevent invisible items
-      // when dragging across compartments with different ranges
+      // Get item dimensions for centering
       const itemWidth = this.draggedItem.item.dimensionMcm || 27;
+      
+      // FIX: Center the item at the drop position (position represents CENTER of item, not start)
+      // The mouse position shows where the CENTER should be, so subtract half width to get the start position
+      let centerPosition = compartmentStart + dropPercent * compartmentWidth;
+      let newPosition = centerPosition - (itemWidth / 2);
+      
+      // Ensure position stays within target compartment bounds to prevent invisible items
       const minPosition = compartmentStart;
       const maxPosition = compartmentEnd - itemWidth;
       newPosition = Math.max(minPosition, Math.min(newPosition, maxPosition));
 
       // Set displayIndex as rounded value for tooltip/display purposes only
-      const displayIndex = Math.round(newPosition);
+      // displayIndex should show the center position for consistency with drag tooltip
+      const displayIndex = Math.round(newPosition + (itemWidth / 2));
 
       // Allow drops within same compartment or to different compartment
       if (this.draggedItem.compartmentId === toCompartmentId) {
