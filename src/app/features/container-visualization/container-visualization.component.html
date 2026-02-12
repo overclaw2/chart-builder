@@ -59,6 +59,10 @@
           (dragleave)="onDragLeave($event, compartment.id)"
           (drop)="onDrop($event, container.id, compartment.id)"
         >
+          <!-- Drag tooltip (shows current index while dragging) -->
+          <div class="drag-tooltip" *ngIf="dragTooltip.visible && dragOverCompartmentId === compartment.id">
+            📍 Index: {{ dragTooltip.index }}
+          </div>
           <div class="position-label top">{{ compartment.items.length > 0 ? compartment.items[0].position : 0 }}</div>
           
           <div class="container-bar">

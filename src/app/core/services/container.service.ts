@@ -201,6 +201,13 @@ export class ContainerService {
     const currentData = this.shipDataSubject.value;
     let movedItem: Item | undefined;
     let itemWeight = 0;
+    let targetCompartmentData: any;
+
+    // Find target compartment to get its range for validation
+    const targetContainer = currentData.containers.find((c) => c.id === toContainerId);
+    if (targetContainer) {
+      targetCompartmentData = targetContainer.compartments.find((comp) => comp.id === toCompartmentId);
+    }
 
     // Update containers
     let updatedContainers = currentData.containers.map((container) => {
@@ -233,12 +240,31 @@ export class ContainerService {
 
           // Add to target compartment
           if (compartment.id === toCompartmentId && movedItem) {
-            const targetPosition =
-              newPosition ||
-              compartment.widthindexStart + 1000 + compartment.items.length * 600;
-            movedItem.position = targetPosition;
+            // FIX: Properly validate and clamp position to compartment range
+            let finalPosition = newPosition;
+            
+            if (finalPosition === undefined || finalPosition === null) {
+              // Default position: center of compartment
+              finalPosition =
+                compartment.widthindexStart +
+                (compartment.widthindexEnd - compartment.widthindexStart) / 2;
+            } else {
+              // Clamp position to ensure it's within compartment bounds
+              // Leave margin for item width
+              const itemDimension = movedItem.dimensionMcm || 27;
+              const minPosition = compartment.widthindexStart;
+              const maxPosition = compartment.widthindexEnd - itemDimension;
+              
+              finalPosition = Math.max(minPosition, Math.min(finalPosition, maxPosition));
+            }
+            
+            movedItem.position = finalPosition;
+            
+            // Set displayIndex to final position if not explicitly provided
             if (displayIndex !== undefined) {
               movedItem.displayIndex = displayIndex;
+            } else {
+              movedItem.displayIndex = Math.round(finalPosition);
             }
 
             const newItems = [...compartment.items, movedItem];

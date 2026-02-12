@@ -15,6 +15,7 @@ export class ContainerVisualizationComponent implements OnInit {
   draggedItem: { containerId: string; compartmentId: string; item: Item } | null = null;
   dragOverCompartmentId: string | null = null;
   loadingMessage: string | null = null;
+  dragTooltip: { index: number; visible: boolean } = { index: 0, visible: false };
 
   constructor(private containerService: ContainerService) {}
 
@@ -72,12 +73,24 @@ export class ContainerVisualizationComponent implements OnInit {
     const itemEnd = item.position + itemDimension;
     
     // Calculate position relative to compartment's widthindex range
-    const leftPercent = ((itemStart - compartmentRangeStart) / compartmentRangeSize) * 100;
-    const widthPercent = ((itemDimension) / compartmentRangeSize) * 100;
+    let leftPercent = ((itemStart - compartmentRangeStart) / compartmentRangeSize) * 100;
+    let widthPercent = ((itemDimension) / compartmentRangeSize) * 100;
+
+    // FIX: Properly clamp position to keep item visible within bounds
+    // Clamp left position to 0-100%
+    leftPercent = Math.max(0, Math.min(100, leftPercent));
+    
+    // Clamp width and adjust left if item extends beyond right edge
+    if (leftPercent + widthPercent > 100) {
+      // Item extends beyond right edge - trim the width
+      widthPercent = Math.max(5, 100 - leftPercent); // Keep minimum 5% width visible
+    } else {
+      widthPercent = Math.max(5, widthPercent); // Ensure minimum visibility
+    }
 
     return {
-      left: `${Math.max(0, leftPercent)}%`,  // Clamp to prevent negative values
-      width: `${Math.max(0, widthPercent)}%`,
+      left: `${leftPercent}%`,
+      width: `${widthPercent}%`,
     };
   }
 
@@ -91,6 +104,7 @@ export class ContainerVisualizationComponent implements OnInit {
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
     }
+    this.dragTooltip.visible = true;
   }
 
   onDragOver(event: DragEvent, compartmentId?: string): void {
@@ -100,7 +114,34 @@ export class ContainerVisualizationComponent implements OnInit {
     }
     if (compartmentId) {
       this.dragOverCompartmentId = compartmentId;
+      // Update tooltip with current position during drag (Ofer's requirement)
+      this.updateDragTooltip(event, compartmentId);
     }
+  }
+
+  updateDragTooltip(event: DragEvent, compartmentId: string): void {
+    if (!this.shipData || !this.draggedItem) return;
+
+    // Find the target compartment
+    const targetCompartment = this.shipData.containers
+      .find((c) => c.id === this.draggedItem!.containerId)
+      ?.compartments.find((comp) => comp.id === compartmentId);
+
+    if (!targetCompartment) return;
+
+    // Get the drag zone position to calculate current index
+    const dropZone = event.currentTarget as HTMLElement;
+    const rect = dropZone.getBoundingClientRect();
+    const dragX = event.clientX - rect.left;
+    const dragPercent = dragX / rect.width;
+
+    // Calculate the index at current mouse position
+    const currentIndex =
+      targetCompartment.widthindexStart +
+      dragPercent * (targetCompartment.widthindexEnd - targetCompartment.widthindexStart);
+
+    // Update tooltip with rounded index value
+    this.dragTooltip.index = Math.round(currentIndex);
   }
 
   onDragLeave(event: DragEvent, compartmentId: string): void {
@@ -159,6 +200,7 @@ export class ContainerVisualizationComponent implements OnInit {
     }
 
     this.draggedItem = null;
+    this.dragTooltip.visible = false;
   }
 
   onDownload(compartment: Compartment): void {
