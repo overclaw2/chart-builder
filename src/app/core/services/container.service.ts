@@ -141,13 +141,60 @@ export class ContainerService {
     });
   }
 
+  updateItemPositionInCompartment(
+    containerId: string,
+    compartmentId: string,
+    itemId: string,
+    newPosition: number,
+    displayIndex?: number
+  ): void {
+    const currentData = this.shipDataSubject.value;
+
+    const updatedContainers = currentData.containers.map((container) => {
+      if (container.id === containerId) {
+        const updatedCompartments = container.compartments.map((compartment) => {
+          if (compartment.id === compartmentId) {
+            const items = compartment.items.map((item) => {
+              if (item.id === itemId) {
+                return {
+                  ...item,
+                  position: newPosition,
+                  displayIndex: displayIndex,
+                };
+              }
+              return item;
+            });
+
+            return {
+              ...compartment,
+              items,
+            };
+          }
+          return compartment;
+        });
+
+        return {
+          ...container,
+          compartments: updatedCompartments,
+        };
+      }
+      return container;
+    });
+
+    this.shipDataSubject.next({
+      ...currentData,
+      containers: updatedContainers,
+    });
+  }
+
   moveItemBetweenCompartments(
     fromContainerId: string,
     fromCompartmentId: string,
     toContainerId: string,
     toCompartmentId: string,
     itemId: string,
-    newPosition?: number
+    newPosition?: number,
+    displayIndex?: number
   ): void {
     const currentData = this.shipDataSubject.value;
     let movedItem: Item | undefined;
@@ -188,6 +235,9 @@ export class ContainerService {
               newPosition ||
               compartment.widthindexStart + 1000 + compartment.items.length * 600;
             movedItem.position = targetPosition;
+            if (displayIndex !== undefined) {
+              movedItem.displayIndex = displayIndex;
+            }
 
             const newItems = [...compartment.items, movedItem];
             const newWeight = compartment.weightKg + itemWeight;

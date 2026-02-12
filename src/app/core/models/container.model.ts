@@ -4,8 +4,9 @@ export interface Item {
   dimensionMcm: number;
   weightKg: number;
   destination: string;
-  position: number; // start position in compartment
+  position: number; // start position in compartment (index value)
   length: number; // length in compartment
+  displayIndex?: number; // index to display below item (for Ofer's requirement)
 }
 
 export interface Compartment {

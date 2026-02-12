@@ -62,18 +62,22 @@
           <div class="position-label top">{{ compartment.items.length > 0 ? compartment.items[0].position : 0 }}</div>
           
           <div class="container-bar">
-            <div
-              class="item"
-              *ngFor="let item of compartment.items"
-              [ngStyle]="getItemPosition(item, compartment)"
-              draggable="true"
-              (dragstart)="onDragStart($event, container.id, compartment.id, item)"
-            >
-              <div class="item-content">
-                <div class="item-name">{{ item.name }}</div>
-                <div class="item-detail">{{ item.dimensionMcm }} [Mcm]</div>
-                <div class="item-detail">{{ item.weightKg }} [Kg]</div>
-                <div class="item-destination">{{ item.destination }}</div>
+            <div class="item-wrapper" *ngFor="let item of compartment.items" [ngStyle]="getItemPosition(item, compartment)">
+              <div
+                class="item"
+                draggable="true"
+                (dragstart)="onDragStart($event, container.id, compartment.id, item)"
+              >
+                <div class="item-content">
+                  <div class="item-name">{{ item.name }}</div>
+                  <div class="item-detail">{{ item.dimensionMcm }} [Mcm]</div>
+                  <div class="item-detail">{{ item.weightKg }} [Kg]</div>
+                  <div class="item-destination">{{ item.destination }}</div>
+                </div>
+              </div>
+              <!-- Display index below item (Ofer's requirement) -->
+              <div class="item-index" *ngIf="item.displayIndex !== undefined">
+                {{ item.displayIndex }}
               </div>
             </div>
           </div>

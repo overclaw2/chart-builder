@@ -103,35 +103,54 @@ export class ContainerVisualizationComponent implements OnInit {
 
   onDrop(event: DragEvent, containerId: string, toCompartmentId: string): void {
     event.preventDefault();
-    if (this.draggedItem && this.draggedItem.compartmentId !== toCompartmentId) {
-      // Calculate new position based on drop location
-      const dropZone = event.currentTarget as HTMLElement;
-      const rect = dropZone.getBoundingClientRect();
-      const dropX = event.clientX - rect.left;
-      const dropPercent = dropX / rect.width;
+    if (!this.draggedItem) return;
 
-      // Get target compartment to calculate position
-      const targetCompartment = this.shipData?.containers
-        .find((c) => c.id === containerId)
-        ?.compartments.find((comp) => comp.id === toCompartmentId);
-        
-      if (targetCompartment) {
-        const newPosition =
-          targetCompartment.widthindexStart +
-          dropPercent * (targetCompartment.widthindexEnd - targetCompartment.widthindexStart);
+    // Calculate new position based on drop location
+    const dropZone = event.currentTarget as HTMLElement;
+    const rect = dropZone.getBoundingClientRect();
+    const dropX = event.clientX - rect.left;
+    const dropPercent = dropX / rect.width;
 
+    // Get target compartment to calculate position
+    const targetCompartment = this.shipData?.containers
+      .find((c) => c.id === containerId)
+      ?.compartments.find((comp) => comp.id === toCompartmentId);
+      
+    if (targetCompartment) {
+      // Calculate new position based on drop location (Avihai's requirement: stay where dropped)
+      const newPosition =
+        targetCompartment.widthindexStart +
+        dropPercent * (targetCompartment.widthindexEnd - targetCompartment.widthindexStart);
+
+      // For Ofer's requirement: set displayIndex to show below package
+      // Round to nearest integer for clean display
+      const displayIndex = Math.round(newPosition);
+
+      // Allow drops within same compartment (Avihai's fix) or to different compartment
+      if (this.draggedItem.compartmentId === toCompartmentId) {
+        // Same compartment - just update position
+        this.containerService.updateItemPositionInCompartment(
+          containerId,
+          toCompartmentId,
+          this.draggedItem.item.id,
+          newPosition,
+          displayIndex
+        );
+      } else {
+        // Different compartment - move item
         this.containerService.moveItemBetweenCompartments(
           this.draggedItem.containerId,
           this.draggedItem.compartmentId,
           containerId,
           toCompartmentId,
           this.draggedItem.item.id,
-          newPosition
+          newPosition,
+          displayIndex
         );
       }
-
-      this.draggedItem = null;
     }
+
+    this.draggedItem = null;
   }
 
   onDownload(compartment: Compartment): void {
