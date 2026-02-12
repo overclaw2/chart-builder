@@ -559,9 +559,12 @@ export class ContainerVisualizationComponent implements OnInit {
   }
 
   onDragLeaveRemoveZone(event: DragEvent): void {
-    // Only clear if leaving the items-list container entirely
+    // Only clear if leaving the items-list-container (the entire sidebar section)
+    const itemsListContainer = (event.currentTarget as HTMLElement).closest('.items-list-container');
     const target = event.relatedTarget as HTMLElement;
-    if (!target || !target.closest('.items-list')) {
+    
+    // Only clear drag-over state if we're leaving the entire items-list-container
+    if (!target || !itemsListContainer?.contains(target)) {
       this.dragOverRemoveZone = false;
     }
   }
