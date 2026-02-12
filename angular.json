@@ -67,12 +67,15 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "chart-builder:build"
+          },
           "configurations": {
             "production": {
-              "buildTarget": "chart-builder:build:production"
+              "browserTarget": "chart-builder:build:production"
             },
             "development": {
-              "buildTarget": "chart-builder:build:development"
+              "browserTarget": "chart-builder:build:development"
             }
           },
           "defaultConfiguration": "development"
