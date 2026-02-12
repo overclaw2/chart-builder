@@ -1,5 +1,27 @@
 <div class="container-visualization">
-  <h1 class="title">{{ shipData?.title }}</h1>
+  <div class="header-section">
+    <h1 class="title">{{ shipData?.title }}</h1>
+    
+    <!-- JSON Upload Section -->
+    <div class="upload-section">
+      <div class="upload-controls">
+        <input
+          type="file"
+          #fileInput
+          (change)="onFileSelected($event)"
+          accept=".json"
+          hidden
+        />
+        <button class="upload-btn" (click)="fileInput.click()" title="Load JSON data">
+          📤 Load JSON Data
+        </button>
+        <button class="reset-btn" (click)="onResetToMock()" title="Reset to mock data">
+          🔄 Reset to Mock
+        </button>
+        <span class="upload-status" *ngIf="loadingMessage">{{ loadingMessage }}</span>
+      </div>
+    </div>
+  </div>
 
   <div class="containers-list" *ngIf="shipData">
     <div class="container-card" *ngFor="let container of shipData.containers">

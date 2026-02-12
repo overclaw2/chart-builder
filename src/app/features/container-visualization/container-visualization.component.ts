@@ -14,6 +14,7 @@ export class ContainerVisualizationComponent implements OnInit {
   shipData: ShipData | null = null;
   draggedItem: { containerId: string; compartmentId: string; item: Item } | null = null;
   dragOverCompartmentId: string | null = null;
+  loadingMessage: string | null = null;
 
   constructor(private containerService: ContainerService) {}
 
@@ -21,6 +22,41 @@ export class ContainerVisualizationComponent implements OnInit {
     this.containerService.getShipData().subscribe((data) => {
       this.shipData = data;
     });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    this.loadingMessage = '📤 Loading...';
+
+    this.containerService
+      .loadDataFromFile(file)
+      .then(() => {
+        this.loadingMessage = '✅ Data loaded successfully!';
+        setTimeout(() => {
+          this.loadingMessage = null;
+        }, 3000);
+        // Reset file input
+        input.value = '';
+      })
+      .catch((error) => {
+        this.loadingMessage = `❌ Error: ${error.message}`;
+        setTimeout(() => {
+          this.loadingMessage = null;
+        }, 5000);
+        input.value = '';
+      });
+  }
+
+  onResetToMock(): void {
+    this.containerService.resetToMockData();
+    this.loadingMessage = '🔄 Reset to mock data';
+    setTimeout(() => {
+      this.loadingMessage = null;
+    }, 2000);
   }
 
   getItemPosition(item: Item, compartment: Compartment): { left: string; width: string } {

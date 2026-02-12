@@ -9,7 +9,18 @@ export class ContainerService {
   private shipDataSubject = new BehaviorSubject<ShipData>(this.getMockData());
   public shipData$ = this.shipDataSubject.asObservable();
 
-  constructor() {}
+  constructor() {
+    // Try to load data from localStorage first
+    const savedData = localStorage.getItem('shipData');
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData) as ShipData;
+        this.shipDataSubject.next(parsedData);
+      } catch (e) {
+        console.error('Failed to parse saved data:', e);
+      }
+    }
+  }
 
   getMockData(): ShipData {
     return {
@@ -72,6 +83,51 @@ export class ContainerService {
 
   getShipData(): Observable<ShipData> {
     return this.shipData$;
+  }
+
+  loadDataFromJSON(jsonData: ShipData): void {
+    try {
+      // Validate basic structure
+      if (!jsonData.containers || !Array.isArray(jsonData.containers)) {
+        throw new Error('Invalid data structure: missing containers array');
+      }
+
+      // Save to localStorage for persistence
+      localStorage.setItem('shipData', JSON.stringify(jsonData));
+      
+      // Update the subject
+      this.shipDataSubject.next(jsonData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      throw error;
+    }
+  }
+
+  loadDataFromFile(file: File): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (event: ProgressEvent<FileReader>) => {
+        try {
+          const jsonData = JSON.parse(event.target?.result as string) as ShipData;
+          this.loadDataFromJSON(jsonData);
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      };
+      
+      reader.onerror = () => {
+        reject(new Error('Failed to read file'));
+      };
+      
+      reader.readAsText(file);
+    });
+  }
+
+  resetToMockData(): void {
+    localStorage.removeItem('shipData');
+    this.shipDataSubject.next(this.getMockData());
   }
 
   updateContainer(container: Container): void {
