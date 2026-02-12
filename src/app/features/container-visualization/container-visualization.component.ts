@@ -17,6 +17,14 @@ export class ContainerVisualizationComponent implements OnInit {
   loadingMessage: string | null = null;
   dragTooltip: { index: number; visible: boolean } = { index: 0, visible: false };
   hoveredItemId: string | null = null;
+  contextMenu: { visible: boolean; x: number; y: number; containerId: string; compartmentId: string; itemId: string } = {
+    visible: false,
+    x: 0,
+    y: 0,
+    containerId: '',
+    compartmentId: '',
+    itemId: ''
+  };
 
   constructor(private containerService: ContainerService) {}
 
@@ -267,6 +275,65 @@ export class ContainerVisualizationComponent implements OnInit {
 
   onItemMouseLeave(): void {
     this.hoveredItemId = null;
+  }
+
+  onItemContextMenu(event: MouseEvent, containerId: string, compartmentId: string, itemId: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    this.contextMenu = {
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      containerId,
+      compartmentId,
+      itemId
+    };
+  }
+
+  closeContextMenu(): void {
+    this.contextMenu.visible = false;
+  }
+
+  onRemoveItem(): void {
+    if (!this.shipData) return;
+
+    const container = this.shipData.containers.find(c => c.id === this.contextMenu.containerId);
+    if (!container) return;
+
+    const compartment = container.compartments.find(comp => comp.id === this.contextMenu.compartmentId);
+    if (!compartment) return;
+
+    // Find the item to get its weight and width for stats update
+    const itemToRemove = compartment.items.find(item => item.id === this.contextMenu.itemId);
+    if (!itemToRemove) {
+      this.closeContextMenu();
+      return;
+    }
+
+    // Remove the item from the compartment
+    const itemIndex = compartment.items.findIndex(item => item.id === this.contextMenu.itemId);
+    if (itemIndex > -1) {
+      const itemWeight = itemToRemove.weightKg;
+      const itemWidth = itemToRemove.dimensionMcm || 27;
+      
+      // Remove from items array
+      compartment.items.splice(itemIndex, 1);
+      
+      // Recalculate compartment statistics
+      const newWeight = compartment.weightKg - itemWeight;
+      compartment.weightKg = newWeight;
+      compartment.weightUtilization = parseFloat(((newWeight / compartment.totalCapacity) * 100).toFixed(2));
+      
+      // Recalculate width utilization based on remaining items
+      const totalPackageWidth = compartment.items.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
+      compartment.widthUtilization = parseFloat(((totalPackageWidth / compartment.widthMcm) * 100).toFixed(1));
+      
+      // Trigger change detection by creating a new reference
+      this.shipData = { ...this.shipData };
+    }
+
+    this.closeContextMenu();
   }
 
   // TASK 4: Add top axis highlighting for packages (Avihai's requirement)

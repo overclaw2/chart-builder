@@ -1,4 +1,4 @@
-<div class="container-visualization">
+<div class="container-visualization" (click)="closeContextMenu()">
   <div class="header-section">
     <h1 class="title">{{ shipData?.title }}</h1>
     
@@ -88,6 +88,7 @@
                 (dragstart)="onDragStart($event, container.id, compartment.id, item)"
                 (mouseenter)="onItemMouseEnter(item.id)"
                 (mouseleave)="onItemMouseLeave()"
+                (contextmenu)="onItemContextMenu($event, container.id, compartment.id, item.id)"
                 [style.backgroundColor]="getItemColor(item)"
               >
                 <div class="item-content">
@@ -136,6 +137,13 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Context Menu for right-click item removal -->
+  <div class="context-menu" *ngIf="contextMenu.visible" [ngStyle]="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }" (click)="$event.stopPropagation()">
+    <div class="context-menu-item" (click)="onRemoveItem()">
+      🗑️ Remove Item
     </div>
   </div>
 </div>
