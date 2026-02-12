@@ -271,10 +271,24 @@ export class ContainerVisualizationComponent implements OnInit {
     return item.color || '#7dd3fc'; // Default light blue color
   }
 
-  onItemMouseEnter(itemId: string): void {
-    this.hoveredItemId = itemId;
-    // TODO 4: Calculate tooltip positioning
-    this.calculateTooltipPosition(itemId);
+  onItemMouseEnter(itemId: string, event: MouseEvent): void {
+    // FIX 1: Add boundary checking - only show tooltip when hovering directly over the item
+    const itemElement = (event.target as HTMLElement).closest('.item');
+    if (!itemElement) {
+      return;
+    }
+
+    const itemRect = itemElement.getBoundingClientRect();
+    const pointerX = event.clientX;
+    const pointerY = event.clientY;
+
+    // Check if pointer is actually within the item's bounds
+    if (pointerX >= itemRect.left && pointerX <= itemRect.right &&
+        pointerY >= itemRect.top && pointerY <= itemRect.bottom) {
+      this.hoveredItemId = itemId;
+      // TODO 4: Calculate tooltip positioning
+      this.calculateTooltipPosition(itemId);
+    }
   }
 
   onItemMouseLeave(): void {

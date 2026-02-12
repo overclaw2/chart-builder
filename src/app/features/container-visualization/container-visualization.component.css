@@ -235,6 +235,8 @@
   user-select: none;
   min-width: 80px;
   position: relative;
+  /* FIX 2: Ensure badge stays visible within item bounds */
+  overflow: visible;
 }
 
 .item:hover {
@@ -272,7 +274,8 @@
 }
 
 /* AVIHAI FIX #2: Central position width index badge - centered on package, not below */
-/* Positioned in the middle of the package itself for better visibility */
+/* Positioned in the middle of the package itself using item-wrapper's center */
+/* FIX: Position within item-wrapper bounds using top/left positioning relative to wrapper center */
 .item-central-position-badge {
   position: absolute;
   top: 50%;
@@ -291,6 +294,10 @@
   transition: all 0.2s ease;
   width: fit-content;
   pointer-events: none;
+  /* FIX: Ensure badge stays within its item-wrapper container */
+  max-width: 95%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .item-central-position-badge:hover {
