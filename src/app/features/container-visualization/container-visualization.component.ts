@@ -17,6 +17,7 @@ export class ContainerVisualizationComponent implements OnInit {
   loadingMessage: string | null = null;
   dragTooltip: { index: number; visible: boolean } = { index: 0, visible: false };
   hoveredItemId: string | null = null;
+  isDragging: boolean = false;
   contextMenu: { visible: boolean; x: number; y: number; containerId: string; compartmentId: string; itemId: string } = {
     visible: false,
     x: 0,
@@ -131,6 +132,7 @@ export class ContainerVisualizationComponent implements OnInit {
     item: Item
   ): void {
     this.draggedItem = { containerId, compartmentId, item };
+    this.isDragging = true;
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
     }
@@ -244,6 +246,9 @@ export class ContainerVisualizationComponent implements OnInit {
 
     this.draggedItem = null;
     this.dragTooltip.visible = false;
+    this.isDragging = false;
+    // Clear hovered item after drag completes
+    this.hoveredItemId = null;
   }
 
   onDownload(compartment: Compartment): void {
@@ -274,7 +279,10 @@ export class ContainerVisualizationComponent implements OnInit {
   }
 
   onItemMouseLeave(): void {
-    this.hoveredItemId = null;
+    // Don't clear hoveredItemId during drag - tooltip should remain visible during drag operations
+    if (!this.isDragging) {
+      this.hoveredItemId = null;
+    }
   }
 
   onItemContextMenu(event: MouseEvent, containerId: string, compartmentId: string, itemId: string): void {
