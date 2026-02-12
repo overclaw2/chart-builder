@@ -227,6 +227,10 @@
             <div class="item-location">
               <span class="location-badge">{{ item.location }}</span>
             </div>
+            <!-- Close button (X icon) to remove item from placed items -->
+            <button class="close-btn" (click)="onRemoveFromPlacedItems(item, $event)" title="Remove from chart">
+              ✕
+            </button>
           </div>
           <div class="empty-state" *ngIf="getTotalPlacedItems() === 0">
             No items placed yet

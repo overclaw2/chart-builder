@@ -795,6 +795,41 @@
   background: #16a34a;
 }
 
+/* Close button (X icon) for removing placed items */
+.close-btn {
+  display: none;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+  padding: 0.3rem 0.5rem;
+  border: none;
+  background: #ff6b6b;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  line-height: 1;
+  min-width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.list-item.placed:hover .close-btn {
+  display: flex;
+}
+
+.close-btn:hover {
+  background: #ff5252;
+  transform: scale(1.1);
+}
+
+.close-btn:active {
+  background: #ff3333;
+  transform: scale(0.95);
+}
+
 .empty-state {
   padding: 2rem 1rem;
   text-align: center;

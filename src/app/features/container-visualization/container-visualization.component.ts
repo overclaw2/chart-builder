@@ -649,6 +649,28 @@ export class ContainerVisualizationComponent implements OnInit {
     this.dragOverRemoveZone = false;
   }
 
+  // NEW: Remove item from placed items list via close button (X icon)
+  onRemoveFromPlacedItems(item: Item, event: Event): void {
+    event.stopPropagation();
+    
+    if (!this.shipData) return;
+
+    // Find the container and compartment for this item
+    for (const container of this.shipData.containers) {
+      for (const compartment of container.compartments) {
+        if (compartment.items.find(i => i.id === item.id)) {
+          // Remove the item from its compartment via service
+          this.containerService.removeItemFromCompartment(
+            container.id,
+            compartment.id,
+            item.id
+          );
+          return;
+        }
+      }
+    }
+  }
+
   onDragOverAvailableZone(event: DragEvent): void {
     event.preventDefault();
     if (event.dataTransfer) {
