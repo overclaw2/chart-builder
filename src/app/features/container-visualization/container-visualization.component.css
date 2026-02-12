@@ -497,3 +497,74 @@
   opacity: 1;
   box-shadow: 0 1px 4px rgba(218, 165, 32, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.5);
 }
+
+/* TODO 1: Drop zones visual feedback - shows valid drop areas while dragging */
+.drop-zones-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+  display: flex;
+  border-radius: 4px;
+  background: linear-gradient(90deg, 
+    rgba(52, 211, 153, 0.08) 0%,
+    rgba(52, 211, 153, 0.12) 10%,
+    rgba(52, 211, 153, 0.08) 20%,
+    rgba(52, 211, 153, 0.12) 30%,
+    rgba(52, 211, 153, 0.08) 40%,
+    rgba(52, 211, 153, 0.12) 50%,
+    rgba(52, 211, 153, 0.08) 60%,
+    rgba(52, 211, 153, 0.12) 70%,
+    rgba(52, 211, 153, 0.08) 80%,
+    rgba(52, 211, 153, 0.12) 90%,
+    rgba(52, 211, 153, 0.08) 100%
+  );
+  animation: zone-pulse 1.5s ease-in-out infinite;
+}
+
+.drop-zone-grid-line {
+  flex: 1;
+  border-right: 1px dashed rgba(52, 211, 153, 0.4);
+  position: relative;
+}
+
+.drop-zone-grid-line:last-child {
+  border-right: none;
+}
+
+/* Add visual indicator at each zone to show where you can drop */
+.drop-zone-grid-line::before {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  color: rgba(52, 211, 153, 0.6);
+  font-weight: bold;
+  opacity: 0;
+  animation: zone-indicator-appear 0.3s ease forwards;
+}
+
+@keyframes zone-pulse {
+  0%, 100% {
+    background-color: rgba(52, 211, 153, 0.03);
+  }
+  50% {
+    background-color: rgba(52, 211, 153, 0.08);
+  }
+}
+
+@keyframes zone-indicator-appear {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

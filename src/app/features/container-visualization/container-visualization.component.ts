@@ -394,4 +394,22 @@ export class ContainerVisualizationComponent implements OnInit {
     const centralPosition = item.position + (item.dimensionMcm / 2);
     return Math.round(centralPosition).toString();
   }
+
+  // TODO 1: Get drop zones visualization for valid drop areas
+  // Creates a visual grid showing where packages can be dropped
+  getDropZones(compartment: Compartment): Array<{ left: string; width: string }> {
+    const compartmentRangeSize = compartment.widthindexEnd - compartment.widthindexStart;
+    const zoneCount = 10; // Show 10 zones across the compartment
+    const zoneWidth = 100 / zoneCount;
+    
+    const zones = [];
+    for (let i = 0; i < zoneCount; i++) {
+      zones.push({
+        left: `${i * zoneWidth}%`,
+        width: `${zoneWidth}%`
+      });
+    }
+    
+    return zones;
+  }
 }

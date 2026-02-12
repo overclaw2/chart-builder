@@ -80,6 +80,11 @@
             📍 Index: {{ dragTooltip.index }}
           </div>
           
+          <!-- Drop zone visual feedback - grid overlay showing valid drop areas -->
+          <div class="drop-zones-grid" *ngIf="dragOverCompartmentId === compartment.id">
+            <div class="drop-zone-grid-line" *ngFor="let zone of getDropZones(compartment)" [ngStyle]="zone"></div>
+          </div>
+          
           <div class="container-bar">
             <div class="item-wrapper" *ngFor="let item of compartment.items" [ngStyle]="getItemPosition(item, compartment)">
               <div
