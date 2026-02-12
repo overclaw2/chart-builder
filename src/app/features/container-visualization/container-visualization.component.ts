@@ -32,6 +32,7 @@ export class ContainerVisualizationComponent implements OnInit {
   // Remove item functionality
   draggedPlacedItem: { containerId: string; compartmentId: string; item: Item } | null = null;
   dragOverRemoveZone: boolean = false;
+  dragOverAvailableZone: boolean = false;
 
   constructor(private containerService: ContainerService) {}
 
@@ -222,6 +223,13 @@ export class ContainerVisualizationComponent implements OnInit {
       
       // Position item at exact drop location
       let newPosition = compartmentStart + dropPercent * compartmentWidth;
+      
+      // FIX: Ensure position stays within target compartment bounds to prevent invisible items
+      // when dragging across compartments with different ranges
+      const itemWidth = this.draggedItem.item.dimensionMcm || 27;
+      const minPosition = compartmentStart;
+      const maxPosition = compartmentEnd - itemWidth;
+      newPosition = Math.max(minPosition, Math.min(newPosition, maxPosition));
 
       // Set displayIndex as rounded value for tooltip/display purposes only
       const displayIndex = Math.round(newPosition);
@@ -587,5 +595,39 @@ export class ContainerVisualizationComponent implements OnInit {
 
     this.draggedPlacedItem = null;
     this.dragOverRemoveZone = false;
+  }
+
+  onDragOverAvailableZone(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    this.dragOverAvailableZone = true;
+  }
+
+  onDragLeaveAvailableZone(event: DragEvent): void {
+    // Only clear if leaving the items-list-container (the entire sidebar section)
+    const itemsListContainer = (event.currentTarget as HTMLElement).closest('.items-list-container');
+    const target = event.relatedTarget as HTMLElement;
+    
+    // Only clear drag-over state if we're leaving the entire items-list-container
+    if (!target || !itemsListContainer?.contains(target)) {
+      this.dragOverAvailableZone = false;
+    }
+  }
+
+  onDropToAvailable(event: DragEvent): void {
+    event.preventDefault();
+    if (!this.draggedPlacedItem) return;
+
+    // Remove the item from its compartment
+    this.containerService.removeItemFromCompartment(
+      this.draggedPlacedItem.containerId,
+      this.draggedPlacedItem.compartmentId,
+      this.draggedPlacedItem.item.id
+    );
+
+    this.draggedPlacedItem = null;
+    this.dragOverAvailableZone = false;
   }
 }

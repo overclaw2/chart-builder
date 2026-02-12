@@ -171,7 +171,11 @@
           <h3>📦 Available Items</h3>
           <span class="count-badge">{{ getTotalAvailableItems() }}</span>
         </div>
-        <div class="items-list">
+        <div class="items-list"
+          [class.drag-over-remove]="dragOverAvailableZone"
+          (dragover)="onDragOverAvailableZone($event)"
+          (dragleave)="onDragLeaveAvailableZone($event)"
+          (drop)="onDropToAvailable($event)">
           <div class="list-item" *ngFor="let item of getAvailableItems()">
             <div class="item-info">
               <div class="item-label">{{ item.name }}</div>
@@ -183,6 +187,9 @@
           </div>
           <div class="empty-state" *ngIf="getTotalAvailableItems() === 0">
             No items available
+          </div>
+          <div class="remove-hint" *ngIf="getTotalPlacedItems() > 0 && dragOverAvailableZone">
+            Drop here to remove from chart
           </div>
         </div>
       </div>
