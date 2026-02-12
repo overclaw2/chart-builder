@@ -10,6 +10,7 @@ import {
   ChartCreateInput,
   ChartUpdateInput,
   DragDropEvent,
+  DataItem,
 } from '../models/chart.model';
 
 @Injectable({
