@@ -16,6 +16,7 @@ export class ContainerVisualizationComponent implements OnInit {
   dragOverCompartmentId: string | null = null;
   loadingMessage: string | null = null;
   dragTooltip: { index: number; visible: boolean } = { index: 0, visible: false };
+  hoveredItemId: string | null = null;
 
   constructor(private containerService: ContainerService) {}
 
@@ -258,6 +259,14 @@ export class ContainerVisualizationComponent implements OnInit {
 
   getItemColor(item: Item): string {
     return item.color || '#7dd3fc'; // Default light blue color
+  }
+
+  onItemMouseEnter(itemId: string): void {
+    this.hoveredItemId = itemId;
+  }
+
+  onItemMouseLeave(): void {
+    this.hoveredItemId = null;
   }
 
   // TASK 4: Add top axis highlighting for packages (Avihai's requirement)

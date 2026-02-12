@@ -86,6 +86,8 @@
                 class="item"
                 draggable="true"
                 (dragstart)="onDragStart($event, container.id, compartment.id, item)"
+                (mouseenter)="onItemMouseEnter(item.id)"
+                (mouseleave)="onItemMouseLeave()"
                 [style.backgroundColor]="getItemColor(item)"
               >
                 <div class="item-content">
@@ -107,6 +109,23 @@
                 <!-- Moved inside .item to ensure tooltip is centered on package itself -->
                 <div class="item-central-position-tooltip" title="Central position width index">
                   📍 {{ getCentralPositionIndex(item) }}
+                </div>
+                
+                <!-- Hover tooltip with package data (appears on hover) -->
+                <div class="item-hover-tooltip" *ngIf="hoveredItemId === item.id">
+                  <div class="tooltip-title">{{ item.name }}</div>
+                  <div class="tooltip-row">
+                    <span class="tooltip-label">Width:</span>
+                    <span class="tooltip-value">{{ item.dimensionMcm }} Mcm</span>
+                  </div>
+                  <div class="tooltip-row">
+                    <span class="tooltip-label">Weight:</span>
+                    <span class="tooltip-value">{{ item.weightKg }} Kg</span>
+                  </div>
+                  <div class="tooltip-row">
+                    <span class="tooltip-label">Destination:</span>
+                    <span class="tooltip-value">{{ item.destination }}</span>
+                  </div>
                 </div>
               </div>
               <!-- Display index below item (legacy) -->
