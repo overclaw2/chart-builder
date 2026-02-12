@@ -412,4 +412,44 @@ export class ContainerVisualizationComponent implements OnInit {
     
     return zones;
   }
+
+  // TODO 2: Get available items (items that have been added to the container structure but not yet placed in compartments)
+  // Note: In the current implementation, all items are already placed in compartments
+  // This method returns empty for now (can be extended for future features like an item pool)
+  getAvailableItems(): Array<any> {
+    // Placeholder for available items that haven't been placed yet
+    // In a future enhancement, this could come from a separate inventory pool
+    return [];
+  }
+
+  // TODO 2: Get total count of available items
+  getTotalAvailableItems(): number {
+    return this.getAvailableItems().length;
+  }
+
+  // TODO 2: Get placed items - items currently in compartments across all containers
+  getPlacedItems(): Array<any> {
+    const placedItems: Array<any> = [];
+    
+    if (!this.shipData) return placedItems;
+    
+    // Iterate through all containers and compartments to collect placed items
+    this.shipData.containers.forEach((container) => {
+      container.compartments.forEach((compartment) => {
+        compartment.items.forEach((item) => {
+          placedItems.push({
+            ...item,
+            location: `${container.name} (${compartment.index}/${container.compartments.length})`
+          });
+        });
+      });
+    });
+    
+    return placedItems;
+  }
+
+  // TODO 2: Get total count of placed items
+  getTotalPlacedItems(): number {
+    return this.getPlacedItems().length;
+  }
 }

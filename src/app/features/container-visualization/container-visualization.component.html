@@ -1,6 +1,10 @@
 <div class="container-visualization" (click)="closeContextMenu()">
-  <div class="header-section">
-    <h1 class="title">{{ shipData?.title }}</h1>
+  <!-- Layout wrapper for charts and side panels -->
+  <div class="layout-wrapper">
+    <!-- Main content area with charts -->
+    <div class="main-content">
+      <div class="header-section">
+        <h1 class="title">{{ shipData?.title }}</h1>
     
     <!-- JSON Upload Section -->
     <div class="upload-section">
@@ -140,6 +144,54 @@
                 {{ item.displayIndex }}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- Side panel with item lists -->
+    <div class="side-panel">
+      <!-- Available Items List -->
+      <div class="items-list-container">
+        <div class="list-header">
+          <h3>📦 Available Items</h3>
+          <span class="count-badge">{{ getTotalAvailableItems() }}</span>
+        </div>
+        <div class="items-list">
+          <div class="list-item" *ngFor="let item of getAvailableItems()">
+            <div class="item-info">
+              <div class="item-label">{{ item.name }}</div>
+              <div class="item-specs">{{ item.dimensionMcm }} Mcm × {{ item.weightKg }} Kg</div>
+            </div>
+            <div class="item-location">
+              <span class="location-badge">{{ item.destination }}</span>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="getTotalAvailableItems() === 0">
+            No items available
+          </div>
+        </div>
+      </div>
+
+      <!-- Placed Items List -->
+      <div class="items-list-container">
+        <div class="list-header">
+          <h3>✅ Placed Items</h3>
+          <span class="count-badge">{{ getTotalPlacedItems() }}</span>
+        </div>
+        <div class="items-list">
+          <div class="list-item placed" *ngFor="let item of getPlacedItems()">
+            <div class="item-info">
+              <div class="item-label">{{ item.name }}</div>
+              <div class="item-specs">{{ item.dimensionMcm }} Mcm × {{ item.weightKg }} Kg</div>
+            </div>
+            <div class="item-location">
+              <span class="location-badge">{{ item.location }}</span>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="getTotalPlacedItems() === 0">
+            No items placed yet
           </div>
         </div>
       </div>
