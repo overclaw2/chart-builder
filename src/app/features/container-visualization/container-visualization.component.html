@@ -31,10 +31,10 @@
         <div class="container-header">
           <div class="container-info">
             <a href="#" class="container-link">
-              {{ container.ship }} | {{ container.name }} ({{ compartment.index }}/{{ container.compartments.length }}) - Width Utilization: {{ compartment.widthUtilization }}%
+              {{ container.ship }} | {{ container.name }} ({{ compartment.index }}/{{ container.compartments.length }})
             </a>
             <div class="metadata">
-              widthindex {{ compartment.widthindexStart }} Mcm - {{ compartment.widthindexEnd }} Mcm | Width {{ compartment.widthMcm }} Cm - {{ compartment.widthUtilization }}% utilization | Weight {{ compartment.weightKg }} Kg - {{ compartment.weightUtilization }}% utilization
+              widthindex {{ compartment.widthindexStart }} Mcm - {{ compartment.widthindexEnd }} Mcm | Width {{ compartment.widthMcm }} Cm - {{ compartment.widthUtilization }}% width utilization | Weight {{ compartment.weightKg }} Kg - {{ getContainerWeightUtilization(container) }}% container weight utilization
             </div>
           </div>
           <div class="controls">
@@ -51,6 +51,22 @@
           </div>
         </div>
 
+        <!-- Top Axis with Range and Package Highlighting (Avihai's requirement) -->
+        <div class="axis-wrapper">
+          <div class="top-axis">
+            <div class="axis-label">{{ compartment.widthindexStart }}</div>
+            <div class="axis-track">
+              <!-- Highlight areas where packages are located -->
+              <div 
+                class="axis-highlight" 
+                *ngFor="let item of compartment.items"
+                [ngStyle]="getAxisHighlightPosition(item, compartment)"
+              ></div>
+            </div>
+            <div class="axis-label">{{ compartment.widthindexEnd }}</div>
+          </div>
+        </div>
+
         <!-- Compartment Bar -->
         <div
           class="container-bar-wrapper"
@@ -63,7 +79,6 @@
           <div class="drag-tooltip" *ngIf="dragTooltip.visible && dragOverCompartmentId === compartment.id">
             📍 Index: {{ dragTooltip.index }}
           </div>
-          <div class="position-label top">{{ compartment.items.length > 0 ? compartment.items[0].position : 0 }}</div>
           
           <div class="container-bar">
             <div class="item-wrapper" *ngFor="let item of compartment.items" [ngStyle]="getItemPosition(item, compartment)">
@@ -71,12 +86,22 @@
                 class="item"
                 draggable="true"
                 (dragstart)="onDragStart($event, container.id, compartment.id, item)"
+                [style.backgroundColor]="getItemColor(item)"
               >
                 <div class="item-content">
                   <div class="item-name">{{ item.name }}</div>
                   <div class="item-detail">{{ item.dimensionMcm }} [Mcm]</div>
                   <div class="item-detail">{{ item.weightKg }} [Kg]</div>
                   <div class="item-destination">{{ item.destination }}</div>
+                  <div class="item-color-picker">
+                    <input
+                      type="color"
+                      [value]="getItemColor(item)"
+                      (change)="onColorChange($event, item)"
+                      title="Click to change color"
+                      class="color-input"
+                    />
+                  </div>
                 </div>
               </div>
               <!-- Display index below item (Ofer's requirement) -->
@@ -85,8 +110,6 @@
               </div>
             </div>
           </div>
-
-          <div class="position-label bottom">{{ compartment.items.length > 0 ? compartment.items[0].position - 750 : 0 }}</div>
         </div>
       </div>
     </div>

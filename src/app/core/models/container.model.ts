@@ -7,6 +7,7 @@ export interface Item {
   position: number; // start position in compartment (index value)
   length: number; // length in compartment
   displayIndex?: number; // index to display below item (for Ofer's requirement)
+  color?: string; // color for item visualization (default: #7dd3fc)
 }
 
 export interface Compartment {

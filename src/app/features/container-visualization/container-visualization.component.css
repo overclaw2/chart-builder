@@ -285,3 +285,73 @@
     transform: translateX(-50%) translateY(0);
   }
 }
+
+.item-color-picker {
+  margin-top: 0.35rem;
+  display: flex;
+  justify-content: center;
+}
+
+.color-input {
+  width: 30px;
+  height: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  padding: 1px;
+  background: transparent;
+}
+
+.color-input:hover {
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* TASK 4: Top axis styling for range display and package highlighting (Avihai) */
+.axis-wrapper {
+  margin-bottom: 0.5rem;
+}
+
+.top-axis {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #666666;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.axis-label {
+  min-width: 50px;
+  text-align: center;
+  color: #555555;
+}
+
+.axis-track {
+  flex: 1;
+  position: relative;
+  height: 20px;
+  background: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.axis-highlight {
+  position: absolute;
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
+  border: 1px solid #daa520;
+  border-radius: 2px;
+  opacity: 0.8;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+}
+
+.axis-highlight:hover {
+  opacity: 1;
+  box-shadow: 0 1px 4px rgba(218, 165, 32, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}

@@ -231,4 +231,67 @@ export class ContainerVisualizationComponent implements OnInit {
   onRefresh(): void {
     console.log('Refresh data');
   }
+
+  onColorChange(event: Event, item: Item): void {
+    const input = event.target as HTMLInputElement;
+    const newColor = input.value;
+    
+    // Update the item's color
+    item.color = newColor;
+    
+    // Trigger change detection
+    this.shipData = { ...this.shipData! };
+  }
+
+  getItemColor(item: Item): string {
+    return item.color || '#7dd3fc'; // Default light blue color
+  }
+
+  // TASK 4: Add top axis highlighting for packages (Avihai's requirement)
+  getAxisHighlightPosition(item: Item, compartment: Compartment): { left: string; width: string } {
+    const compartmentRangeStart = compartment.widthindexStart;
+    const compartmentRangeEnd = compartment.widthindexEnd;
+    const compartmentRangeSize = compartmentRangeEnd - compartmentRangeStart;
+
+    const itemStart = item.position;
+    const itemDimension = item.dimensionMcm || 27;
+
+    // Calculate position relative to compartment's widthindex range
+    let leftPercent = ((itemStart - compartmentRangeStart) / compartmentRangeSize) * 100;
+    let widthPercent = ((itemDimension) / compartmentRangeSize) * 100;
+
+    // Clamp values to 0-100%
+    leftPercent = Math.max(0, Math.min(100, leftPercent));
+    widthPercent = Math.max(3, Math.min(100, widthPercent));
+
+    if (leftPercent + widthPercent > 100) {
+      widthPercent = 100 - leftPercent;
+    }
+
+    return {
+      left: `${leftPercent}%`,
+      width: `${widthPercent}%`,
+    };
+  }
+
+  // TASK 3 & 2: Calculate container-level weight utilization
+  // Weight utilization = total weight in container / container's total weight capacity
+  getContainerWeightUtilization(container: Container): string {
+    // Calculate total weight in all compartments
+    let totalWeightInContainer = 0;
+    // Calculate total capacity of container (sum of all compartments' capacity)
+    let totalContainerCapacity = 0;
+
+    container.compartments.forEach((compartment) => {
+      totalWeightInContainer += compartment.weightKg;
+      totalContainerCapacity += compartment.totalCapacity;
+    });
+
+    if (totalContainerCapacity === 0) {
+      return '0';
+    }
+
+    const utilization = (totalWeightInContainer / totalContainerCapacity) * 100;
+    return utilization.toFixed(2);
+  }
 }
