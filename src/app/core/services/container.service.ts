@@ -19,45 +19,50 @@ export class ContainerService {
           id: 'container-1',
           name: 'Container 1',
           ship: 'Ever Given',
-          widthindexStart: 10000,
-          widthindexEnd: 10150,
-          widthMcm: 120,
-          widthUtilization: 18,
-          weightKg: 1500,
-          weightUtilization: 8.57,
-          totalCapacity: 15000,
-          items: [
+          compartments: [
             {
-              id: 'item-1',
-              name: 'Ali Express 10',
-              dimensionMcm: 27,
-              weightKg: 100,
-              destination: 'ISRAEL',
-              position: 13768.6,
-              length: 500,
+              id: 'compartment-1',
+              index: 1,
+              widthindexStart: 10000,
+              widthindexEnd: 10150,
+              widthMcm: 120,
+              widthUtilization: 18,
+              weightKg: 1500,
+              weightUtilization: 8.57,
+              totalCapacity: 15000,
+              items: [
+                {
+                  id: 'item-1',
+                  name: 'Ali Express 10',
+                  dimensionMcm: 27,
+                  weightKg: 100,
+                  destination: 'ISRAEL',
+                  position: 13768.6,
+                  length: 500,
+                },
+              ],
             },
-          ],
-        },
-        {
-          id: 'container-2',
-          name: 'Container 2',
-          ship: 'Ever Given',
-          widthindexStart: 10150,
-          widthindexEnd: 10250,
-          widthMcm: 100,
-          widthUtilization: 30,
-          weightKg: 1500,
-          weightUtilization: 8.57,
-          totalCapacity: 15000,
-          items: [
             {
-              id: 'item-2',
-              name: 'Ali Express 10',
-              dimensionMcm: 30,
-              weightKg: 200,
-              destination: 'ISRAEL',
-              position: 14085.2,
-              length: 500,
+              id: 'compartment-2',
+              index: 2,
+              widthindexStart: 10150,
+              widthindexEnd: 10250,
+              widthMcm: 100,
+              widthUtilization: 30,
+              weightKg: 1500,
+              weightUtilization: 8.57,
+              totalCapacity: 15000,
+              items: [
+                {
+                  id: 'item-2',
+                  name: 'Ali Express 10',
+                  dimensionMcm: 30,
+                  weightKg: 200,
+                  destination: 'ISRAEL',
+                  position: 14085.2,
+                  length: 500,
+                },
+              ],
             },
           ],
         },
@@ -80,72 +85,79 @@ export class ContainerService {
     });
   }
 
-  moveItem(fromContainerId: string, toContainerId: string, itemId: string, newPosition?: number): void {
+  moveItemBetweenCompartments(
+    fromContainerId: string,
+    fromCompartmentId: string,
+    toContainerId: string,
+    toCompartmentId: string,
+    itemId: string,
+    newPosition?: number
+  ): void {
     const currentData = this.shipDataSubject.value;
     let movedItem: Item | undefined;
-    let fromContainerWeight = 0;
-    let fromContainerUtilization = 0;
-    let toContainerWeight = 0;
-    let toContainerUtilization = 0;
+    let itemWeight = 0;
 
-    // Remove item from source container and get its weight
-    let updatedContainers = currentData.containers.map((c) => {
-      if (c.id === fromContainerId) {
-        const items = c.items.filter((item) => {
-          if (item.id === itemId) {
-            movedItem = { ...item };
-            if (newPosition !== undefined) {
-              movedItem.position = newPosition;
-            }
-            fromContainerWeight = item.weightKg;
-            return false;
+    // Update containers
+    let updatedContainers = currentData.containers.map((container) => {
+      if (container.id === fromContainerId || container.id === toContainerId) {
+        const updatedCompartments = container.compartments.map((compartment) => {
+          // Remove from source compartment
+          if (compartment.id === fromCompartmentId) {
+            const items = compartment.items.filter((item) => {
+              if (item.id === itemId) {
+                movedItem = { ...item };
+                itemWeight = item.weightKg;
+                if (newPosition !== undefined) {
+                  movedItem.position = newPosition;
+                }
+                return false;
+              }
+              return true;
+            });
+
+            const newWeight = compartment.weightKg - itemWeight;
+            const newUtilization = (newWeight / 17500) * 100;
+
+            return {
+              ...compartment,
+              items,
+              weightKg: newWeight,
+              weightUtilization: parseFloat(newUtilization.toFixed(2)),
+            };
           }
-          return true;
+
+          // Add to target compartment
+          if (compartment.id === toCompartmentId && movedItem) {
+            const targetPosition =
+              newPosition ||
+              compartment.widthindexStart + 1000 + compartment.items.length * 600;
+            movedItem.position = targetPosition;
+
+            const newItems = [...compartment.items, movedItem];
+            const newWeight = compartment.weightKg + itemWeight;
+            const newUtilization = (newWeight / 17500) * 100;
+            const totalItemLength = newItems.reduce((sum, item) => sum + item.length, 0);
+            const newWidthUtilization = (totalItemLength / compartment.totalCapacity) * 100;
+
+            return {
+              ...compartment,
+              items: newItems,
+              weightKg: newWeight,
+              weightUtilization: parseFloat(newUtilization.toFixed(2)),
+              widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
+            };
+          }
+
+          return compartment;
         });
 
-        // Recalculate utilization for source container
-        const newWeight = c.weightKg - fromContainerWeight;
-        const newUtilization = (newWeight / 17500) * 100; // Max weight typically 17.5 tonnes
-
         return {
-          ...c,
-          items,
-          weightKg: newWeight,
-          weightUtilization: parseFloat(newUtilization.toFixed(2)),
+          ...container,
+          compartments: updatedCompartments,
         };
       }
-      return c;
+      return container;
     });
-
-    // Add item to target container
-    if (movedItem) {
-      updatedContainers = updatedContainers.map((c) => {
-        if (c.id === toContainerId) {
-          toContainerWeight = movedItem!.weightKg;
-
-          // Position item at reasonable location in target container
-          const targetPosition = newPosition || c.widthindexStart + 1000 + c.items.length * 600;
-          movedItem!.position = targetPosition;
-
-          const newItems = [...c.items, movedItem!];
-          const newWeight = c.weightKg + toContainerWeight;
-          const newUtilization = (newWeight / 17500) * 100;
-
-          // Recalculate width utilization based on items
-          const totalItemLength = newItems.reduce((sum, item) => sum + item.length, 0);
-          const newWidthUtilization = (totalItemLength / c.totalCapacity) * 100;
-
-          return {
-            ...c,
-            items: newItems,
-            weightKg: newWeight,
-            weightUtilization: parseFloat(newUtilization.toFixed(2)),
-            widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
-          };
-        }
-        return c;
-      });
-    }
 
     this.shipDataSubject.next({
       ...currentData,

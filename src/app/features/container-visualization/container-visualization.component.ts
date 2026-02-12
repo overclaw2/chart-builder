@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContainerService } from '../../core/services/container.service';
-import { ShipData, Container, Item } from '../../core/models/container.model';
+import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
 
 @Component({
   selector: 'app-container-visualization',
@@ -12,8 +12,8 @@ import { ShipData, Container, Item } from '../../core/models/container.model';
 })
 export class ContainerVisualizationComponent implements OnInit {
   shipData: ShipData | null = null;
-  draggedItem: { containerId: string; item: Item } | null = null;
-  dragOverContainerId: string | null = null;
+  draggedItem: { containerId: string; compartmentId: string; item: Item } | null = null;
+  dragOverCompartmentId: string | null = null;
 
   constructor(private containerService: ContainerService) {}
 
@@ -23,13 +23,13 @@ export class ContainerVisualizationComponent implements OnInit {
     });
   }
 
-  getItemPosition(item: Item, container: Container): { left: string; width: string } {
-    const containerWidth = container.totalCapacity;
+  getItemPosition(item: Item, compartment: Compartment): { left: string; width: string } {
+    const compartmentWidth = compartment.totalCapacity;
     const itemStart = item.position;
     const itemEnd = item.position + item.length;
     
-    const leftPercent = (itemStart / containerWidth) * 100;
-    const widthPercent = ((itemEnd - itemStart) / containerWidth) * 100;
+    const leftPercent = (itemStart / compartmentWidth) * 100;
+    const widthPercent = ((itemEnd - itemStart) / compartmentWidth) * 100;
 
     return {
       left: `${leftPercent}%`,
@@ -40,51 +40,55 @@ export class ContainerVisualizationComponent implements OnInit {
   onDragStart(
     event: DragEvent,
     containerId: string,
+    compartmentId: string,
     item: Item
   ): void {
-    this.draggedItem = { containerId, item };
+    this.draggedItem = { containerId, compartmentId, item };
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
     }
   }
 
-  onDragOver(event: DragEvent, containerId?: string): void {
+  onDragOver(event: DragEvent, compartmentId?: string): void {
     event.preventDefault();
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'move';
     }
-    if (containerId) {
-      this.dragOverContainerId = containerId;
+    if (compartmentId) {
+      this.dragOverCompartmentId = compartmentId;
     }
   }
 
-  onDragLeave(event: DragEvent, containerId: string): void {
-    if (this.dragOverContainerId === containerId) {
-      this.dragOverContainerId = null;
+  onDragLeave(event: DragEvent, compartmentId: string): void {
+    if (this.dragOverCompartmentId === compartmentId) {
+      this.dragOverCompartmentId = null;
     }
   }
 
-  onDrop(event: DragEvent, toContainerId: string): void {
+  onDrop(event: DragEvent, containerId: string, toCompartmentId: string): void {
     event.preventDefault();
-    if (this.draggedItem && this.draggedItem.containerId !== toContainerId) {
+    if (this.draggedItem && this.draggedItem.compartmentId !== toCompartmentId) {
       // Calculate new position based on drop location
       const dropZone = event.currentTarget as HTMLElement;
       const rect = dropZone.getBoundingClientRect();
       const dropX = event.clientX - rect.left;
       const dropPercent = dropX / rect.width;
 
-      // Get target container to calculate position
-      const targetContainer = this.shipData?.containers.find(
-        (c) => c.id === toContainerId
-      );
-      if (targetContainer) {
+      // Get target compartment to calculate position
+      const targetCompartment = this.shipData?.containers
+        .find((c) => c.id === containerId)
+        ?.compartments.find((comp) => comp.id === toCompartmentId);
+        
+      if (targetCompartment) {
         const newPosition =
-          targetContainer.widthindexStart +
-          dropPercent * (targetContainer.widthindexEnd - targetContainer.widthindexStart);
+          targetCompartment.widthindexStart +
+          dropPercent * (targetCompartment.widthindexEnd - targetCompartment.widthindexStart);
 
-        this.containerService.moveItem(
+        this.containerService.moveItemBetweenCompartments(
           this.draggedItem.containerId,
-          toContainerId,
+          this.draggedItem.compartmentId,
+          containerId,
+          toCompartmentId,
           this.draggedItem.item.id,
           newPosition
         );
@@ -94,8 +98,8 @@ export class ContainerVisualizationComponent implements OnInit {
     }
   }
 
-  onDownload(container: Container): void {
-    console.log('Download container', container.id);
+  onDownload(compartment: Compartment): void {
+    console.log('Download compartment', compartment.id);
   }
 
   onRefresh(): void {

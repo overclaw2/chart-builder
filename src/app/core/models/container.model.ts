@@ -4,14 +4,13 @@ export interface Item {
   dimensionMcm: number;
   weightKg: number;
   destination: string;
-  position: number; // start position in container
-  length: number; // length in container
+  position: number; // start position in compartment
+  length: number; // length in compartment
 }
 
-export interface Container {
+export interface Compartment {
   id: string;
-  name: string;
-  ship: string;
+  index: number; // 1 or 2
   widthindexStart: number;
   widthindexEnd: number;
   widthMcm: number;
@@ -20,6 +19,13 @@ export interface Container {
   weightUtilization: number; // percentage
   items: Item[];
   totalCapacity: number;
+}
+
+export interface Container {
+  id: string;
+  name: string;
+  ship: string;
+  compartments: Compartment[];
 }
 
 export interface ShipData {

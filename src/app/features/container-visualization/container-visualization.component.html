@@ -3,58 +3,61 @@
 
   <div class="containers-list" *ngIf="shipData">
     <div class="container-card" *ngFor="let container of shipData.containers">
-      <!-- Container Header -->
-      <div class="container-header">
-        <div class="container-info">
-          <a href="#" class="container-link">
-            {{ container.ship }} | {{ container.name }}
-          </a>
-          <div class="metadata">
-            widthindex {{ container.widthindexStart }} Mcm - {{ container.widthindexEnd }} Mcm | Width {{ container.widthMcm }} Cm - {{ container.widthUtilization }}% utilization | Weight {{ container.weightKg }} Kg - {{ container.weightUtilization }}% utilization
-          </div>
-        </div>
-        <div class="controls">
-          <button class="icon-btn" (click)="onDownload(container)" title="Download">
-            ↓
-          </button>
-          <button class="icon-btn" (click)="onRefresh()" title="Refresh">
-            ↻
-          </button>
-          <select class="filter-select">
-            <option>None</option>
-            <option selected>All</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Container Bar -->
-      <div
-        class="container-bar-wrapper"
-        [class.drag-over]="dragOverContainerId === container.id"
-        (dragover)="onDragOver($event, container.id)"
-        (dragleave)="onDragLeave($event, container.id)"
-        (drop)="onDrop($event, container.id)"
-      >
-        <div class="position-label top">{{ container.items.length > 0 ? container.items[0].position : 0 }}</div>
-        
-        <div class="container-bar">
-          <div
-            class="item"
-            *ngFor="let item of container.items"
-            [ngStyle]="getItemPosition(item, container)"
-            draggable="true"
-            (dragstart)="onDragStart($event, container.id, item)"
-          >
-            <div class="item-content">
-              <div class="item-name">{{ item.name }}</div>
-              <div class="item-detail">{{ item.dimensionMcm }} [Mcm]</div>
-              <div class="item-detail">{{ item.weightKg }} [Kg]</div>
-              <div class="item-destination">{{ item.destination }}</div>
+      <!-- Compartments within container -->
+      <div class="compartment-group" *ngFor="let compartment of container.compartments">
+        <!-- Compartment Header -->
+        <div class="container-header">
+          <div class="container-info">
+            <a href="#" class="container-link">
+              {{ container.ship }} | {{ container.name }} ({{ compartment.index }}/{{ container.compartments.length }})
+            </a>
+            <div class="metadata">
+              widthindex {{ compartment.widthindexStart }} Mcm - {{ compartment.widthindexEnd }} Mcm | Width {{ compartment.widthMcm }} Cm - {{ compartment.widthUtilization }}% utilization | Weight {{ compartment.weightKg }} Kg - {{ compartment.weightUtilization }}% utilization
             </div>
           </div>
+          <div class="controls">
+            <button class="icon-btn" (click)="onDownload(compartment)" title="Download">
+              ↓
+            </button>
+            <button class="icon-btn" (click)="onRefresh()" title="Refresh">
+              ↻
+            </button>
+            <select class="filter-select">
+              <option>None</option>
+              <option selected>All</option>
+            </select>
+          </div>
         </div>
 
-        <div class="position-label bottom">{{ container.items.length > 0 ? container.items[0].position - 750 : 0 }}</div>
+        <!-- Compartment Bar -->
+        <div
+          class="container-bar-wrapper"
+          [class.drag-over]="dragOverCompartmentId === compartment.id"
+          (dragover)="onDragOver($event, compartment.id)"
+          (dragleave)="onDragLeave($event, compartment.id)"
+          (drop)="onDrop($event, container.id, compartment.id)"
+        >
+          <div class="position-label top">{{ compartment.items.length > 0 ? compartment.items[0].position : 0 }}</div>
+          
+          <div class="container-bar">
+            <div
+              class="item"
+              *ngFor="let item of compartment.items"
+              [ngStyle]="getItemPosition(item, compartment)"
+              draggable="true"
+              (dragstart)="onDragStart($event, container.id, compartment.id, item)"
+            >
+              <div class="item-content">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-detail">{{ item.dimensionMcm }} [Mcm]</div>
+                <div class="item-detail">{{ item.weightKg }} [Kg]</div>
+                <div class="item-destination">{{ item.destination }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="position-label bottom">{{ compartment.items.length > 0 ? compartment.items[0].position - 750 : 0 }}</div>
+        </div>
       </div>
     </div>
   </div>
