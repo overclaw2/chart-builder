@@ -56,7 +56,8 @@
               "browserTarget": "chart-builder:build:production"
             },
             "development": {
-              "browserTarget": "chart-builder:build:development"
+              "browserTarget": "chart-builder:build:development",
+              "disableHostCheck": true
             }
           },
           "defaultConfiguration": "development"
