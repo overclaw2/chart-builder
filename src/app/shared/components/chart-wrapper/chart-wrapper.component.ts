@@ -9,7 +9,6 @@ import {
   SimpleChanges,
   ViewChild,
   ElementRef,
-  ChangeDetectionStrategy,
 } from '@angular/core';
 import { Chart } from '../../../core/models/chart.model';
 import * as echarts from 'echarts';
@@ -18,7 +17,6 @@ import * as echarts from 'echarts';
   selector: 'app-chart-wrapper',
   templateUrl: './chart-wrapper.component.html',
   styleUrls: ['./chart-wrapper.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartWrapperComponent implements OnInit, OnChanges, OnDestroy {
   @Input() chart!: Chart;

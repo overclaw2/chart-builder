@@ -1,21 +1,12 @@
-import {
-  Component,
-  OnInit,
-  ChangeDetectionStrategy,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Chart } from '../../core/models/chart.model';
 import { ChartStore } from '../../core/services/chart.store';
-import { ChartWrapperComponent } from '../../shared/components/chart-wrapper/chart-wrapper.component';
 
 @Component({
-  selector: 'app-chart-canvas',
-  standalone: true,
-  imports: [CommonModule, ChartWrapperComponent],
+  selector: 'app-root',
   templateUrl: './chart-canvas.component.html',
   styleUrls: ['./chart-canvas.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartCanvasComponent implements OnInit {
   charts$: Observable<Chart[]>;
