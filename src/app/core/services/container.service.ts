@@ -192,26 +192,39 @@ export class ContainerService {
       let normalizedData: ShipData;
 
       if (jsonData && typeof jsonData === 'object') {
-        if (Array.isArray(jsonData)) {
+        let dataToProcess = jsonData;
+        
+        // FIX: Handle wrapped data structures (e.g., { data: { containers: [...] } })
+        if (!Array.isArray(jsonData) && !jsonData.containers) {
+          // Check for common wrapper properties like 'data'
+          if (jsonData.data && typeof jsonData.data === 'object') {
+            dataToProcess = jsonData.data;
+          }
+        }
+
+        if (Array.isArray(dataToProcess)) {
           // Raw array of containers - wrap it
           normalizedData = {
             title: 'Container Ship Status',
-            containers: jsonData,
+            containers: dataToProcess,
           };
-        } else if (jsonData.containers && Array.isArray(jsonData.containers)) {
+        } else if (dataToProcess.containers && Array.isArray(dataToProcess.containers)) {
           // Standard ShipData format with containers array
-          normalizedData = jsonData;
+          normalizedData = {
+            title: dataToProcess.title || 'Container Ship Status',
+            containers: dataToProcess.containers,
+          };
         } else {
           // Unknown structure - provide detailed diagnostic
-          const keys = Object.keys(jsonData);
-          const hasContainers = 'containers' in jsonData;
-          const containersIsArray = Array.isArray(jsonData.containers);
+          const keys = Object.keys(dataToProcess);
+          const hasContainers = 'containers' in dataToProcess;
+          const containersIsArray = Array.isArray(dataToProcess.containers);
           
           throw new Error(
             `Invalid data structure: Expected { containers: Array, title?: string }. ` +
             `Received object with keys: [${keys.join(', ')}]. ` +
             (hasContainers && !containersIsArray ? 
-              `Note: 'containers' property exists but is not an array (type: ${typeof jsonData.containers}).` :
+              `Note: 'containers' property exists but is not an array (type: ${typeof dataToProcess.containers}).` :
               `Note: No 'containers' property found.`)
           );
         }
