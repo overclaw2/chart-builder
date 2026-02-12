@@ -193,8 +193,15 @@
           <h3>✅ Placed Items</h3>
           <span class="count-badge">{{ getTotalPlacedItems() }}</span>
         </div>
-        <div class="items-list">
-          <div class="list-item placed" *ngFor="let item of getPlacedItems()">
+        <div class="items-list" 
+          [class.drag-over-remove]="dragOverRemoveZone"
+          (dragover)="onDragOverRemoveZone($event)"
+          (dragleave)="onDragLeaveRemoveZone($event)"
+          (drop)="onDropToRemove($event)">
+          <div class="list-item placed" 
+            *ngFor="let item of getPlacedItems()"
+            draggable="true"
+            (dragstart)="onDragStartPlacedItem($event, item)">
             <div class="item-info">
               <div class="item-label">{{ item.name }}</div>
               <div class="item-specs">{{ item.dimensionMcm }} Mcm × {{ item.weightKg }} Kg</div>
@@ -205,6 +212,9 @@
           </div>
           <div class="empty-state" *ngIf="getTotalPlacedItems() === 0">
             No items placed yet
+          </div>
+          <div class="remove-hint" *ngIf="getTotalPlacedItems() > 0 && dragOverRemoveZone">
+            Drop here to remove from chart
           </div>
         </div>
       </div>

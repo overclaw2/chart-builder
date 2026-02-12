@@ -700,10 +700,15 @@
 
 .list-item.placed {
   background: rgba(52, 211, 153, 0.05);
+  cursor: grab;
 }
 
 .list-item.placed:hover {
   background: rgba(52, 211, 153, 0.1);
+}
+
+.list-item.placed:active {
+  cursor: grabbing;
 }
 
 .item-info {
@@ -755,6 +760,35 @@
   color: #999999;
   font-size: 0.85rem;
   font-style: italic;
+}
+
+.items-list.drag-over-remove {
+  background: #fff3cd;
+  border: 2px dashed #ff6b6b;
+}
+
+.items-list.drag-over-remove .list-header {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+}
+
+.remove-hint {
+  padding: 1rem;
+  text-align: center;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: rgba(255, 107, 107, 0.05);
+  border-top: 1px solid rgba(255, 107, 107, 0.2);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* Mobile responsive - stack panels vertically on small screens */

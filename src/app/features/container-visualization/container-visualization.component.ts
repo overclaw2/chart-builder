@@ -28,6 +28,10 @@ export class ContainerVisualizationComponent implements OnInit {
   };
   // TODO 4: Track if tooltip should show above or below item
   tooltipPositioning: { [itemId: string]: 'above' | 'below' } = {};
+  
+  // Remove item functionality
+  draggedPlacedItem: { containerId: string; compartmentId: string; item: Item } | null = null;
+  dragOverRemoveZone: boolean = false;
 
   constructor(private containerService: ContainerService) {}
 
@@ -525,5 +529,55 @@ export class ContainerVisualizationComponent implements OnInit {
       return 'tooltip-below';
     }
     return 'tooltip-above';
+  }
+
+  // Remove item from compartment by dragging from placed items list
+  onDragStartPlacedItem(event: DragEvent, item: Item): void {
+    // Find which container and compartment this item belongs to
+    if (!this.shipData) return;
+
+    for (const container of this.shipData.containers) {
+      for (const compartment of container.compartments) {
+        if (compartment.items.find(i => i.id === item.id)) {
+          this.draggedPlacedItem = { containerId: container.id, compartmentId: compartment.id, item };
+          if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', item.id);
+          }
+          return;
+        }
+      }
+    }
+  }
+
+  onDragOverRemoveZone(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    this.dragOverRemoveZone = true;
+  }
+
+  onDragLeaveRemoveZone(event: DragEvent): void {
+    // Only clear if leaving the items-list container entirely
+    const target = event.relatedTarget as HTMLElement;
+    if (!target || !target.closest('.items-list')) {
+      this.dragOverRemoveZone = false;
+    }
+  }
+
+  onDropToRemove(event: DragEvent): void {
+    event.preventDefault();
+    if (!this.draggedPlacedItem) return;
+
+    // Remove the item from its compartment
+    this.containerService.removeItemFromCompartment(
+      this.draggedPlacedItem.containerId,
+      this.draggedPlacedItem.compartmentId,
+      this.draggedPlacedItem.item.id
+    );
+
+    this.draggedPlacedItem = null;
+    this.dragOverRemoveZone = false;
   }
 }

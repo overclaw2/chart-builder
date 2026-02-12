@@ -341,6 +341,61 @@ export class ContainerService {
     });
   }
 
+  removeItemFromCompartment(
+    containerId: string,
+    compartmentId: string,
+    itemId: string
+  ): void {
+    const currentData = this.shipDataSubject.value;
+
+    const updatedContainers = currentData.containers.map((container) => {
+      if (container.id === containerId) {
+        const updatedCompartments = container.compartments.map((compartment) => {
+          if (compartment.id === compartmentId) {
+            let removedItemWeight = 0;
+            let removedItemWidth = 0;
+
+            const items = compartment.items.filter((item) => {
+              if (item.id === itemId) {
+                removedItemWeight = item.weightKg;
+                removedItemWidth = item.dimensionMcm || 27;
+                return false;
+              }
+              return true;
+            });
+
+            const newWeight = compartment.weightKg - removedItemWeight;
+            const newUtilization = (newWeight / 17500) * 100;
+            
+            // Recalculate widthUtilization using dimensionMcm
+            const totalPackageWidth = items.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
+            const newWidthUtilization = (totalPackageWidth / compartment.widthMcm) * 100;
+
+            return {
+              ...compartment,
+              items,
+              weightKg: newWeight,
+              weightUtilization: parseFloat(newUtilization.toFixed(2)),
+              widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
+            };
+          }
+          return compartment;
+        });
+
+        return {
+          ...container,
+          compartments: updatedCompartments,
+        };
+      }
+      return container;
+    });
+
+    this.shipDataSubject.next({
+      ...currentData,
+      containers: updatedContainers,
+    });
+  }
+
   moveItemBetweenCompartments(
     fromContainerId: string,
     fromCompartmentId: string,
