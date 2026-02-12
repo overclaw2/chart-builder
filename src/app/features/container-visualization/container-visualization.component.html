@@ -80,6 +80,17 @@
             </div>
             <div class="axis-label">{{ compartment.widthindexEnd }}</div>
           </div>
+          <!-- Width Index Tooltips Below Axis with Vertical Connectors -->
+          <div class="axis-labels-wrapper">
+            <div 
+              class="axis-label-with-connector"
+              *ngFor="let item of compartment.items"
+              [ngStyle]="getAxisLabelPosition(item, compartment)"
+            >
+              <div class="axis-label-connector"></div>
+              <div class="axis-label-tooltip">{{ getCentralPositionIndex(item) }}</div>
+            </div>
+          </div>
         </div>
 
         <!-- Compartment Bar -->

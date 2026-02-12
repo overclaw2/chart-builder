@@ -436,6 +436,27 @@ export class ContainerVisualizationComponent implements OnInit {
     return Math.round(centralPosition).toString();
   }
 
+  // Get position for axis label (tooltip below axis with connector line)
+  getAxisLabelPosition(item: Item, compartment: Compartment): { left: string } {
+    const compartmentRangeStart = compartment.widthindexStart;
+    const compartmentRangeEnd = compartment.widthindexEnd;
+    const compartmentRangeSize = compartmentRangeEnd - compartmentRangeStart;
+
+    const itemStart = item.position;
+    const itemDimension = item.dimensionMcm || 27;
+    const centralPosition = itemStart + itemDimension / 2;
+
+    // Calculate left position as percentage of compartment range
+    let leftPercent = ((centralPosition - compartmentRangeStart) / compartmentRangeSize) * 100;
+
+    // Clamp to compartment bounds
+    leftPercent = Math.max(0, Math.min(100, leftPercent));
+
+    return {
+      left: `${leftPercent}%`
+    };
+  }
+
   // TODO 1: Get drop zones visualization for valid drop areas
   // Creates a visual grid showing where packages can be dropped
   getDropZones(compartment: Compartment): Array<{ left: string; width: string }> {
