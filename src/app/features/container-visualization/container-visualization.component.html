@@ -30,7 +30,9 @@
       <!-- Container Bar -->
       <div
         class="container-bar-wrapper"
-        (dragover)="onDragOver($event)"
+        [class.drag-over]="dragOverContainerId === container.id"
+        (dragover)="onDragOver($event, container.id)"
+        (dragleave)="onDragLeave($event, container.id)"
         (drop)="onDrop($event, container.id)"
       >
         <div class="position-label top">{{ container.items.length > 0 ? container.items[0].position : 0 }}</div>

@@ -13,6 +13,7 @@ import { ShipData, Container, Item } from '../../core/models/container.model';
 export class ContainerVisualizationComponent implements OnInit {
   shipData: ShipData | null = null;
   draggedItem: { containerId: string; item: Item } | null = null;
+  dragOverContainerId: string | null = null;
 
   constructor(private containerService: ContainerService) {}
 
@@ -47,21 +48,48 @@ export class ContainerVisualizationComponent implements OnInit {
     }
   }
 
-  onDragOver(event: DragEvent): void {
+  onDragOver(event: DragEvent, containerId?: string): void {
     event.preventDefault();
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'move';
+    }
+    if (containerId) {
+      this.dragOverContainerId = containerId;
+    }
+  }
+
+  onDragLeave(event: DragEvent, containerId: string): void {
+    if (this.dragOverContainerId === containerId) {
+      this.dragOverContainerId = null;
     }
   }
 
   onDrop(event: DragEvent, toContainerId: string): void {
     event.preventDefault();
     if (this.draggedItem && this.draggedItem.containerId !== toContainerId) {
-      this.containerService.moveItem(
-        this.draggedItem.containerId,
-        toContainerId,
-        this.draggedItem.item.id
+      // Calculate new position based on drop location
+      const dropZone = event.currentTarget as HTMLElement;
+      const rect = dropZone.getBoundingClientRect();
+      const dropX = event.clientX - rect.left;
+      const dropPercent = dropX / rect.width;
+
+      // Get target container to calculate position
+      const targetContainer = this.shipData?.containers.find(
+        (c) => c.id === toContainerId
       );
+      if (targetContainer) {
+        const newPosition =
+          targetContainer.widthindexStart +
+          dropPercent * (targetContainer.widthindexEnd - targetContainer.widthindexStart);
+
+        this.containerService.moveItem(
+          this.draggedItem.containerId,
+          toContainerId,
+          this.draggedItem.item.id,
+          newPosition
+        );
+      }
+
       this.draggedItem = null;
     }
   }

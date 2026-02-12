@@ -80,27 +80,68 @@ export class ContainerService {
     });
   }
 
-  moveItem(fromContainerId: string, toContainerId: string, itemId: string): void {
+  moveItem(fromContainerId: string, toContainerId: string, itemId: string, newPosition?: number): void {
     const currentData = this.shipDataSubject.value;
     let movedItem: Item | undefined;
+    let fromContainerWeight = 0;
+    let fromContainerUtilization = 0;
+    let toContainerWeight = 0;
+    let toContainerUtilization = 0;
+
+    // Remove item from source container and get its weight
     let updatedContainers = currentData.containers.map((c) => {
       if (c.id === fromContainerId) {
         const items = c.items.filter((item) => {
           if (item.id === itemId) {
-            movedItem = item;
+            movedItem = { ...item };
+            if (newPosition !== undefined) {
+              movedItem.position = newPosition;
+            }
+            fromContainerWeight = item.weightKg;
             return false;
           }
           return true;
         });
-        return { ...c, items };
+
+        // Recalculate utilization for source container
+        const newWeight = c.weightKg - fromContainerWeight;
+        const newUtilization = (newWeight / 17500) * 100; // Max weight typically 17.5 tonnes
+
+        return {
+          ...c,
+          items,
+          weightKg: newWeight,
+          weightUtilization: parseFloat(newUtilization.toFixed(2)),
+        };
       }
       return c;
     });
 
+    // Add item to target container
     if (movedItem) {
       updatedContainers = updatedContainers.map((c) => {
         if (c.id === toContainerId) {
-          return { ...c, items: [...c.items, movedItem!] };
+          toContainerWeight = movedItem!.weightKg;
+
+          // Position item at reasonable location in target container
+          const targetPosition = newPosition || c.widthindexStart + 1000 + c.items.length * 600;
+          movedItem!.position = targetPosition;
+
+          const newItems = [...c.items, movedItem!];
+          const newWeight = c.weightKg + toContainerWeight;
+          const newUtilization = (newWeight / 17500) * 100;
+
+          // Recalculate width utilization based on items
+          const totalItemLength = newItems.reduce((sum, item) => sum + item.length, 0);
+          const newWidthUtilization = (totalItemLength / c.totalCapacity) * 100;
+
+          return {
+            ...c,
+            items: newItems,
+            weightKg: newWeight,
+            weightUtilization: parseFloat(newUtilization.toFixed(2)),
+            widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
+          };
         }
         return c;
       });
