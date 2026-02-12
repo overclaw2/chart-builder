@@ -148,6 +148,7 @@
 .container-bar-wrapper {
   position: relative;
   margin: 1rem 0;
+  padding-bottom: 2.5rem; /* Space for item tooltips */
 }
 
 .position-label {
@@ -241,9 +242,33 @@
   margin-top: 0.25rem;
 }
 
-.item-index {
+/* OFER REQUIREMENT: Central position width index tooltip below each package */
+.item-central-position-tooltip {
   position: absolute;
   bottom: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #0066cc;
+  padding: 0.3rem 0.6rem;
+  border-radius: 3px;
+  border: 1px solid #0052a3;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.item-central-position-tooltip:hover {
+  background: #0052a3;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.item-index {
+  position: absolute;
+  bottom: -3rem;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.75rem;
@@ -254,7 +279,7 @@
   border-radius: 3px;
   border: 1px solid #0066cc;
   white-space: nowrap;
-  z-index: 10;
+  z-index: 9;
 }
 
 .drag-tooltip {

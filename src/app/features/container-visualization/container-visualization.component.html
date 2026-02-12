@@ -104,7 +104,11 @@
                   </div>
                 </div>
               </div>
-              <!-- Display index below item (Ofer's requirement) -->
+              <!-- OFER REQUIREMENT: Show central position width index tooltip below each package (always visible) -->
+              <div class="item-central-position-tooltip" title="Central position width index">
+                📍 {{ getCentralPositionIndex(item) }}
+              </div>
+              <!-- Display index below item (legacy) -->
               <div class="item-index" *ngIf="item.displayIndex !== undefined">
                 {{ item.displayIndex }}
               </div>

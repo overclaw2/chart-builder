@@ -307,4 +307,12 @@ export class ContainerVisualizationComponent implements OnInit {
     const utilization = (totalWeightInContainer / totalContainerCapacity) * 100;
     return utilization.toFixed(2);
   }
+
+  // OFER REQUIREMENT: Get central position width index for package tooltip
+  // This should show below each package permanently (not just during drag)
+  getCentralPositionIndex(item: Item): string {
+    // Central position = item.position + (item.dimensionMcm / 2)
+    const centralPosition = item.position + (item.dimensionMcm / 2);
+    return Math.round(centralPosition).toString();
+  }
 }
