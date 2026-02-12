@@ -15,12 +15,14 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
+    "skipLibCheck": true,
     "target": "ES2017",
     "module": "es2020",
     "lib": [
       "ES2020",
       "dom"
-    ]
+    ],
+    "types": []
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

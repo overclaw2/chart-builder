@@ -176,10 +176,10 @@ export class ChartStore {
   /**
    * Add data item to chart
    */
-  addItemToChart(chartId: string, item: Omit<any, 'id'>): void {
+  addItemToChart(chartId: string, item: Omit<DataItem, 'id'>): void {
     const charts = this.charts$.value.map((chart) => {
       if (chart.id === chartId) {
-        const newItem = { ...item, id: this.generateId('item') };
+        const newItem: DataItem = { ...item as any, id: this.generateId('item') };
         return {
           ...chart,
           data: [...chart.data, newItem],
