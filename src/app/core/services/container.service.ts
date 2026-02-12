@@ -36,7 +36,7 @@ export class ContainerService {
               index: 1,
               widthindexStart: 10000,
               widthindexEnd: 10150,
-              widthMcm: 120,
+              widthMcm: 150,
               widthUtilization: 18,
               weightKg: 1500,
               weightUtilization: 8.57,
@@ -201,6 +201,7 @@ export class ContainerService {
     const currentData = this.shipDataSubject.value;
     let movedItem: Item | undefined;
     let itemWeight = 0;
+    let itemWidth = 0;
     let targetCompartmentData: any;
 
     // Find target compartment to get its range for validation
@@ -219,6 +220,7 @@ export class ContainerService {
               if (item.id === itemId) {
                 movedItem = { ...item };
                 itemWeight = item.weightKg;
+                itemWidth = item.dimensionMcm || 27; // FIX: Use dimensionMcm for width calculation
                 if (newPosition !== undefined) {
                   movedItem.position = newPosition;
                 }
@@ -229,12 +231,17 @@ export class ContainerService {
 
             const newWeight = compartment.weightKg - itemWeight;
             const newUtilization = (newWeight / 17500) * 100;
+            
+            // FIX: Recalculate widthUtilization using dimensionMcm instead of length
+            const totalPackageWidth = items.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
+            const newWidthUtilization = (totalPackageWidth / compartment.widthMcm) * 100;
 
             return {
               ...compartment,
               items,
               weightKg: newWeight,
               weightUtilization: parseFloat(newUtilization.toFixed(2)),
+              widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
             };
           }
 
@@ -270,8 +277,10 @@ export class ContainerService {
             const newItems = [...compartment.items, movedItem];
             const newWeight = compartment.weightKg + itemWeight;
             const newUtilization = (newWeight / 17500) * 100;
-            const totalItemLength = newItems.reduce((sum, item) => sum + item.length, 0);
-            const newWidthUtilization = (totalItemLength / compartment.totalCapacity) * 100;
+            
+            // FIX: Calculate widthUtilization using dimensionMcm (package width) instead of length
+            const totalPackageWidth = newItems.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
+            const newWidthUtilization = (totalPackageWidth / compartment.widthMcm) * 100;
 
             return {
               ...compartment,

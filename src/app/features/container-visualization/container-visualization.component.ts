@@ -76,16 +76,37 @@ export class ContainerVisualizationComponent implements OnInit {
     let leftPercent = ((itemStart - compartmentRangeStart) / compartmentRangeSize) * 100;
     let widthPercent = ((itemDimension) / compartmentRangeSize) * 100;
 
-    // FIX: Properly clamp position to keep item visible within bounds
+    // FIX: Ensure item is always visible - handle cross-compartment moves
+    // If item start is before compartment start, adjust position
+    if (itemStart < compartmentRangeStart) {
+      // Item starts before compartment - show from left edge
+      const visibleWidth = itemEnd - compartmentRangeStart;
+      leftPercent = 0;
+      widthPercent = (visibleWidth / compartmentRangeSize) * 100;
+    } else if (itemStart > compartmentRangeEnd) {
+      // Item starts after compartment - show at right edge with minimum width
+      leftPercent = 100;
+      widthPercent = 5; // Minimum width to keep visible
+    } else {
+      // Item starts within compartment - normal calculation
+      leftPercent = ((itemStart - compartmentRangeStart) / compartmentRangeSize) * 100;
+      widthPercent = ((itemDimension) / compartmentRangeSize) * 100;
+    }
+    
     // Clamp left position to 0-100%
     leftPercent = Math.max(0, Math.min(100, leftPercent));
     
-    // Clamp width and adjust left if item extends beyond right edge
+    // Ensure minimum width visibility
+    widthPercent = Math.max(3, Math.min(100, widthPercent));
+    
+    // Adjust right edge if item extends beyond compartment
     if (leftPercent + widthPercent > 100) {
-      // Item extends beyond right edge - trim the width
-      widthPercent = Math.max(5, 100 - leftPercent); // Keep minimum 5% width visible
-    } else {
-      widthPercent = Math.max(5, widthPercent); // Ensure minimum visibility
+      widthPercent = 100 - leftPercent;
+    }
+    
+    // Ensure width is never 0
+    if (widthPercent <= 0) {
+      widthPercent = 3; // Minimum width to ensure visibility
     }
 
     return {

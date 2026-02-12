@@ -31,7 +31,7 @@
         <div class="container-header">
           <div class="container-info">
             <a href="#" class="container-link">
-              {{ container.ship }} | {{ container.name }} ({{ compartment.index }}/{{ container.compartments.length }})
+              {{ container.ship }} | {{ container.name }} ({{ compartment.index }}/{{ container.compartments.length }}) - Width Utilization: {{ compartment.widthUtilization }}%
             </a>
             <div class="metadata">
               widthindex {{ compartment.widthindexStart }} Mcm - {{ compartment.widthindexEnd }} Mcm | Width {{ compartment.widthMcm }} Cm - {{ compartment.widthUtilization }}% utilization | Weight {{ compartment.weightKg }} Kg - {{ compartment.weightUtilization }}% utilization
