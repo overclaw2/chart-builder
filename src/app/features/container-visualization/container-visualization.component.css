@@ -298,13 +298,11 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* AVIHAI FIX #1: Hover tooltip with package data - always positioned above, visible on hover */
+/* AVIHAI FIX #1: Hover tooltip with package data - positioned above or below based on available space */
+/* TODO 4: Dynamic positioning - default above, switches to below if not enough room */
 /* Hidden by default, shown when hoveredItemId matches using .visible class */
 .item-hover-tooltip {
   position: absolute;
-  bottom: 102%;
-  left: 50%;
-  transform: translateX(-50%);
   background: #ffffff;
   border: 2px solid #0066cc;
   border-radius: 6px;
@@ -321,6 +319,19 @@
   opacity: 0;
   visibility: hidden;
   transition: all 0.15s ease;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Default: tooltip above the item */
+.item-hover-tooltip.tooltip-above {
+  bottom: 102%;
+}
+
+/* Alternative: tooltip below the item if not enough space above */
+.item-hover-tooltip.tooltip-below {
+  top: 102%;
+  bottom: auto;
 }
 
 /* Show tooltip when hovered (via .visible class) */

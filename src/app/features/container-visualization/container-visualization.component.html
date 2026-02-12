@@ -102,7 +102,7 @@
           </div>
           
           <div class="container-bar">
-            <div class="item-wrapper" *ngFor="let item of compartment.items" [ngStyle]="getItemPosition(item, compartment)">
+            <div class="item-wrapper" *ngFor="let item of compartment.items" [ngStyle]="getItemPosition(item, compartment)" [attr.data-item-id]="item.id">
               <div
                 class="item"
                 draggable="true"
@@ -111,6 +111,7 @@
                 (mouseleave)="onItemMouseLeave()"
                 (contextmenu)="onItemContextMenu($event, container.id, compartment.id, item.id)"
                 [style.backgroundColor]="getItemColor(item)"
+                [attr.data-item-id]="item.id"
               >
                 <div class="item-content">
                   <div class="item-name">{{ item.name }}</div>
@@ -128,8 +129,8 @@
                   </div>
                 </div>
                 <!-- AVIHAI FIX #1: Hover tooltip with package data (appears on hover, not just drag) -->
-                <!-- Positioned above package with higher z-index to ensure visibility during interactions -->
-                <div class="item-hover-tooltip" [class.visible]="hoveredItemId === item.id">
+                <!-- TODO 4: Positioned above or below package depending on available space -->
+                <div class="item-hover-tooltip" [class.visible]="hoveredItemId === item.id" [ngClass]="getTooltipPositioning(item.id)">
                   <div class="tooltip-title">{{ item.name }}</div>
                   <div class="tooltip-row">
                     <span class="tooltip-label">Width:</span>

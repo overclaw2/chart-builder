@@ -26,6 +26,8 @@ export class ContainerVisualizationComponent implements OnInit {
     compartmentId: '',
     itemId: ''
   };
+  // TODO 4: Track if tooltip should show above or below item
+  tooltipPositioning: { [itemId: string]: 'above' | 'below' } = {};
 
   constructor(private containerService: ContainerService) {}
 
@@ -271,6 +273,8 @@ export class ContainerVisualizationComponent implements OnInit {
 
   onItemMouseEnter(itemId: string): void {
     this.hoveredItemId = itemId;
+    // TODO 4: Calculate tooltip positioning
+    this.calculateTooltipPosition(itemId);
   }
 
   onItemMouseLeave(): void {
@@ -468,5 +472,44 @@ export class ContainerVisualizationComponent implements OnInit {
     
     // Trigger change detection
     this.shipData = { ...this.shipData! };
+  }
+
+  // TODO 4: Calculate tooltip positioning - check if tooltip fits above or needs to go below
+  calculateTooltipPosition(itemId: string): void {
+    // Use setTimeout to allow DOM to update before calculating position
+    setTimeout(() => {
+      const tooltipElement = document.querySelector(`.item-hover-tooltip.visible`) as HTMLElement;
+      const itemElement = document.querySelector(`[data-item-id="${itemId}"]`) as HTMLElement;
+      
+      if (!tooltipElement || !itemElement) {
+        // Default to above if elements not found
+        this.tooltipPositioning[itemId] = 'above';
+        return;
+      }
+      
+      const itemRect = itemElement.getBoundingClientRect();
+      const tooltipHeight = tooltipElement.offsetHeight;
+      const tooltipWidth = tooltipElement.offsetWidth;
+      
+      // Calculate if there's enough space above the item
+      const spaceAbove = itemRect.top - tooltipHeight - 10; // 10px padding
+      const spaceBelow = window.innerHeight - (itemRect.bottom + tooltipHeight + 10);
+      
+      // Position above if there's enough space, otherwise below
+      if (spaceAbove > 20) {
+        this.tooltipPositioning[itemId] = 'above';
+      } else {
+        this.tooltipPositioning[itemId] = 'below';
+      }
+    }, 0);
+  }
+
+  // TODO 4: Get tooltip positioning class
+  getTooltipPositioning(itemId: string): string {
+    const positioning = this.tooltipPositioning[itemId];
+    if (positioning === 'below') {
+      return 'tooltip-below';
+    }
+    return 'tooltip-above';
   }
 }
