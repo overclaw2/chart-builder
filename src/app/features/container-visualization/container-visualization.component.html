@@ -42,6 +42,17 @@
             </div>
           </div>
           <div class="controls">
+            <!-- TODO 3: Color picker for compartment -->
+            <div class="compartment-color-picker" title="Change compartment color">
+              <input
+                type="color"
+                class="compartment-color-input"
+                [value]="getCompartmentColor(compartment)"
+                (change)="onCompartmentColorChange($event, compartment)"
+              />
+              <span class="color-icon">🎨</span>
+            </div>
+            
             <button class="icon-btn" (click)="onDownload(compartment)" title="Download">
               ↓
             </button>
@@ -78,6 +89,7 @@
           (dragover)="onDragOver($event, compartment.id)"
           (dragleave)="onDragLeave($event, compartment.id)"
           (drop)="onDrop($event, container.id, compartment.id)"
+          [style.--compartment-bg]="getCompartmentColor(compartment)"
         >
           <!-- Drag tooltip (shows current index while dragging) -->
           <div class="drag-tooltip" *ngIf="dragTooltip.visible && dragOverCompartmentId === compartment.id">

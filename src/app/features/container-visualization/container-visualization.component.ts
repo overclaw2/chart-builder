@@ -452,4 +452,21 @@ export class ContainerVisualizationComponent implements OnInit {
   getTotalPlacedItems(): number {
     return this.getPlacedItems().length;
   }
+
+  // TODO 3: Get compartment background color (default: light gray)
+  getCompartmentColor(compartment: Compartment): string {
+    return compartment.backgroundColor || '#e8e8e8';
+  }
+
+  // TODO 3: Handle compartment color change
+  onCompartmentColorChange(event: Event, compartment: Compartment): void {
+    const input = event.target as HTMLInputElement;
+    const newColor = input.value;
+    
+    // Update the compartment's background color
+    compartment.backgroundColor = newColor;
+    
+    // Trigger change detection
+    this.shipData = { ...this.shipData! };
+  }
 }

@@ -145,6 +145,34 @@
   cursor: pointer;
 }
 
+/* TODO 3: Compartment color picker in header */
+.compartment-color-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.compartment-color-input {
+  width: 36px;
+  height: 32px;
+  border: 2px solid #d0d0d0;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 2px;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.compartment-color-input:hover {
+  border-color: #999999;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.color-icon {
+  font-size: 0.9rem;
+}
+
 .container-bar-wrapper {
   position: relative;
   margin: 1rem 0;
@@ -170,7 +198,7 @@
 .container-bar {
   position: relative;
   height: 100px;
-  background: #e8e8e8;
+  background: var(--compartment-bg, #e8e8e8); /* TODO 3: Use compartment color */
   border-radius: 4px;
   overflow: hidden;
   transition: all 0.2s ease;

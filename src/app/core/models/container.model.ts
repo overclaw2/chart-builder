@@ -21,6 +21,7 @@ export interface Compartment {
   weightUtilization: number; // percentage
   items: Item[];
   totalCapacity: number;
+  backgroundColor?: string; // Color of the compartment bar (TODO 3)
 }
 
 export interface Container {
