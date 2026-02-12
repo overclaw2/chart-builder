@@ -206,6 +206,7 @@
   box-sizing: border-box;
   user-select: none;
   min-width: 80px;
+  position: relative;
 }
 
 .item:hover {
@@ -243,9 +244,10 @@
 }
 
 /* OFER REQUIREMENT: Central position width index tooltip below each package */
+/* Now positioned inside .item (which has position: relative) for proper centering on package */
 .item-central-position-tooltip {
   position: absolute;
-  bottom: -1.5rem;
+  bottom: -2rem;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.75rem;
@@ -259,6 +261,7 @@
   z-index: 10;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
+  width: fit-content;
 }
 
 .item-central-position-tooltip:hover {
