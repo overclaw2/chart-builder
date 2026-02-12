@@ -191,26 +191,33 @@ export class ContainerService {
       // Validate and normalize input structure
       let normalizedData: ShipData;
 
-      if (jsonData.containers && Array.isArray(jsonData.containers)) {
-        // Standard ShipData format with containers array
-        normalizedData = jsonData;
-      } else if (Array.isArray(jsonData)) {
-        // Raw array of containers - wrap it
-        normalizedData = {
-          title: 'Container Ship Status',
-          containers: jsonData,
-        };
-      } else if (jsonData.title && !jsonData.containers) {
-        // Has title but no containers - might be wrapped differently
-        throw new Error('Invalid data structure: title found but no containers array. Expected structure: { containers: [...], title?: "..." }');
+      if (jsonData && typeof jsonData === 'object') {
+        if (Array.isArray(jsonData)) {
+          // Raw array of containers - wrap it
+          normalizedData = {
+            title: 'Container Ship Status',
+            containers: jsonData,
+          };
+        } else if (jsonData.containers && Array.isArray(jsonData.containers)) {
+          // Standard ShipData format with containers array
+          normalizedData = jsonData;
+        } else {
+          // Unknown structure - provide detailed diagnostic
+          const keys = Object.keys(jsonData);
+          const hasContainers = 'containers' in jsonData;
+          const containersIsArray = Array.isArray(jsonData.containers);
+          
+          throw new Error(
+            `Invalid data structure: Expected { containers: Array, title?: string }. ` +
+            `Received object with keys: [${keys.join(', ')}]. ` +
+            (hasContainers && !containersIsArray ? 
+              `Note: 'containers' property exists but is not an array (type: ${typeof jsonData.containers}).` :
+              `Note: No 'containers' property found.`)
+          );
+        }
       } else {
-        // Unknown structure - provide helpful error message
-        const keys = Object.keys(jsonData || {});
-        throw new Error(
-          `Invalid data structure: missing containers array. ` +
-          `Found keys: ${keys.length > 0 ? keys.join(', ') : 'none'}. ` +
-          `Expected: { containers: [{...}], title?: "..." }`
-        );
+        // Not an object or array
+        throw new Error(`Invalid data structure: Expected object or array, received ${typeof jsonData}`);
       }
 
       // Validate that containers is an array with valid structure
@@ -224,11 +231,19 @@ export class ContainerService {
 
       // Validate at least one container has the expected structure
       const firstContainer = normalizedData.containers[0];
+      if (!firstContainer || typeof firstContainer !== 'object') {
+        throw new Error('Invalid container structure: containers must contain valid objects');
+      }
+      
       if (!firstContainer.compartments || !Array.isArray(firstContainer.compartments)) {
         throw new Error(
           'Invalid container structure: each container must have a compartments array. ' +
-          `First container keys: ${Object.keys(firstContainer).join(', ')}`
+          `First container has keys: [${Object.keys(firstContainer).join(', ')}]`
         );
+      }
+
+      if (firstContainer.compartments.length === 0) {
+        throw new Error('Invalid container structure: compartments array cannot be empty');
       }
 
       // Save to localStorage for persistence
