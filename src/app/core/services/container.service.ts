@@ -186,18 +186,56 @@ export class ContainerService {
     return this.shipData$;
   }
 
-  loadDataFromJSON(jsonData: ShipData): void {
+  loadDataFromJSON(jsonData: any): void {
     try {
-      // Validate basic structure
-      if (!jsonData.containers || !Array.isArray(jsonData.containers)) {
-        throw new Error('Invalid data structure: missing containers array');
+      // Validate and normalize input structure
+      let normalizedData: ShipData;
+
+      if (jsonData.containers && Array.isArray(jsonData.containers)) {
+        // Standard ShipData format with containers array
+        normalizedData = jsonData;
+      } else if (Array.isArray(jsonData)) {
+        // Raw array of containers - wrap it
+        normalizedData = {
+          title: 'Container Ship Status',
+          containers: jsonData,
+        };
+      } else if (jsonData.title && !jsonData.containers) {
+        // Has title but no containers - might be wrapped differently
+        throw new Error('Invalid data structure: title found but no containers array. Expected structure: { containers: [...], title?: "..." }');
+      } else {
+        // Unknown structure - provide helpful error message
+        const keys = Object.keys(jsonData || {});
+        throw new Error(
+          `Invalid data structure: missing containers array. ` +
+          `Found keys: ${keys.length > 0 ? keys.join(', ') : 'none'}. ` +
+          `Expected: { containers: [{...}], title?: "..." }`
+        );
+      }
+
+      // Validate that containers is an array with valid structure
+      if (!Array.isArray(normalizedData.containers)) {
+        throw new Error('Invalid data structure: containers must be an array');
+      }
+
+      if (normalizedData.containers.length === 0) {
+        throw new Error('Invalid data structure: containers array is empty');
+      }
+
+      // Validate at least one container has the expected structure
+      const firstContainer = normalizedData.containers[0];
+      if (!firstContainer.compartments || !Array.isArray(firstContainer.compartments)) {
+        throw new Error(
+          'Invalid container structure: each container must have a compartments array. ' +
+          `First container keys: ${Object.keys(firstContainer).join(', ')}`
+        );
       }
 
       // Save to localStorage for persistence
-      localStorage.setItem('shipData', JSON.stringify(jsonData));
+      localStorage.setItem('shipData', JSON.stringify(normalizedData));
       
       // Update the subject
-      this.shipDataSubject.next(jsonData);
+      this.shipDataSubject.next(normalizedData);
     } catch (error) {
       console.error('Error loading data:', error);
       throw error;
