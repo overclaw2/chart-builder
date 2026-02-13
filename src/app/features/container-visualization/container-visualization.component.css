@@ -191,6 +191,9 @@
   position: relative;
   margin: 1rem 0 4.5rem 0;
   padding-bottom: 2.5rem; /* Space for item tooltips + position labels below */
+  /* Match the axis-wrapper's left/right spacing (50px min-width labels + 0.5rem gaps) */
+  padding-left: 58px;
+  padding-right: 58px;
 }
 
 .position-label {
@@ -594,6 +597,9 @@
   margin-bottom: 1rem;
   margin-top: 0.5rem;
   width: 100%;
+  /* Align with container-bar below */
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .axis-range-label {
