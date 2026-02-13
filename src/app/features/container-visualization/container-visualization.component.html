@@ -182,6 +182,16 @@
             📍 Index: {{ dragTooltip.index }}
           </div>
           
+          <!-- TASK 4: Width Index Labels while dragging (start/stop values at lower left of package) -->
+          <div class="drag-index-labels" *ngIf="dragTooltip.visible && dragOverCompartmentId === compartment.id && draggedItem">
+            <div class="drag-index-label drag-start-label">
+              Start: {{ dragTooltip.startIndex }}
+            </div>
+            <div class="drag-index-label drag-stop-label">
+              Stop: {{ dragTooltip.stopIndex }}
+            </div>
+          </div>
+          
           <!-- Drop zone visual feedback - grid overlay showing valid drop areas -->
           <div class="drop-zones-grid" *ngIf="dragOverCompartmentId === compartment.id">
             <div class="drop-zone-grid-line" *ngFor="let zone of getDropZones(compartment)" [ngStyle]="zone"></div>

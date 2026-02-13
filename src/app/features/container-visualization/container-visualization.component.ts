@@ -16,7 +16,7 @@ export class ContainerVisualizationComponent implements OnInit {
   draggedItem: { containerId: string; compartmentId: string; item: Item } | null = null;
   dragOverCompartmentId: string | null = null;
   loadingMessage: string | null = null;
-  dragTooltip: { index: number; visible: boolean } = { index: 0, visible: false };
+  dragTooltip: { index: number; visible: boolean; startIndex?: number; stopIndex?: number } = { index: 0, visible: false };
   hoveredItemId: string | null = null;
   isDragging: boolean = false;
   grabOffset: number = 0; // Offset between mouse position and item's left edge when grab occurs
@@ -226,8 +226,16 @@ export class ContainerVisualizationComponent implements OnInit {
     // Clamp tooltip to compartment range (consistent with onDrop behavior)
     currentIndex = Math.max(compartmentStart, Math.min(compartmentEnd, currentIndex));
 
-    // Update tooltip with rounded index value
+    // TASK 4: Calculate start and stop indices (left and right edges of the item)
+    // Start = position - (width / 2) = left edge
+    // Stop = position + (width / 2) = right edge
+    const startIndex = Math.round(currentIndex - (itemWidth / 2));
+    const stopIndex = Math.round(currentIndex + (itemWidth / 2));
+
+    // Update tooltip with rounded index value and start/stop values
     this.dragTooltip.index = Math.round(currentIndex);
+    this.dragTooltip.startIndex = startIndex;
+    this.dragTooltip.stopIndex = stopIndex;
   }
 
   onDragLeave(event: DragEvent, compartmentId: string): void {

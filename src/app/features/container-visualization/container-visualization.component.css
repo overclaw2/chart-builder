@@ -501,6 +501,49 @@
   }
 }
 
+/* TASK 4: Width Index Labels while dragging (positioned at lower left of package) */
+.drag-index-labels {
+  position: absolute;
+  bottom: -3rem;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 99;
+  pointer-events: none;
+}
+
+.drag-index-label {
+  background: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+  padding: 0.35rem 0.6rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  animation: label-fade-in 0.2s ease;
+}
+
+.drag-start-label {
+  border-left: 3px solid #4ade80;
+}
+
+.drag-stop-label {
+  border-left: 3px solid #f87171;
+}
+
+@keyframes label-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .item-color-picker {
   margin-top: 0.35rem;
   display: flex;
