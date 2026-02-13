@@ -49,6 +49,14 @@ export class ContainerVisualizationComponent implements OnInit {
   // TASK 5: Conv popup modal state
   convPopup: { visible: boolean; item: Item | null } = { visible: false, item: null };
 
+  // Tooltip positioning for fixed/overlay mode
+  tooltipState: { visible: boolean; x: number; y: number; item: Item | null } = { 
+    visible: false, 
+    x: 0, 
+    y: 0, 
+    item: null 
+  };
+
   constructor(private containerService: ContainerService) {}
 
   ngOnInit(): void {
@@ -388,8 +396,35 @@ export class ContainerVisualizationComponent implements OnInit {
     if (pointerX >= itemRect.left && pointerX <= itemRect.right &&
         pointerY >= itemRect.top && pointerY <= itemRect.bottom) {
       this.hoveredItemId = itemId;
-      // TODO 4: Calculate tooltip positioning
-      this.calculateTooltipPosition(itemId);
+      
+      // TASK 2 FIX: Show global overlay tooltip at the correct position
+      // Find the item data from shipData
+      let foundItem: Item | null = null;
+      if (this.shipData) {
+        for (const container of this.shipData.containers) {
+          for (const compartment of container.compartments) {
+            const item = compartment.items.find(i => i.id === itemId);
+            if (item) {
+              foundItem = item;
+              break;
+            }
+          }
+          if (foundItem) break;
+        }
+      }
+
+      if (foundItem) {
+        // Position tooltip above the item, centered horizontally
+        const tooltipX = itemRect.left + itemRect.width / 2;
+        const tooltipY = itemRect.top - 10; // 10px above the item
+        
+        this.tooltipState = {
+          visible: true,
+          x: Math.round(tooltipX),
+          y: Math.round(tooltipY),
+          item: foundItem
+        };
+      }
     }
   }
 
@@ -397,6 +432,7 @@ export class ContainerVisualizationComponent implements OnInit {
     // Don't clear hoveredItemId during drag - tooltip should remain visible during drag operations
     if (!this.isDragging) {
       this.hoveredItemId = null;
+      this.tooltipState = { visible: false, x: 0, y: 0, item: null };
     }
   }
 
@@ -1002,5 +1038,20 @@ export class ContainerVisualizationComponent implements OnInit {
     if (event.target === event.currentTarget) {
       this.closeConvPopup();
     }
+  }
+
+  // TASK 2 FIX: Get compartment utilization for a given item
+  getTooltipCompartmentUtilization(item: Item): number {
+    if (!this.shipData) return 0;
+    
+    // Find which compartment contains this item
+    for (const container of this.shipData.containers) {
+      for (const compartment of container.compartments) {
+        if (compartment.items.find(i => i.id === item.id)) {
+          return compartment.widthUtilization;
+        }
+      }
+    }
+    return 0;
   }
 }

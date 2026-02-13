@@ -235,9 +235,8 @@
                   conv
                 </button>
                 
-                <!-- HOVER TOOLTIP: Package data displayed on mouse hover -->
-                <!-- Positioned above or below package depending on available space -->
-                <div class="item-hover-tooltip" [class.visible]="hoveredItemId === item.id" [ngClass]="getTooltipPositioning(item.id)">
+                <!-- HOVER TOOLTIP: Moved to global overlay to prevent clipping -->
+                <!-- <div class="item-hover-tooltip" [class.visible]="hoveredItemId === item.id" [ngClass]="getTooltipPositioning(item.id)">
                   <div class="tooltip-title">{{ item.name }}</div>
                   <div class="tooltip-row">
                     <span class="tooltip-label">Width:</span>
@@ -259,7 +258,8 @@
                     <span class="tooltip-label">Compartment Use:</span>
                     <span class="tooltip-value">{{ compartment.widthUtilization }}%</span>
                   </div>
-                </div>
+                </div> -->
+
               </div>
               <!-- Display index below item (legacy) -->
               <div class="item-index" *ngIf="item.displayIndex !== undefined">
@@ -278,6 +278,34 @@
   <div class="context-menu" *ngIf="contextMenu.visible" [ngStyle]="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }" (click)="$event.stopPropagation()">
     <div class="context-menu-item" (click)="onRemoveItem()">
       🗑️ Remove Item
+    </div>
+  </div>
+
+  <!-- HOVER TOOLTIP: Global overlay tooltip to prevent clipping by overflow hidden containers -->
+  <div class="item-hover-tooltip-overlay" 
+    *ngIf="tooltipState.visible && tooltipState.item"
+    [style.left.px]="tooltipState.x"
+    [style.top.px]="tooltipState.y">
+    <div class="tooltip-title">{{ tooltipState.item.name }}</div>
+    <div class="tooltip-row">
+      <span class="tooltip-label">Width:</span>
+      <span class="tooltip-value">{{ tooltipState.item.dimensionMcm }} Mcm</span>
+    </div>
+    <div class="tooltip-row">
+      <span class="tooltip-label">Weight:</span>
+      <span class="tooltip-value">{{ tooltipState.item.weightKg }} Kg</span>
+    </div>
+    <div class="tooltip-row">
+      <span class="tooltip-label">Destination:</span>
+      <span class="tooltip-value">{{ tooltipState.item.destination }}</span>
+    </div>
+    <div class="tooltip-row">
+      <span class="tooltip-label">Position:</span>
+      <span class="tooltip-value">{{ getCentralPositionIndex(tooltipState.item) }}</span>
+    </div>
+    <div class="tooltip-row">
+      <span class="tooltip-label">Compartment Use:</span>
+      <span class="tooltip-value">{{ getTooltipCompartmentUtilization(tooltipState.item) }}%</span>
     </div>
   </div>
 

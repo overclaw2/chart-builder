@@ -334,6 +334,27 @@
 
 /* AVIHAI FIX #1: Hover tooltip with package data - positioned below the package shape */
 /* Always shown below the item, below the axis, not interfering with badge */
+/* TASK 2 FIX: Global overlay tooltip to prevent clipping by overflow hidden containers */
+.item-hover-tooltip-overlay {
+  position: fixed;
+  background: var(--bg-secondary);
+  border: 2px solid var(--info-color);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  z-index: 1001;
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+  pointer-events: auto;
+  min-width: 160px;
+  white-space: normal;
+  width: max-content;
+  max-width: 200px;
+  animation: tooltip-appear 0.15s ease;
+  transform: translateX(-50%);
+}
+
+/* Legacy: Keep old classes for compatibility */
 .item-hover-tooltip {
   position: absolute;
   background: var(--bg-secondary);
