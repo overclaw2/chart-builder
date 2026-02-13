@@ -1411,9 +1411,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  flex: 0 1 calc(25% - 0.75rem);
-  min-width: 220px;
-  max-width: 300px;
+  flex: 1 1 auto;
+  min-width: 200px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   background: var(--bg-tertiary);
@@ -1581,9 +1580,10 @@
   flex-direction: row;
   flex-wrap: nowrap;
   padding-left: 0;
-  gap: 1rem;
-  justify-content: center;
+  gap: 0.75rem;
+  justify-content: space-between;
   align-items: flex-start;
+  width: 100%;
 }
 
 .tree-grid-container {
