@@ -63,8 +63,8 @@ export class ContainerVisualizationComponent implements OnInit {
   // Side panel collapse state
   isSidePanelCollapsed: boolean = false;
 
-  // Search area collapse state
-  isSearchCollapsed: boolean = false;
+  // Search area collapse state (TASK: Default to COLLAPSED on app load per user requirement)
+  isSearchCollapsed: boolean = true;
 
   // Reference to available packages component to sync state
   @ViewChild(AvailablePackagesComponent) availablePackagesComponent!: AvailablePackagesComponent;
