@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContainerService } from '../../core/services/container.service';
 import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
@@ -60,7 +60,7 @@ export class ContainerVisualizationComponent implements OnInit {
   // Track initial tooltip position during drag to keep it fixed below package
   initialTooltipY: number = 0;
 
-  constructor(private containerService: ContainerService) {}
+  constructor(private containerService: ContainerService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.containerService.getShipData().subscribe((data) => {
@@ -277,6 +277,9 @@ export class ContainerVisualizationComponent implements OnInit {
         item: this.draggedItem.item
       };
     }
+
+    // Trigger change detection to update position badge in real-time during drag
+    this.cdr.detectChanges();
   }
 
   onDragLeave(event: DragEvent, compartmentId: string): void {
