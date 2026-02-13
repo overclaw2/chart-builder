@@ -1363,11 +1363,14 @@
 /* Tree Container */
 .conveyor-tree {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 0.75rem;
   padding: 1rem 0;
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 /* Tree Title */
@@ -1402,6 +1405,9 @@
 
 .tree-level-0 {
   padding: 0.5rem 0;
+  flex: 1 1 calc(25% - 0.75rem);
+  min-width: 180px;
+  max-width: 250px;
 }
 
 .tree-level-1 {
