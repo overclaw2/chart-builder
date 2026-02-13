@@ -230,6 +230,11 @@
                   📍 {{ getCentralPositionIndex(item) }}
                 </div>
                 
+                <!-- TASK 5: Conv button to open popup with package details -->
+                <button class="conv-button" (click)="openConvPopup(item, $event)" title="Open package details window">
+                  conv
+                </button>
+                
                 <!-- HOVER TOOLTIP: Package data displayed on mouse hover -->
                 <!-- Positioned above or below package depending on available space -->
                 <div class="item-hover-tooltip" [class.visible]="hoveredItemId === item.id" [ngClass]="getTooltipPositioning(item.id)">
@@ -273,6 +278,46 @@
   <div class="context-menu" *ngIf="contextMenu.visible" [ngStyle]="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }" (click)="$event.stopPropagation()">
     <div class="context-menu-item" (click)="onRemoveItem()">
       🗑️ Remove Item
+    </div>
+  </div>
+
+  <!-- TASK 5: Conv popup modal for package details -->
+  <div class="conv-popup-backdrop" *ngIf="convPopup.visible" (click)="onConvPopupBackdropClick($event)">
+    <div class="conv-popup-modal">
+      <div class="conv-popup-header">
+        <h2>Package Details</h2>
+      </div>
+      <div class="conv-popup-content" *ngIf="convPopup.item">
+        <div class="popup-field">
+          <span class="popup-label">Name:</span>
+          <span class="popup-value">{{ convPopup.item.name }}</span>
+        </div>
+        <div class="popup-field">
+          <span class="popup-label">Width:</span>
+          <span class="popup-value">{{ convPopup.item.dimensionMcm }} Mcm</span>
+        </div>
+        <div class="popup-field">
+          <span class="popup-label">Weight:</span>
+          <span class="popup-value">{{ convPopup.item.weightKg }} Kg</span>
+        </div>
+        <div class="popup-field">
+          <span class="popup-label">Destination:</span>
+          <span class="popup-value">{{ convPopup.item.destination }}</span>
+        </div>
+        <div class="popup-field">
+          <span class="popup-label">Position:</span>
+          <span class="popup-value">{{ getCentralPositionIndex(convPopup.item) }}</span>
+        </div>
+        <div class="popup-field">
+          <span class="popup-label">Color:</span>
+          <div class="popup-color-display" [style.backgroundColor]="getItemColor(convPopup.item)"></div>
+        </div>
+      </div>
+      <div class="conv-popup-footer">
+        <button class="conv-popup-cancel-btn" (click)="closeConvPopup()">
+          Cancel
+        </button>
+      </div>
     </div>
   </div>
 </div>

@@ -46,6 +46,9 @@ export class ContainerVisualizationComponent implements OnInit {
   // Reference to available packages component to sync state
   @ViewChild(AvailablePackagesComponent) availablePackagesComponent!: AvailablePackagesComponent;
 
+  // TASK 5: Conv popup modal state
+  convPopup: { visible: boolean; item: Item | null } = { visible: false, item: null };
+
   constructor(private containerService: ContainerService) {}
 
   ngOnInit(): void {
@@ -982,5 +985,22 @@ export class ContainerVisualizationComponent implements OnInit {
 
   onMoveContainerDown(containerId: string): void {
     this.containerService.moveContainerDown(containerId);
+  }
+
+  // TASK 5: Conv popup methods
+  openConvPopup(item: Item, event: Event): void {
+    event.stopPropagation(); // Prevent event bubbling
+    this.convPopup = { visible: true, item };
+  }
+
+  closeConvPopup(): void {
+    this.convPopup = { visible: false, item: null };
+  }
+
+  onConvPopupBackdropClick(event: MouseEvent): void {
+    // Close popup when clicking on the backdrop/overlay
+    if (event.target === event.currentTarget) {
+      this.closeConvPopup();
+    }
   }
 }
