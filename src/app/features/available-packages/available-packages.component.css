@@ -3,11 +3,12 @@
   flex-direction: column;
   width: 320px;
   height: 100%;
-  background: #ffffff;
-  border-right: 2px solid #e5e5e5;
+  background: var(--bg-secondary);
+  border-right: 2px solid var(--border-color);
   transition: all 0.3s ease;
   overflow: hidden;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 2px 0 8px var(--shadow-sm);
+  color: var(--text-primary);
 }
 
 .available-packages-panel.collapsed {
@@ -20,11 +21,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--info-color) 0%, var(--compartment-border) 100%);
   color: white;
-  border-bottom: 1px solid #5a67d8;
+  border-bottom: 1px solid var(--info-color);
   flex-shrink: 0;
   min-height: 70px;
+  transition: all 0.3s ease;
 }
 
 .available-packages-panel.collapsed .panel-header {
@@ -118,12 +120,13 @@
 
 .panel-info {
   padding: 1rem;
-  background: #f0f4ff;
-  border-bottom: 1px solid #e5e5e5;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
   font-size: 0.8rem;
-  color: #555555;
+  color: var(--text-secondary);
   text-align: center;
   flex-shrink: 0;
+  transition: all 0.3s ease;
 }
 
 .panel-info p {
@@ -147,16 +150,16 @@
 }
 
 .packages-list::-webkit-scrollbar-track {
-  background: #f5f5f5;
+  background: var(--bg-tertiary);
 }
 
 .packages-list::-webkit-scrollbar-thumb {
-  background: #d0d0d0;
+  background: var(--border-color);
   border-radius: 3px;
 }
 
 .packages-list::-webkit-scrollbar-thumb:hover {
-  background: #999999;
+  background: var(--text-secondary);
 }
 
 /* Package Item */
@@ -165,18 +168,19 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: white;
-  border: 2px solid #e5e5e5;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
   border-radius: 6px;
   cursor: grab;
   transition: all 0.2s ease;
   user-select: none;
+  color: var(--text-primary);
 }
 
 .package-item:hover {
-  border-color: #667eea;
-  background: #f9f7ff;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+  border-color: var(--info-color);
+  background: var(--hover-bg);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
   transform: translateX(4px);
 }
 
@@ -185,10 +189,10 @@
 }
 
 .package-item.dragging {
-  opacity: 0.5;
-  border-color: #667eea;
-  background: #e8e4ff;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  opacity: 0.8;
+  border-color: var(--info-color);
+  background: var(--bg-tertiary);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 /* Color Indicator */
@@ -215,12 +219,13 @@
 .package-name {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 0.3rem;
   line-height: 1.2;
+  transition: all 0.3s ease;
 }
 
 .package-specs {
@@ -229,19 +234,22 @@
   align-items: center;
   flex-wrap: wrap;
   font-size: 0.7rem;
-  color: #888888;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
 }
 
 .spec-item {
-  background: #f5f5f5;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
   padding: 0.2rem 0.4rem;
   border-radius: 2px;
   white-space: nowrap;
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .destination-badge {
-  background: #667eea;
+  background: var(--info-color);
   color: white;
   padding: 0.2rem 0.5rem;
   border-radius: 2px;
