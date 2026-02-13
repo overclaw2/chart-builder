@@ -474,20 +474,24 @@
 
 .drag-tooltip {
   position: absolute;
-  top: -2rem;
+  top: -3rem;
   left: 50%;
   transform: translateX(-50%);
-  background: #000000;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: #ffffff;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 700;
   white-space: nowrap;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(59, 130, 246, 0.3);
   pointer-events: none;
   animation: tooltip-pop 0.2s ease;
+  border: 2px solid #3b82f6;
+  letter-spacing: 0.5px;
+  min-width: 120px;
+  text-align: center;
 }
 
 @keyframes tooltip-pop {
