@@ -510,35 +510,50 @@
 
 /* TASK 4: Top axis styling for range display and package highlighting (Avihai) */
 .axis-wrapper {
-  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.axis-range-label {
+  min-width: 50px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.axis-start-label {
+  order: 1;
 }
 
 .top-axis {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
-  color: #666666;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  flex: 1;
+  order: 2;
+  min-width: 0;
 }
 
-.axis-label {
-  min-width: 50px;
-  text-align: center;
-  color: #555555;
+.axis-end-label {
+  order: 3;
 }
 
 .axis-track {
   flex: 1;
   position: relative;
   height: 20px;
-  background: #f0f0f0;
-  border: 1px solid #d0d0d0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   border-radius: 3px;
   overflow: hidden;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .axis-highlight {

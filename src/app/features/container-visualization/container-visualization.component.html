@@ -137,8 +137,11 @@
 
         <!-- Top Axis with Range and Package Highlighting (Avihai's requirement) -->
         <div class="axis-wrapper">
+          <!-- Start label (positioned outside/above) -->
+          <div class="axis-range-label axis-start-label">{{ compartment.widthindexStart }}</div>
+          
+          <!-- Timeline strip (track only, no labels) -->
           <div class="top-axis">
-            <div class="axis-label">{{ compartment.widthindexStart }}</div>
             <div class="axis-track">
               <!-- Highlight areas where packages are located -->
               <div 
@@ -147,18 +150,21 @@
                 [ngStyle]="getAxisHighlightPosition(item, compartment)"
               ></div>
             </div>
-            <div class="axis-label">{{ compartment.widthindexEnd }}</div>
           </div>
-          <!-- Width Index Tooltips Below Axis with Vertical Connectors -->
-          <div class="axis-labels-wrapper">
-            <div 
-              class="axis-label-with-connector"
-              *ngFor="let item of compartment.items"
-              [ngStyle]="getAxisLabelPosition(item, compartment)"
-            >
-              <div class="axis-label-connector"></div>
-              <div class="axis-label-tooltip">{{ getCentralPositionIndex(item) }}</div>
-            </div>
+          
+          <!-- End label (positioned outside/above) -->
+          <div class="axis-range-label axis-end-label">{{ compartment.widthindexEnd }}</div>
+        </div>
+        
+        <!-- Width Index Tooltips Below Axis with Vertical Connectors -->
+        <div class="axis-labels-wrapper">
+          <div 
+            class="axis-label-with-connector"
+            *ngFor="let item of compartment.items"
+            [ngStyle]="getAxisLabelPosition(item, compartment)"
+          >
+            <div class="axis-label-connector"></div>
+            <div class="axis-label-tooltip">{{ getCentralPositionIndex(item) }}</div>
           </div>
         </div>
 
