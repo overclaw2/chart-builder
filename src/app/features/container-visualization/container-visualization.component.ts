@@ -45,6 +45,9 @@ export class ContainerVisualizationComponent implements OnInit {
   // Side panel collapse state
   isSidePanelCollapsed: boolean = false;
 
+  // Search area collapse state
+  isSearchCollapsed: boolean = false;
+
   // Reference to available packages component to sync state
   @ViewChild(AvailablePackagesComponent) availablePackagesComponent!: AvailablePackagesComponent;
 
@@ -1091,6 +1094,11 @@ export class ContainerVisualizationComponent implements OnInit {
    */
   onToggleSidePanel(): void {
     this.isSidePanelCollapsed = !this.isSidePanelCollapsed;
+  }
+
+  // Toggle search area collapse state
+  onToggleSearchCollapse(): void {
+    this.isSearchCollapsed = !this.isSearchCollapsed;
   }
 
   /**

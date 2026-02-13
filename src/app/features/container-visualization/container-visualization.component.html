@@ -82,7 +82,20 @@
 
     <!-- TASK 2: Search and Filter Section -->
     <div class="search-filter-section">
-      <div class="search-filter-container">
+      <!-- Search Header with Collapse Toggle -->
+      <div class="search-filter-header">
+        <h3 class="search-title">🔍 Search & Filter</h3>
+        <button 
+          class="search-collapse-btn" 
+          (click)="onToggleSearchCollapse()"
+          [title]="isSearchCollapsed ? 'Expand search' : 'Collapse search'"
+        >
+          {{ isSearchCollapsed ? '▼' : '▲' }}
+        </button>
+      </div>
+
+      <!-- Search Filters (Collapsible) -->
+      <div class="search-filter-container" [class.collapsed]="isSearchCollapsed">
         <!-- Search Filters Row 1: Name, Destination, ID -->
         <div class="filter-row">
           <div class="filter-group">
