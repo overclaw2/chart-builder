@@ -862,4 +862,13 @@ export class ContainerVisualizationComponent implements OnInit {
     this.dragTooltip.visible = false;
     this.dragOverCompartmentId = null;
   }
+
+  // Container Reordering Methods
+  onMoveContainerUp(containerId: string): void {
+    this.containerService.moveContainerUp(containerId);
+  }
+
+  onMoveContainerDown(containerId: string): void {
+    this.containerService.moveContainerDown(containerId);
+  }
 }

@@ -294,7 +294,52 @@ export class ContainerService {
 
   resetToMockData(): void {
     localStorage.removeItem('shipData');
-    this.shipDataSubject.next(this.getMockData());
+    const mockData = this.getMockData();
+    // Initialize orderIndex for mock data
+    mockData.containers.forEach((container, index) => {
+      container.orderIndex = index;
+    });
+    this.shipDataSubject.next(mockData);
+  }
+
+  reorderContainers(fromIndex: number, toIndex: number): void {
+    const currentData = this.shipDataSubject.value;
+    const containers = [...currentData.containers];
+    
+    // Move container from fromIndex to toIndex
+    const [movedContainer] = containers.splice(fromIndex, 1);
+    containers.splice(toIndex, 0, movedContainer);
+    
+    // Update orderIndex for all containers
+    containers.forEach((container, index) => {
+      container.orderIndex = index;
+    });
+    
+    // Save to localStorage
+    const updatedData = {
+      ...currentData,
+      containers
+    };
+    localStorage.setItem('shipData', JSON.stringify(updatedData));
+    this.shipDataSubject.next(updatedData);
+  }
+
+  moveContainerUp(containerId: string): void {
+    const currentData = this.shipDataSubject.value;
+    const currentIndex = currentData.containers.findIndex(c => c.id === containerId);
+    
+    if (currentIndex > 0) {
+      this.reorderContainers(currentIndex, currentIndex - 1);
+    }
+  }
+
+  moveContainerDown(containerId: string): void {
+    const currentData = this.shipDataSubject.value;
+    const currentIndex = currentData.containers.findIndex(c => c.id === containerId);
+    
+    if (currentIndex < currentData.containers.length - 1) {
+      this.reorderContainers(currentIndex, currentIndex + 1);
+    }
   }
 
   updateContainer(container: Container): void {

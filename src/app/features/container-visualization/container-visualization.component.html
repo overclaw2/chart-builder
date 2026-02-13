@@ -111,12 +111,27 @@
   </div>
 
   <div class="containers-list" *ngIf="shipData">
-    <div class="container-card" *ngFor="let container of shipData.containers">
+    <div class="container-card" *ngFor="let container of shipData.containers; let idx = index">
       <!-- Compartments within container -->
       <div class="compartment-group" *ngFor="let compartment of container.compartments">
         <!-- Compartment Header -->
         <div class="container-header">
           <div class="container-info">
+            <div class="container-order-controls">
+              <button class="order-btn" 
+                (click)="onMoveContainerUp(container.id)" 
+                [disabled]="idx === 0"
+                title="Move container up">
+                ↑
+              </button>
+              <span class="container-order-index">{{ idx + 1 }}/{{ shipData.containers.length }}</span>
+              <button class="order-btn" 
+                (click)="onMoveContainerDown(container.id)" 
+                [disabled]="idx === shipData.containers.length - 1"
+                title="Move container down">
+                ↓
+              </button>
+            </div>
             <a href="#" class="container-link">
               {{ container.name }} ({{ compartment.index }}/{{ container.compartments.length }})
             </a>

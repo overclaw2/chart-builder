@@ -29,6 +29,7 @@ export interface Container {
   name: string;
   ship: string;
   compartments: Compartment[];
+  orderIndex?: number; // Position in the container list for custom ordering
 }
 
 export interface ShipData {

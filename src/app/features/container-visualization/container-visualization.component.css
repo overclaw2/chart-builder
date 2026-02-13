@@ -1003,3 +1003,55 @@
     display: none;
   }
 }
+
+/* Container Order Controls */
+.container-order-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 1rem;
+  padding: 0.5rem;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.order-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #cccccc;
+  background: #ffffff;
+  color: #333333;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.order-btn:hover:not(:disabled) {
+  background: #0066cc;
+  color: white;
+  border-color: #0066cc;
+  transform: scale(1.05);
+}
+
+.order-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.order-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.container-order-index {
+  font-size: 0.8rem;
+  color: #666666;
+  font-weight: 500;
+  min-width: 2.5rem;
+  text-align: center;
+}
