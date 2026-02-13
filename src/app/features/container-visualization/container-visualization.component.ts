@@ -1372,8 +1372,8 @@ export class ContainerVisualizationComponent implements OnInit {
     if (!compartment) return null;
 
     // Generate conveyor structure
-    const areaStart = Math.floor(compartment.widthindexRange.start / 100) * 100;
-    const areaEnd = Math.ceil(compartment.widthindexRange.end / 100) * 100;
+    const areaStart = Math.floor(compartment.widthindexStart / 100) * 100;
+    const areaEnd = Math.ceil(compartment.widthindexEnd / 100) * 100;
     const rangeSpan = areaEnd - areaStart;
 
     // Create areas (currently just one main area, could be divided into sub-areas)
