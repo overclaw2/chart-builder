@@ -342,6 +342,102 @@ export class ContainerService {
     }
   }
 
+  // Collision Detection Methods
+  doesItemOverlapWithOthers(
+    compartmentId: string,
+    itemPosition: number,
+    itemWidth: number,
+    excludeItemId?: string
+  ): boolean {
+    const currentData = this.shipDataSubject.value;
+    
+    // Find the compartment
+    let targetCompartment: any = null;
+    for (const container of currentData.containers) {
+      const comp = container.compartments.find(c => c.id === compartmentId);
+      if (comp) {
+        targetCompartment = comp;
+        break;
+      }
+    }
+    
+    if (!targetCompartment) {
+      return false;
+    }
+    
+    // Check collision with existing items
+    for (const item of targetCompartment.items) {
+      // Skip the item being moved
+      if (excludeItemId && item.id === excludeItemId) {
+        continue;
+      }
+      
+      const itemEnd = itemPosition + itemWidth;
+      const existingItemEnd = item.position + (item.dimensionMcm || 27);
+      
+      // Check if there's any overlap
+      const hasOverlap = itemPosition < existingItemEnd && itemEnd > item.position;
+      
+      if (hasOverlap) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  getNextAvailablePosition(
+    compartmentId: string,
+    itemWidth: number,
+    compartmentStart: number,
+    compartmentEnd: number
+  ): number | null {
+    const currentData = this.shipDataSubject.value;
+    
+    // Find the compartment
+    let targetCompartment: any = null;
+    for (const container of currentData.containers) {
+      const comp = container.compartments.find(c => c.id === compartmentId);
+      if (comp) {
+        targetCompartment = comp;
+        break;
+      }
+    }
+    
+    if (!targetCompartment || targetCompartment.items.length === 0) {
+      // Compartment is empty, position at start
+      return compartmentStart;
+    }
+    
+    // Sort items by position
+    const sortedItems = [...targetCompartment.items].sort((a, b) => a.position - b.position);
+    
+    // Check if there's space before the first item
+    if (sortedItems[0].position - compartmentStart >= itemWidth) {
+      return compartmentStart;
+    }
+    
+    // Find gaps between items
+    for (let i = 0; i < sortedItems.length - 1; i++) {
+      const currentItemEnd = sortedItems[i].position + (sortedItems[i].dimensionMcm || 27);
+      const nextItemStart = sortedItems[i + 1].position;
+      const gapSize = nextItemStart - currentItemEnd;
+      
+      if (gapSize >= itemWidth) {
+        return currentItemEnd;
+      }
+    }
+    
+    // Check space after the last item
+    const lastItem = sortedItems[sortedItems.length - 1];
+    const lastItemEnd = lastItem.position + (lastItem.dimensionMcm || 27);
+    if (compartmentEnd - lastItemEnd >= itemWidth) {
+      return lastItemEnd;
+    }
+    
+    return null; // No available space
+  }
+
   updateContainer(container: Container): void {
     const currentData = this.shipDataSubject.value;
     const updatedContainers = currentData.containers.map((c) =>

@@ -268,6 +268,38 @@ export class ContainerVisualizationComponent implements OnInit {
       const maxPosition = compartmentEnd - itemWidth;
       newPosition = Math.max(minPosition, Math.min(newPosition, maxPosition));
 
+      // COLLISION DETECTION: Check if the new position would overlap with other items
+      const wouldOverlap = this.containerService.doesItemOverlapWithOthers(
+        toCompartmentId,
+        newPosition,
+        itemWidth,
+        this.draggedItem.item.id
+      );
+
+      if (wouldOverlap) {
+        // Find next available position instead
+        const nextAvailablePos = this.containerService.getNextAvailablePosition(
+          toCompartmentId,
+          itemWidth,
+          compartmentStart,
+          compartmentEnd
+        );
+
+        if (nextAvailablePos !== null) {
+          // Use the next available position instead
+          newPosition = nextAvailablePos;
+        } else {
+          // No space available - reject the drop
+          console.warn('Cannot drop item: insufficient space or collision detected');
+          this.draggedItem = null;
+          this.dragTooltip.visible = false;
+          this.isDragging = false;
+          this.grabOffset = 0;
+          this.hoveredItemId = null;
+          return;
+        }
+      }
+
       // Set displayIndex as rounded value for tooltip/display purposes only
       // displayIndex should show the center position of the item
       const displayIndex = Math.round(newPosition + (itemWidth / 2));
@@ -815,6 +847,35 @@ export class ContainerVisualizationComponent implements OnInit {
       const minPosition = compartmentStart;
       const maxPosition = compartmentEnd - itemWidth;
       newPosition = Math.max(minPosition, Math.min(newPosition, maxPosition));
+
+      // COLLISION DETECTION: Check if the new position would overlap with other items
+      const wouldOverlap = this.containerService.doesItemOverlapWithOthers(
+        toCompartmentId,
+        newPosition,
+        itemWidth
+      );
+
+      if (wouldOverlap) {
+        // Find next available position instead
+        const nextAvailablePos = this.containerService.getNextAvailablePosition(
+          toCompartmentId,
+          itemWidth,
+          compartmentStart,
+          compartmentEnd
+        );
+
+        if (nextAvailablePos !== null) {
+          // Use the next available position instead
+          newPosition = nextAvailablePos;
+        } else {
+          // No space available - reject the drop
+          console.warn('Cannot drop item: insufficient space or collision detected');
+          this.draggedAvailablePackage = null;
+          this.dragTooltip.visible = false;
+          this.dragOverCompartmentId = null;
+          return;
+        }
+      }
 
       const displayIndex = Math.round(newPosition + (itemWidth / 2));
 
