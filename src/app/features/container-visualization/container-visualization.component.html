@@ -432,46 +432,89 @@
     </div>
   </div>
 
-  <!-- TASK 5: Conv popup modal for package details -->
+  <!-- TASK 5: Conveyor Allocation Window - New Design -->
   <div class="conv-popup-backdrop" *ngIf="convPopup.visible" (click)="onConvPopupBackdropClick($event)">
-    <div class="conv-popup-modal">
-      <div class="conv-popup-header">
-        <h2>📦 Package Details</h2>
+    <div class="conveyor-window" *ngIf="convPopup.item && getConveyorData(convPopup.item) as conveyorData">
+      <!-- Header -->
+      <div class="conveyor-header">
+        <h2>{{ conveyorData.title }}</h2>
         <span class="close-icon" (click)="closeConvPopup()" title="Close">✕</span>
       </div>
-      <div class="conv-popup-content" *ngIf="convPopup.item">
-        <div class="popup-field">
-          <span class="popup-label">Package Name</span>
-          <span class="popup-value">{{ convPopup.item.name }}</span>
-        </div>
-        <div class="popup-field">
-          <span class="popup-label">Dimensions</span>
-          <span class="popup-value">{{ convPopup.item.dimensionMcm }} Mcm</span>
-        </div>
-        <div class="popup-field">
-          <span class="popup-label">Weight</span>
-          <span class="popup-value">{{ convPopup.item.weightKg }} Kg</span>
-        </div>
-        <div class="popup-field">
-          <span class="popup-label">Destination</span>
-          <span class="popup-value">{{ convPopup.item.destination }}</span>
-        </div>
-        <div class="popup-field">
-          <span class="popup-label">Position Index</span>
-          <span class="popup-value">{{ getCentralPositionIndex(convPopup.item) }}</span>
-        </div>
-        <div class="popup-field color-field">
-          <div class="popup-color-display" [style.backgroundColor]="getItemColor(convPopup.item)"></div>
-          <div>
-            <div class="popup-label">Package Color</div>
-            <div class="popup-value" style="font-size: 0.85rem; opacity: 0.8;">Color identifier</div>
+
+      <!-- Conveyor Content -->
+      <div class="conveyor-content">
+        <!-- Area Section -->
+        <div class="conveyor-section">
+          <h3>Area</h3>
+          <div class="area-visualization">
+            <div class="area-scale">
+              <span class="scale-label">{{ conveyorData.areaStart }}</span>
+              <span class="scale-label">{{ conveyorData.areaEnd }}</span>
+            </div>
+            <div class="area-bars">
+              <div *ngFor="let area of conveyorData.areas" 
+                class="area-bar"
+                [style.width]="area.width"
+                [class.highlighted]="area.highlighted"
+                [style.backgroundColor]="area.color">
+                <span class="area-label">{{ area.name }}</span>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- Sections Overview -->
+        <div class="conveyor-section">
+          <h3>Sections</h3>
+          <div class="sections-overview">
+            <div class="section-range-labels">
+              <span>{{ conveyorData.sectionStart }}</span>
+              <span>{{ conveyorData.sectionEnd }}</span>
+            </div>
+            <div class="sections-bars">
+              <div *ngFor="let section of conveyorData.sections" 
+                class="section-bar"
+                [style.width]="section.width"
+                [style.marginLeft]="section.marginLeft">
+                <span class="section-name">{{ section.name }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Details with Allocation Grid -->
+        <div class="conveyor-section" *ngFor="let section of conveyorData.sections">
+          <h3>{{ section.name }}</h3>
+          <div class="section-details">
+            <div class="section-range">
+              <span>{{ section.startRange }}</span>
+              <span>{{ section.endRange }}</span>
+            </div>
+            <div class="allocation-grid">
+              <div *ngFor="let cell of section.cells" 
+                class="grid-cell"
+                [class.allocated]="cell.allocated"
+                [style.backgroundColor]="cell.color"
+                [title]="cell.value">
+                {{ cell.value }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Package Info -->
+        <div class="package-info">
+          <p><strong>Package name:</strong> {{ convPopup.item.name }}</p>
+          <p><strong>Category:</strong> Cargo</p>
+          <p><strong>Width:</strong> {{ convPopup.item.dimensionMcm }}</p>
+          <p><strong>Cells:</strong> {{ conveyorData.allocatedCells }}</p>
+        </div>
       </div>
-      <div class="conv-popup-footer">
-        <button class="conv-popup-cancel-btn" (click)="closeConvPopup()">
-          Close
-        </button>
+
+      <!-- Action Buttons -->
+      <div class="conveyor-footer">
+        <button class="btn-cancel" (click)="closeConvPopup()">Cancel</button>
+        <button class="btn-allocate" (click)="onAllocatePackage()">Allocate</button>
       </div>
     </div>
   </div>

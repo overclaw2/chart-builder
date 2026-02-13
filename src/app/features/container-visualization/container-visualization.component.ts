@@ -1348,4 +1348,130 @@ export class ContainerVisualizationComponent implements OnInit {
     }
     return 0;
   }
+
+  // NEW: Get conveyor visualization data for a package
+  getConveyorData(item: Item): any {
+    if (!this.shipData) return null;
+
+    // Find the compartment containing this item
+    let compartment: Compartment | null = null;
+    let compartmentIndex: number = 0;
+    
+    for (const container of this.shipData.containers) {
+      compartmentIndex = 0;
+      for (const comp of container.compartments) {
+        if (comp.items.find(i => i.id === item.id)) {
+          compartment = comp;
+          break;
+        }
+        compartmentIndex++;
+      }
+      if (compartment) break;
+    }
+
+    if (!compartment) return null;
+
+    // Generate conveyor structure
+    const areaStart = Math.floor(compartment.widthindexRange.start / 100) * 100;
+    const areaEnd = Math.ceil(compartment.widthindexRange.end / 100) * 100;
+    const rangeSpan = areaEnd - areaStart;
+
+    // Create areas (currently just one main area, could be divided into sub-areas)
+    const areas = [
+      {
+        name: '1 - A',
+        width: '20%',
+        color: '#e0e0e0',
+        highlighted: false
+      },
+      {
+        name: '1 - B',
+        width: '30%',
+        color: '#2196F3',
+        highlighted: true
+      },
+      {
+        name: '1 - C',
+        width: '25%',
+        color: '#e0e0e0',
+        highlighted: false
+      },
+      {
+        name: '1 - D',
+        width: '25%',
+        color: '#e0e0e0',
+        highlighted: false
+      }
+    ];
+
+    // Create sections (divide compartment into 4 sections B1-B4)
+    const cellsPerSection = Math.floor(rangeSpan / 4);
+    const sections = [];
+    
+    for (let i = 0; i < 4; i++) {
+      const sectionStart = areaStart + (i * cellsPerSection);
+      const sectionEnd = sectionStart + cellsPerSection;
+      const sectionName = `B${i + 1}`;
+      const sectionWidth = (cellsPerSection / rangeSpan) * 100;
+      const marginLeft = i === 0 ? 0 : (cellsPerSection / rangeSpan) * 100;
+
+      // Create grid cells for this section (0-44 cells per section)
+      const cells = [];
+      const cellCount = 45;
+      
+      for (let c = 0; c < cellCount; c++) {
+        const cellValue = sectionStart + c;
+        const isInItemRange = cellValue >= item.position - (item.dimensionMcm / 2) && 
+                              cellValue <= item.position + (item.dimensionMcm / 2);
+        
+        // Color cells based on their position
+        let cellColor = '#d0d0d0';
+        if (isInItemRange) {
+          // Use item color for allocated cells
+          if (i === 0) cellColor = '#d32f2f'; // Red for B1
+          if (i === 1) cellColor = '#4caf50'; // Green for B2
+          if (i === 2) cellColor = '#ff9800'; // Orange for B3
+          if (i === 3) cellColor = '#1565c0'; // Blue for B4
+        }
+
+        cells.push({
+          value: c,
+          allocated: isInItemRange,
+          color: cellColor
+        });
+      }
+
+      sections.push({
+        name: sectionName,
+        startRange: sectionStart,
+        endRange: sectionEnd,
+        width: sectionWidth,
+        marginLeft: i > 0 ? marginLeft : 0,
+        cells: cells
+      });
+    }
+
+    // Calculate allocated cells count
+    const allocatedCells = sections.reduce((sum, section) => {
+      return sum + section.cells.filter(c => c.allocated).length;
+    }, 0);
+
+    return {
+      title: `Conveyor ${compartmentIndex + 1}`,
+      areaStart: areaStart,
+      areaEnd: areaEnd,
+      sectionStart: areaStart,
+      sectionEnd: areaEnd,
+      areas: areas,
+      sections: sections,
+      allocatedCells: allocatedCells
+    };
+  }
+
+  // NEW: Handle allocate button click
+  onAllocatePackage(): void {
+    // Close the modal after allocation
+    this.closeConvPopup();
+    // In future, this could trigger allocation logic if needed
+  }
 }
