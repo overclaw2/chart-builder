@@ -1,0 +1,226 @@
+<div class="snapshot-timeline-container">
+  <!-- Header Section -->
+  <div class="snapshot-header">
+    <h2>📸 Snapshot Timeline</h2>
+    <div class="header-stats">
+      <span class="stat-item">
+        <strong>{{ getStats().count }}</strong> Snapshots
+      </span>
+      <span class="stat-item" *ngIf="getStats().count > 0">
+        Span: <strong>{{ formatDuration(getStats().oldestTime, getStats().newestTime) }}</strong>
+      </span>
+      <span class="stat-item" *ngIf="getStats().avgSize > 0">
+        Avg Size: <strong>{{ (getStats().avgSize / 1024).toFixed(1) }} KB</strong>
+      </span>
+    </div>
+  </div>
+
+  <!-- Create New Snapshot Section -->
+  <div class="create-snapshot-section">
+    <div class="input-group">
+      <input
+        type="text"
+        [(ngModel)]="newSnapshotLabel"
+        placeholder="Label for this snapshot (e.g., 'End of Hour 1', 'Before Repack')"
+        class="snapshot-label-input"
+        (keyup.enter)="createSnapshot()"
+      />
+      <button class="btn-primary" (click)="createSnapshot()" [disabled]="!shipData">
+        💾 Save Current State
+      </button>
+    </div>
+    <div class="snapshot-actions">
+      <button class="btn-secondary" (click)="exportSnapshots()" [disabled]="snapshots.length === 0">
+        📥 Export Snapshots
+      </button>
+      <label class="btn-secondary">
+        📤 Import Snapshots
+        <input type="file" accept=".json" (change)="importSnapshots($event)" style="display: none" />
+      </label>
+      <button
+        class="btn-danger"
+        (click)="clearAllSnapshots()"
+        [disabled]="snapshots.length === 0"
+      >
+        🗑️ Clear All
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="snapshots.length === 0">
+    <p>📭 No snapshots yet. Create one to get started!</p>
+  </div>
+
+  <!-- Snapshot List with Timeline -->
+  <div class="snapshot-list-container" *ngIf="snapshots.length > 0">
+    <div class="timeline-column">
+      <!-- Timeline visualization -->
+      <div class="timeline-track">
+        <div class="timeline-bar"></div>
+        <div
+          class="timeline-dot"
+          *ngFor="let snapshot of snapshots; let i = index"
+          [style.top.%]="(i / snapshots.length) * 100"
+          [class.selected]="
+            snapshot.id === selectedSnapshot1?.id || snapshot.id === selectedSnapshot2?.id
+          "
+          (click)="selectForComparison(snapshot, selectedSnapshot1?.id === snapshot.id ? 1 : 2)"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Snapshots Grid -->
+    <div class="snapshots-grid">
+      <div class="snapshot-card" *ngFor="let snapshot of snapshots; let i = index">
+        <!-- Card Header with Timestamp -->
+        <div class="snapshot-card-header">
+          <div class="timestamp-info">
+            <strong class="snapshot-index">#{{ snapshots.length - i }}</strong>
+            <span class="timestamp">{{ formatTime(snapshot.timestamp) }}</span>
+          </div>
+          <div class="snapshot-actions-inline">
+            <button class="btn-icon" (click)="restoreSnapshot(snapshot.id)" title="Restore snapshot">
+              ↻
+            </button>
+            <button class="btn-icon" (click)="deleteSnapshot(snapshot.id)" title="Delete snapshot">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Snapshot Label (Editable) -->
+        <div class="snapshot-label-section">
+          <div
+            class="snapshot-label-display"
+            *ngIf="editingSnapshotId !== snapshot.id"
+            (click)="startEditingLabel(snapshot.id)"
+            [class.default-label]="!snapshot.label"
+          >
+            {{ snapshot.label || 'Auto-generated snapshot' }}
+            <span class="edit-hint">✏️</span>
+          </div>
+          <div class="snapshot-label-edit" *ngIf="editingSnapshotId === snapshot.id">
+            <input
+              type="text"
+              [value]="snapshot.label"
+              (keyup.enter)="saveEditingLabel(snapshot.id, $any($event.target).value)"
+              (blur)="saveEditingLabel(snapshot.id, $any($event.target).value)"
+              autofocus
+              class="label-input"
+            />
+          </div>
+        </div>
+
+        <!-- Snapshot Metadata -->
+        <div class="snapshot-metadata">
+          <div class="metadata-item">
+            <span class="label">Items:</span>
+            <strong>{{ snapshot.metadata.itemCount }}</strong>
+          </div>
+          <div class="metadata-item">
+            <span class="label">Weight:</span>
+            <strong>{{ snapshot.metadata.totalWeight }} / {{ snapshot.metadata.totalWeightCapacity }} Kg</strong>
+          </div>
+          <div class="metadata-item">
+            <span class="label">Utilization:</span>
+            <strong>{{ snapshot.metadata.averageUtilization }}%</strong>
+          </div>
+          <div class="metadata-item">
+            <span class="label">Containers:</span>
+            <strong>{{ snapshot.metadata.containerCount }}</strong>
+          </div>
+        </div>
+
+        <!-- Selection Checkboxes -->
+        <div class="selection-area">
+          <label class="checkbox-item">
+            <input
+              type="checkbox"
+              [checked]="snapshot.id === selectedSnapshot1?.id"
+              (change)="selectForComparison(snapshot, 1)"
+            />
+            <span>Compare As 'Before'</span>
+          </label>
+          <label class="checkbox-item">
+            <input
+              type="checkbox"
+              [checked]="snapshot.id === selectedSnapshot2?.id"
+              (change)="selectForComparison(snapshot, 2)"
+            />
+            <span>Compare As 'After'</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison View (Side-by-Side) -->
+  <div class="comparison-section" *ngIf="showComparisonView && snapshotDiff">
+    <div class="comparison-header">
+      <h3>📊 Snapshot Comparison</h3>
+      <button class="btn-secondary" (click)="showComparisonView = false">Close</button>
+    </div>
+
+    <div class="comparison-details">
+      <!-- Summary Stats -->
+      <div class="comparison-summary">
+        <div class="summary-stat">
+          <span class="stat-label">Time Interval:</span>
+          <strong>{{
+            formatDuration(snapshotDiff.timestamp1, snapshotDiff.timestamp2)
+          }}</strong>
+        </div>
+        <div class="summary-stat">
+          <span class="stat-label">Weight Change:</span>
+          <strong [style.color]="getWeightChangeColor(snapshotDiff.weightChange)">
+            {{ snapshotDiff.weightChange > 0 ? '+' : '' }}{{ snapshotDiff.weightChange }} Kg
+          </strong>
+        </div>
+        <div class="summary-stat">
+          <span class="stat-label">Item Count Change:</span>
+          <strong [style.color]="getWeightChangeColor(snapshotDiff.itemCountChange)">
+            {{ snapshotDiff.itemCountChange > 0 ? '+' : '' }}{{ snapshotDiff.itemCountChange }}
+          </strong>
+        </div>
+      </div>
+
+      <!-- Per-Compartment Comparison -->
+      <div class="compartment-comparison">
+        <h4>Per-Compartment Changes:</h4>
+        <div class="compartment-diff-list">
+          <div
+            class="compartment-diff-item"
+            *ngFor="let compDiff of snapshotDiff.compartmentDiffs"
+            [class.has-changes]="
+              compDiff.weightChange !== 0 ||
+              compDiff.itemsAdded > 0 ||
+              compDiff.itemsRemoved > 0
+            "
+          >
+            <div class="compartment-diff-header">
+              <strong>{{ compDiff.containerName }} ({{ compDiff.compartmentIndex }}/2)</strong>
+              <span class="weight-change" [style.color]="getWeightChangeColor(compDiff.weightChange)">
+                {{ compDiff.weightChange > 0 ? '+' : '' }}{{ compDiff.weightChange }} Kg
+              </span>
+            </div>
+            <div class="compartment-diff-details">
+              <span class="detail-item" *ngIf="compDiff.itemsAdded > 0" style="color: #4ade80">
+                +{{ compDiff.itemsAdded }} added
+              </span>
+              <span class="detail-item" *ngIf="compDiff.itemsRemoved > 0" style="color: #ef4444">
+                -{{ compDiff.itemsRemoved }} removed
+              </span>
+              <span class="detail-item" *ngIf="compDiff.itemsModified > 0" style="color: #eab308">
+                ~{{ compDiff.itemsModified }} moved
+              </span>
+              <span class="detail-item" *ngIf="!compDiff.itemsAdded && !compDiff.itemsRemoved && !compDiff.itemsModified" style="color: #94a3b8">
+                No changes
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

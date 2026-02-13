@@ -6,17 +6,19 @@ import { ContainerService } from '../../core/services/container.service';
 import { UndoRedoService } from '../../core/services/undo-redo.service';
 import { HelpService } from '../../core/services/help.service';
 import { CapacityWarningService } from '../../core/services/capacity-warning.service';
+import { SnapshotService } from '../../core/services/snapshot.service';
 import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
 import { AvailablePackagesComponent } from '../available-packages/available-packages.component';
 import { BulkImportComponent } from '../bulk-import/bulk-import.component';
 import { HistoryViewerComponent } from '../history-viewer/history-viewer.component';
 import { HelpPanelComponent } from '../help-panel/help-panel.component';
 import { TourOverlayComponent } from '../tour-overlay/tour-overlay.component';
+import { SnapshotTimelineComponent } from '../snapshot-timeline/snapshot-timeline.component';
 
 @Component({
   selector: 'app-container-visualization',
   standalone: true,
-  imports: [CommonModule, FormsModule, AvailablePackagesComponent, BulkImportComponent, HistoryViewerComponent, HelpPanelComponent, TourOverlayComponent],
+  imports: [CommonModule, FormsModule, AvailablePackagesComponent, BulkImportComponent, HistoryViewerComponent, HelpPanelComponent, TourOverlayComponent, SnapshotTimelineComponent],
   templateUrl: './container-visualization.component.html',
   styleUrls: ['./container-visualization.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
@@ -120,12 +122,16 @@ export class ContainerVisualizationComponent implements OnInit {
   toastNotification: { visible: boolean; message: string; type: 'warning' | 'danger' } = { visible: false, message: '', type: 'warning' };
   strictModeEnabled: boolean = false;
 
+  // NEW: Snapshot Timeline
+  snapshotTimelineOpen: boolean = false;
+
   constructor(
     private containerService: ContainerService, 
     private cdr: ChangeDetectorRef,
     private undoRedoService: UndoRedoService,
     private helpService: HelpService,
-    private capacityWarningService: CapacityWarningService
+    private capacityWarningService: CapacityWarningService,
+    private snapshotService: SnapshotService
   ) {}
 
   ngOnInit(): void {
@@ -1816,6 +1822,24 @@ export class ContainerVisualizationComponent implements OnInit {
    */
   startGuidedTour(): void {
     this.helpService.startTour();
+  }
+
+  // ========== SNAPSHOT TIMELINE ==========
+
+  /**
+   * Toggle snapshot timeline panel
+   */
+  toggleSnapshotTimeline(): void {
+    this.snapshotTimelineOpen = !this.snapshotTimelineOpen;
+  }
+
+  /**
+   * Handle snapshot restoration
+   */
+  onSnapshotRestored(restoredData: ShipData): void {
+    // Load the restored snapshot data - it will trigger the shipData$ subscription
+    this.containerService.updateShipData(restoredData);
+    this.showToast('Snapshot restored successfully!', 'warning');
   }
 
   // ========== CAPACITY WARNINGS ==========

@@ -186,6 +186,15 @@ export class ContainerService {
     return this.shipData$;
   }
 
+  /**
+   * Update ship data directly (used for snapshot restoration and bulk updates)
+   */
+  updateShipData(shipData: ShipData): void {
+    this.shipDataSubject.next(shipData);
+    // Also persist to localStorage
+    localStorage.setItem('shipData', JSON.stringify(shipData));
+  }
+
   loadDataFromJSON(jsonData: any): void {
     try {
       // Validate and normalize input structure
