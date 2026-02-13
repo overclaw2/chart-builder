@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContainerService } from '../../core/services/container.service';
 import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
@@ -10,6 +10,7 @@ import { AvailablePackagesComponent } from '../available-packages/available-pack
   imports: [CommonModule, AvailablePackagesComponent],
   templateUrl: './container-visualization.component.html',
   styleUrls: ['./container-visualization.component.css'],
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class ContainerVisualizationComponent implements OnInit {
   shipData: ShipData | null = null;
@@ -260,9 +261,14 @@ export class ContainerVisualizationComponent implements OnInit {
     const stopIndex = Math.round(currentIndex + (itemWidth / 2));
 
     // Update tooltip with rounded index value and start/stop values
-    this.dragTooltip.index = Math.round(currentIndex);
-    this.dragTooltip.startIndex = startIndex;
-    this.dragTooltip.stopIndex = stopIndex;
+    // Create new object reference to trigger change detection
+    this.dragTooltip = {
+      ...this.dragTooltip,
+      index: Math.round(currentIndex),
+      startIndex: startIndex,
+      stopIndex: stopIndex,
+      visible: true
+    };
 
     // TASK 2 ENHANCEMENT: Show hover tooltip while dragging
     // Keep tooltip at FIXED Y position (below package), only update X position as package moves
@@ -279,7 +285,8 @@ export class ContainerVisualizationComponent implements OnInit {
     }
 
     // Trigger change detection to update position badge in real-time during drag
-    this.cdr.detectChanges();
+    // Use markForCheck to ensure component is checked on next change detection cycle
+    this.cdr.markForCheck();
   }
 
   onDragLeave(event: DragEvent, compartmentId: string): void {
