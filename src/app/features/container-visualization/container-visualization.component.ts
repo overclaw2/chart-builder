@@ -270,6 +270,13 @@ export class ContainerVisualizationComponent implements OnInit {
       visible: true
     };
 
+    // CRITICAL FIX: Update the dragged item's displayIndex directly in the data model
+    // This ensures the position badge in the template updates immediately
+    if (this.draggedItem) {
+      // Update the actual item object's displayIndex so the template reflects the change
+      this.draggedItem.item.displayIndex = Math.round(currentIndex);
+    }
+
     // TASK 2 ENHANCEMENT: Show hover tooltip while dragging
     // Keep tooltip at FIXED Y position (below package), only update X position as package moves
     if (this.draggedItem) {
@@ -353,6 +360,10 @@ export class ContainerVisualizationComponent implements OnInit {
         } else {
           // No space available - reject the drop
           console.warn('Cannot drop item: insufficient space or collision detected');
+          // Reset displayIndex before clearing
+          if (this.draggedItem) {
+            this.draggedItem.item.displayIndex = undefined;
+          }
           this.draggedItem = null;
           this.dragTooltip.visible = false;
           this.tooltipState = { visible: false, x: 0, y: 0, item: null }; // Clear hover tooltip on reject
@@ -392,6 +403,11 @@ export class ContainerVisualizationComponent implements OnInit {
       }
     }
 
+    // Reset displayIndex to null so it uses getCentralPositionIndex again
+    if (this.draggedItem) {
+      this.draggedItem.item.displayIndex = undefined;
+    }
+    
     this.draggedItem = null;
     this.dragTooltip.visible = false;
     this.tooltipState = { visible: false, x: 0, y: 0, item: null }; // Clear hover tooltip on drag end

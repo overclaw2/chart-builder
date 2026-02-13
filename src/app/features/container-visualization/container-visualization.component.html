@@ -223,9 +223,9 @@
                   </div>
                 </div>
                 <!-- AVIHAI FIX #2: Central position width index badge centered on package -->
-                <!-- Updates position while dragging to show real-time position -->
+                <!-- Updates position while dragging - displayIndex is updated in real-time -->
                 <div class="item-central-position-badge" title="Central position width index">
-                  📍 {{ (isDragging && draggedItem && draggedItem.item.id === item.id) ? dragTooltip.index : getCentralPositionIndex(item) }}
+                  📍 {{ item.displayIndex || getCentralPositionIndex(item) }}
                 </div>
                 
                 <!-- TASK 5: Conv button to open popup with package details -->
