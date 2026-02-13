@@ -189,8 +189,8 @@
 
 .container-bar-wrapper {
   position: relative;
-  margin: 1rem 0;
-  padding-bottom: 2.5rem; /* Space for item tooltips */
+  margin: 1rem 0 3rem 0;
+  padding-bottom: 2.5rem; /* Space for item tooltips + position labels below */
 }
 
 .position-label {
@@ -287,35 +287,53 @@
   margin-top: 0.25rem;
 }
 
-/* AVIHAI FIX #2: Central position width index badge - small, transparent, non-interfering */
-/* Positioned in the middle of the package but small and semi-transparent */
+/* AVIHAI FIX #2 (REVISED): Position indicator with connector line */
+/* Badge moved below container with vertical connector to timeline position */
 .item-central-position-badge {
   position: absolute;
-  top: 50%;
+  /* Position below the container-bar, using data attributes for layout */
+  top: 120%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 0.6rem;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
   font-weight: 700;
   color: #ffffff;
-  background: rgba(0, 102, 204, 0.6);
-  padding: 0.2rem 0.4rem;
-  border-radius: 2px;
-  border: 1px solid rgba(0, 82, 163, 0.7);
+  background: var(--info-color, #0066cc);
+  padding: 0.3rem 0.6rem;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 82, 163, 0.8);
   white-space: nowrap;
-  z-index: 3;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  z-index: 9;
+  box-shadow: 0 2px 4px rgba(0, 102, 204, 0.25);
   transition: all 0.2s ease;
   width: fit-content;
   pointer-events: none;
-  /* FIX: Ensure badge stays within its item-wrapper container */
-  max-width: 90%;
+  max-width: 90px;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* Add connector line above label */
+  display: flex;
+  align-items: flex-end;
+  padding-top: 8px;
+}
+
+/* Connector line extending from item to label below */
+.item-central-position-badge::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 8px;
+  background: linear-gradient(180deg, var(--info-color, #0066cc) 0%, rgba(0, 102, 204, 0.3) 100%);
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 1px;
 }
 
 .item-central-position-badge:hover {
-  background: rgba(0, 82, 163, 0.7);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background: var(--compartment-border, #3b82f6);
+  box-shadow: 0 2px 6px rgba(0, 102, 204, 0.35);
+  transform: translateX(-50%) translateY(-2px);
 }
 
 /* AVIHAI FIX #1: Hover tooltip with package data - positioned below the package shape */
