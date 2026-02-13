@@ -518,6 +518,14 @@ export class ContainerVisualizationComponent implements OnInit {
 
   onDrop(event: DragEvent, containerId: string, toCompartmentId: string): void {
     event.preventDefault();
+    
+    // FIX: Route to available packages handler if draggedAvailablePackage is set
+    // This ensures we use the correct handler even if the conditional check fails
+    if (this.draggedAvailablePackage && !this.draggedItem) {
+      this.onDropFromAvailablePackages(event, containerId, toCompartmentId);
+      return;
+    }
+    
     if (!this.draggedItem) return;
 
     // Calculate new position based on drop location
@@ -552,6 +560,7 @@ export class ContainerVisualizationComponent implements OnInit {
       newPosition = Math.max(minPosition, Math.min(newPosition, maxPosition));
 
       // COLLISION DETECTION: Check if the new position would overlap with other items
+      // Only check against items that are NOT the one being dragged
       const wouldOverlap = this.containerService.doesItemOverlapWithOthers(
         toCompartmentId,
         newPosition,
@@ -595,7 +604,7 @@ export class ContainerVisualizationComponent implements OnInit {
       const displayIndex = Math.round(newPosition + (itemWidth / 2));
 
       // Allow drops within same compartment or to different compartment
-      if (this.draggedItem.compartmentId === toCompartmentId) {
+      if (this.draggedItem.containerId === containerId && this.draggedItem.compartmentId === toCompartmentId) {
         // Same compartment - just update position (preserves exact grab point)
         this.containerService.updateItemPositionInCompartment(
           containerId,
@@ -605,7 +614,7 @@ export class ContainerVisualizationComponent implements OnInit {
           displayIndex
         );
       } else {
-        // Different compartment - move item with exact grab point preserved
+        // Different compartment OR different container - move item with exact grab point preserved
         this.containerService.moveItemBetweenCompartments(
           this.draggedItem.containerId,
           this.draggedItem.compartmentId,
@@ -627,6 +636,7 @@ export class ContainerVisualizationComponent implements OnInit {
     }
     
     this.draggedItem = null;
+    this.draggedAvailablePackage = null; // CRITICAL FIX: Also reset draggedAvailablePackage
     this.dragTooltip.visible = false;
     this.tooltipState = { visible: false, x: 0, y: 0, item: null }; // Clear hover tooltip on drag end
     this.initialTooltipY = 0; // Reset initial tooltip Y position
@@ -635,6 +645,7 @@ export class ContainerVisualizationComponent implements OnInit {
     this.grabOffset = 0; // Reset grab offset for next drag
     // Clear hovered item after drag completes
     this.hoveredItemId = null;
+    this.dragOverCompartmentId = null; // Reset drag over state
   }
 
   onDownload(compartment: Compartment): void {
