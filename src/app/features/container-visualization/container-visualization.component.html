@@ -177,10 +177,7 @@
           (drop)="draggedAvailablePackage ? onDropFromAvailablePackages($event, container.id, compartment.id) : onDrop($event, container.id, compartment.id)"
           [style.--compartment-bg]="getCompartmentColor(compartment)"
         >
-          <!-- Drag tooltip (shows current index while dragging) -->
-          <div class="drag-tooltip" *ngIf="dragTooltip.visible && dragOverCompartmentId === compartment.id">
-            📍 Index: {{ dragTooltip.index }}
-          </div>
+          <!-- Drag tooltip removed - position badge updates while dragging instead -->
           
           <!-- TASK 4: Width Index Labels while dragging (start/stop values at lower left of package) -->
           <div class="drag-index-labels" *ngIf="dragTooltip.visible && dragOverCompartmentId === compartment.id && draggedItem">
@@ -226,9 +223,9 @@
                   </div>
                 </div>
                 <!-- AVIHAI FIX #2: Central position width index badge centered on package -->
-                <!-- Positioned in the center of the package, not below it -->
+                <!-- Updates position while dragging to show real-time position -->
                 <div class="item-central-position-badge" title="Central position width index">
-                  📍 {{ getCentralPositionIndex(item) }}
+                  📍 {{ (isDragging && draggedItem && draggedItem.item.id === item.id) ? dragTooltip.index : getCentralPositionIndex(item) }}
                 </div>
                 
                 <!-- TASK 5: Conv button to open popup with package details -->
