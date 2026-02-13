@@ -5,6 +5,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { ContainerService } from '../../core/services/container.service';
 import { UndoRedoService } from '../../core/services/undo-redo.service';
 import { HelpService } from '../../core/services/help.service';
+import { CapacityWarningService } from '../../core/services/capacity-warning.service';
 import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
 import { AvailablePackagesComponent } from '../available-packages/available-packages.component';
 import { BulkImportComponent } from '../bulk-import/bulk-import.component';
@@ -115,20 +116,53 @@ export class ContainerVisualizationComponent implements OnInit {
   helpPanelOpen: boolean = false;
 
   // NEW: Capacity Warnings
-  capacityWarnings: { [compartmentId: string]: { level: 'green' | 'yellow' | 'red' | 'danger'; weight: number; width: number } } = {};
+  capacityWarnings: { [compartmentId: string]: { level: string; weight: number; width: number } } = {};
   toastNotification: { visible: boolean; message: string; type: 'warning' | 'danger' } = { visible: false, message: '', type: 'warning' };
+  strictModeEnabled: boolean = false;
 
   constructor(
     private containerService: ContainerService, 
     private cdr: ChangeDetectorRef,
     private undoRedoService: UndoRedoService,
-    private helpService: HelpService
+    private helpService: HelpService,
+    private capacityWarningService: CapacityWarningService
   ) {}
 
   ngOnInit(): void {
     this.containerService.getShipData().subscribe((data) => {
       this.shipData = data;
       this.applyFilters();
+      // Update capacity warnings whenever ship data changes
+      this.capacityWarningService.updateWarnings(data.containers);
+    });
+
+    // Subscribe to capacity warnings
+    this.capacityWarningService.getWarnings().subscribe((warnings) => {
+      // Build color map for compartments
+      const colorMap: { [compartmentId: string]: { level: string; weight: number; width: number } } = {};
+      
+      warnings.forEach((warning) => {
+        if (!colorMap[warning.compartmentId]) {
+          colorMap[warning.compartmentId] = { level: 'none', weight: 0, width: 0 };
+        }
+        
+        // Get highest severity level
+        const levels = ['danger', 'red', 'yellow', 'none'];
+        const currentLevel = levels.indexOf(colorMap[warning.compartmentId].level);
+        const newLevel = levels.indexOf(warning.level);
+        
+        if (newLevel < currentLevel) {
+          colorMap[warning.compartmentId].level = warning.level;
+        }
+        
+        if (warning.type === 'weight') {
+          colorMap[warning.compartmentId].weight = warning.currentUtilization;
+        } else if (warning.type === 'width') {
+          colorMap[warning.compartmentId].width = warning.currentUtilization;
+        }
+      });
+      
+      this.capacityWarnings = colorMap;
     });
   }
 
@@ -606,6 +640,39 @@ export class ContainerVisualizationComponent implements OnInit {
       // Set displayIndex as rounded value for tooltip/display purposes only
       // displayIndex should show the center position of the item
       const displayIndex = Math.round(newPosition + (itemWidth / 2));
+
+      // CAPACITY CHECK: Validate before allowing drop
+      if (this.draggedItem.compartmentId !== toCompartmentId) {
+        // Moving to a different compartment - check capacity
+        const wouldExceedCapacity = this.capacityWarningService.wouldExceedCapacity(
+          toCompartmentId,
+          this.draggedItem.item.weightKg,
+          this.draggedItem.item.dimensionMcm || 27,
+          targetCompartment
+        );
+
+        if (wouldExceedCapacity.exceedsWeight || wouldExceedCapacity.exceedsWidth) {
+          // In strict mode, reject the drop
+          if (this.strictModeEnabled) {
+            const reason = wouldExceedCapacity.exceedsWeight ? 'weight' : 'width';
+            this.showToast(`Cannot drop: would exceed ${reason} capacity!`, 'danger');
+            // Reject the drop
+            this.draggedItem = null;
+            this.dragTooltip.visible = false;
+            this.tooltipState = { visible: false, x: 0, y: 0, item: null };
+            this.initialTooltipY = 0;
+            this.ghostHighlight = null;
+            this.isDragging = false;
+            this.grabOffset = 0;
+            this.hoveredItemId = null;
+            return;
+          } else {
+            // Show warning but allow drop
+            const reason = wouldExceedCapacity.exceedsWeight ? 'weight' : 'width';
+            this.showToast(`Warning: exceeding ${reason} capacity!`, 'warning');
+          }
+        }
+      }
 
       // Allow drops within same compartment or to different compartment
       if (this.draggedItem.containerId === containerId && this.draggedItem.compartmentId === toCompartmentId) {
@@ -1749,5 +1816,68 @@ export class ContainerVisualizationComponent implements OnInit {
    */
   startGuidedTour(): void {
     this.helpService.startTour();
+  }
+
+  // ========== CAPACITY WARNINGS ==========
+
+  /**
+   * Get warning color for compartment
+   */
+  getCompartmentWarningColor(compartmentId: string): string {
+    const warning = this.capacityWarnings[compartmentId];
+    if (!warning) return '#4ade80'; // Green
+
+    const level = warning.level;
+    switch (level) {
+      case 'danger':
+        return '#dc2626'; // Dark red
+      case 'red':
+        return '#ef4444'; // Red
+      case 'yellow':
+        return '#eab308'; // Yellow
+      default:
+        return '#4ade80'; // Green
+    }
+  }
+
+  /**
+   * Show toast notification
+   */
+  showToast(message: string, type: 'warning' | 'danger' = 'warning'): void {
+    this.toastNotification = { visible: true, message, type };
+    setTimeout(() => {
+      this.toastNotification = { visible: false, message: '', type: 'warning' };
+    }, 4000);
+  }
+
+  /**
+   * Toggle strict mode (prevent drops that exceed capacity)
+   */
+  toggleStrictMode(): void {
+    this.strictModeEnabled = !this.strictModeEnabled;
+    this.capacityWarningService.setStrictMode(this.strictModeEnabled);
+    this.showToast(`Strict Mode ${this.strictModeEnabled ? 'Enabled' : 'Disabled'}`);
+  }
+
+  /**
+   * Set threshold for a compartment
+   */
+  setCompartmentThreshold(compartmentId: string, weightThreshold: number, widthThreshold: number): void {
+    this.capacityWarningService.setThreshold(compartmentId, weightThreshold, widthThreshold);
+    if (this.shipData) {
+      this.capacityWarningService.updateWarnings(this.shipData.containers);
+    }
+  }
+
+  /**
+   * Get capacity info for display
+   */
+  getCapacityInfo(compartment: Compartment): { weight: string; width: string; level: string } {
+    const warning = this.capacityWarnings[compartment.id];
+    return {
+      weight: warning ? `${warning.weight.toFixed(1)}%` : `${compartment.weightUtilization.toFixed(1)}%`,
+      width: warning ? `${warning.width.toFixed(1)}%` : `${compartment.widthUtilization.toFixed(1)}%`,
+      level: warning?.level || 'none'
+    };
   }
 }

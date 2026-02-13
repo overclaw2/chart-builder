@@ -2380,3 +2380,87 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
   }
 }
+
+/* ===== CAPACITY WARNING TOAST NOTIFICATION ===== */
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  z-index: 2000;
+  animation: slideInRight 0.3s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+}
+
+.toast-notification.warning {
+  background: #fbbf24;
+  color: #78350f;
+  border-left: 4px solid #f59e0b;
+}
+
+.toast-notification.danger {
+  background: #ef4444;
+  color: white;
+  border-left: 4px solid #dc2626;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ===== CAPACITY WARNING INDICATOR ===== */
+.capacity-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  border-left: 4px solid #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  animation: fadeIn 0.3s ease;
+}
+
+.capacity-indicator .warning-icon {
+  font-size: 1rem;
+}
+
+.capacity-indicator .warning-text {
+  color: var(--text-primary);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Update container-bar-wrapper to show warning borders */
+.container-bar-wrapper {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.container-bar-wrapper[style*="border-width: 3px"] {
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+}

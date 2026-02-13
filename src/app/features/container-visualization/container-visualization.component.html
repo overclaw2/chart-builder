@@ -1,4 +1,12 @@
 <div class="container-visualization" (click)="closeContextMenu()">
+  <!-- Toast Notification Display -->
+  <div class="toast-notification" 
+    *ngIf="toastNotification.visible"
+    [class.warning]="toastNotification.type === 'warning'"
+    [class.danger]="toastNotification.type === 'danger'">
+    <span class="toast-message">{{ toastNotification.message }}</span>
+  </div>
+
   <!-- Layout wrapper with 3-column structure: available packages (left), main content (center), side panel (right) -->
   <div class="layout-wrapper">
     <!-- Left Panel: Item Lists (collapsible) -->
@@ -301,10 +309,23 @@
           </div>
         </div>
 
+        <!-- Capacity Warning Indicator -->
+        <div class="capacity-indicator" *ngIf="capacityWarnings[compartment.id]" 
+          [style.borderColor]="getCompartmentWarningColor(compartment.id)"
+          [style.borderLeftColor]="getCompartmentWarningColor(compartment.id)">
+          <span class="warning-icon">⚠️</span>
+          <span class="warning-text">
+            Weight: {{ capacityWarnings[compartment.id].weight.toFixed(1) }}% | 
+            Width: {{ capacityWarnings[compartment.id].width.toFixed(1) }}%
+          </span>
+        </div>
+
         <!-- Compartment Bar -->
         <div
           class="container-bar-wrapper"
           [class.drag-over]="dragOverCompartmentId === compartment.id"
+          [style.borderColor]="getCompartmentWarningColor(compartment.id)"
+          [style.borderWidth]="capacityWarnings[compartment.id] ? '3px' : '1px'"
           (dragover)="draggedAvailablePackage ? onDragOverFromAvailable($event, compartment.id) : onDragOver($event, compartment.id)"
           (dragleave)="onDragLeave($event, compartment.id)"
           (drop)="draggedAvailablePackage ? onDropFromAvailablePackages($event, container.id, compartment.id) : onDrop($event, container.id, compartment.id)"
