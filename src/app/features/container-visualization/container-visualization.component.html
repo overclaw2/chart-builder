@@ -436,37 +436,41 @@
   <div class="conv-popup-backdrop" *ngIf="convPopup.visible" (click)="onConvPopupBackdropClick($event)">
     <div class="conv-popup-modal">
       <div class="conv-popup-header">
-        <h2>Package Details</h2>
+        <h2>📦 Package Details</h2>
+        <span class="close-icon" (click)="closeConvPopup()" title="Close">✕</span>
       </div>
       <div class="conv-popup-content" *ngIf="convPopup.item">
         <div class="popup-field">
-          <span class="popup-label">Name:</span>
+          <span class="popup-label">Package Name</span>
           <span class="popup-value">{{ convPopup.item.name }}</span>
         </div>
         <div class="popup-field">
-          <span class="popup-label">Width:</span>
+          <span class="popup-label">Dimensions</span>
           <span class="popup-value">{{ convPopup.item.dimensionMcm }} Mcm</span>
         </div>
         <div class="popup-field">
-          <span class="popup-label">Weight:</span>
+          <span class="popup-label">Weight</span>
           <span class="popup-value">{{ convPopup.item.weightKg }} Kg</span>
         </div>
         <div class="popup-field">
-          <span class="popup-label">Destination:</span>
+          <span class="popup-label">Destination</span>
           <span class="popup-value">{{ convPopup.item.destination }}</span>
         </div>
         <div class="popup-field">
-          <span class="popup-label">Position:</span>
+          <span class="popup-label">Position Index</span>
           <span class="popup-value">{{ getCentralPositionIndex(convPopup.item) }}</span>
         </div>
-        <div class="popup-field">
-          <span class="popup-label">Color:</span>
+        <div class="popup-field color-field">
           <div class="popup-color-display" [style.backgroundColor]="getItemColor(convPopup.item)"></div>
+          <div>
+            <div class="popup-label">Package Color</div>
+            <div class="popup-value" style="font-size: 0.85rem; opacity: 0.8;">Color identifier</div>
+          </div>
         </div>
       </div>
       <div class="conv-popup-footer">
         <button class="conv-popup-cancel-btn" (click)="closeConvPopup()">
-          Cancel
+          Close
         </button>
       </div>
     </div>
