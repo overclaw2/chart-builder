@@ -60,7 +60,7 @@
       <div class="header-section">
         <h1 class="title">{{ shipData?.title }}</h1>
     
-    <!-- JSON Upload Section -->
+    <!-- JSON Upload & History Section -->
     <div class="upload-section">
       <div class="upload-controls">
         <input
@@ -75,6 +75,9 @@
         </button>
         <button class="reset-btn" (click)="onResetToMock()" title="Reset to mock data">
           🔄 Reset to Mock
+        </button>
+        <button class="history-btn" (click)="toggleHistoryViewer()" title="Toggle history viewer (Ctrl+Z to undo, Ctrl+Y to redo)">
+          📜 History
         </button>
         <span class="upload-status" *ngIf="loadingMessage">{{ loadingMessage }}</span>
       </div>
@@ -524,4 +527,11 @@
     [existingPackages]="getExistingPackagesForBulkImport()"
     (packagesImported)="onBulkImportComplete($event)">
   </app-bulk-import>
+
+  <!-- History Viewer Panel -->
+  <app-history-viewer 
+    [isOpen]="historyViewerOpen"
+    (isOpenChange)="historyViewerOpen = $event"
+    (stateSelected)="onHistoryStateSelected($event)">
+  </app-history-viewer>
 </div>

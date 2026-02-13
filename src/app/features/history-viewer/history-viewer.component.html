@@ -1,0 +1,109 @@
+<div class="history-viewer-wrapper" [class.open]="isOpen">
+  <div class="history-viewer-container">
+    <!-- Header -->
+    <div class="history-header">
+      <h3>📜 History Viewer</h3>
+      <div class="header-controls">
+        <button class="view-mode-btn" (click)="toggleViewMode()" [title]="'Switch to ' + (viewMode === 'timeline' ? 'list' : 'timeline') + ' view'">
+          {{ viewMode === 'timeline' ? '📋' : '📈' }}
+        </button>
+        <button class="close-btn" (click)="closeViewer()" title="Close history">✕</button>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn-undo" [disabled]="!canUndo()" (click)="onUndo()" title="Undo (Ctrl+Z)">
+        ↶ Undo
+      </button>
+      <button class="btn-redo" [disabled]="!canRedo()" (click)="onRedo()" title="Redo (Ctrl+Y)">
+        Redo ↷
+      </button>
+    </div>
+
+    <!-- Timeline View -->
+    <div class="timeline-view" *ngIf="viewMode === 'timeline'">
+      <div class="timeline-track">
+        <div class="timeline-line"></div>
+        <div *ngFor="let op of history; let i = index" 
+          class="timeline-item"
+          [class.current]="isCurrentState(i)"
+          [class.future]="isFutureState(i)"
+          (click)="onJumpToState(i)"
+          [style.--color]="getOperationColor(op.type)">
+          <div class="timeline-dot"></div>
+          <div class="timeline-label">
+            <div class="timeline-time">{{ formatTime(op.timestamp) }}</div>
+            <div class="timeline-type">{{ getOperationIcon(op.type) }}</div>
+          </div>
+          <div class="timeline-tooltip">
+            <div class="tooltip-type">{{ op.type }}</div>
+            <div class="tooltip-desc">{{ op.description }}</div>
+            <div class="tooltip-time">{{ formatTime(op.timestamp) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- List View -->
+    <div class="list-view" *ngIf="viewMode === 'list'">
+      <div class="list-container">
+        <div *ngFor="let op of history; let i = index" 
+          class="list-item"
+          [class.current]="isCurrentState(i)"
+          [class.future]="isFutureState(i)"
+          (click)="onJumpToState(i)">
+          <div class="item-index">{{ i + 1 }}</div>
+          <div class="item-icon" [style.color]="getOperationColor(op.type)">
+            {{ getOperationIcon(op.type) }}
+          </div>
+          <div class="item-content">
+            <div class="item-type">{{ op.type }}</div>
+            <div class="item-desc">{{ op.description }}</div>
+            <div class="item-time">{{ formatTime(op.timestamp) }}</div>
+          </div>
+          <div class="item-status">
+            <span *ngIf="isCurrentState(i)" class="status-badge current">Current</span>
+            <span *ngIf="isFutureState(i)" class="status-badge future">Future</span>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="history.length === 0">
+          No operations yet
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="history-summary">
+      <span>Total: {{ history.length }}</span>
+      <span class="divider">•</span>
+      <span>Undo: {{ currentIndex + 1 }}</span>
+      <span class="divider">•</span>
+      <span>Redo: {{ history.length - currentIndex - 1 }}</span>
+    </div>
+
+    <!-- Legend -->
+    <div class="history-legend">
+      <div class="legend-item">
+        <span class="legend-icon" style="color: #2196F3;">🔄</span>
+        <span>Drag</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-icon" style="color: #4CAF50;">➕</span>
+        <span>Add</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-icon" style="color: #F44336;">➖</span>
+        <span>Remove</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-icon" style="color: #FF9800;">🎨</span>
+        <span>Color</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-icon" style="color: #9C27B0;">📦</span>
+        <span>Import</span>
+      </div>
+    </div>
+  </div>
+</div>

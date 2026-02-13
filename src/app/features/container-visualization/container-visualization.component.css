@@ -71,6 +71,29 @@
   border-color: var(--text-secondary);
 }
 
+.history-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--info-color);
+  background: rgba(33, 150, 243, 0.1);
+  color: var(--info-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+
+.history-btn:hover {
+  background: var(--info-color);
+  color: white;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  transform: translateY(-1px);
+}
+
+.history-btn:active {
+  transform: translateY(0);
+}
+
 .upload-status {
   font-size: 0.9rem;
   font-weight: 500;

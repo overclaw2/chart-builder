@@ -2,14 +2,16 @@ import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrateg
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContainerService } from '../../core/services/container.service';
+import { UndoRedoService } from '../../core/services/undo-redo.service';
 import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
 import { AvailablePackagesComponent } from '../available-packages/available-packages.component';
 import { BulkImportComponent } from '../bulk-import/bulk-import.component';
+import { HistoryViewerComponent } from '../history-viewer/history-viewer.component';
 
 @Component({
   selector: 'app-container-visualization',
   standalone: true,
-  imports: [CommonModule, FormsModule, AvailablePackagesComponent, BulkImportComponent],
+  imports: [CommonModule, FormsModule, AvailablePackagesComponent, BulkImportComponent, HistoryViewerComponent],
   templateUrl: './container-visualization.component.html',
   styleUrls: ['./container-visualization.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
@@ -84,7 +86,15 @@ export class ContainerVisualizationComponent implements OnInit {
     dimensionMax: ''
   };
 
-  constructor(private containerService: ContainerService, private cdr: ChangeDetectorRef) {}
+  // NEW: Undo/Redo History
+  historyViewerOpen: boolean = false;
+  previousStateBeforeDrag: ShipData | null = null;
+
+  constructor(
+    private containerService: ContainerService, 
+    private cdr: ChangeDetectorRef,
+    private undoRedoService: UndoRedoService
+  ) {}
 
   ngOnInit(): void {
     this.containerService.getShipData().subscribe((data) => {
@@ -315,6 +325,9 @@ export class ContainerVisualizationComponent implements OnInit {
     compartmentId: string,
     item: Item
   ): void {
+    // UNDO/REDO: Capture state before drag operation
+    this.capturePreviousState();
+
     this.draggedItem = { containerId, compartmentId, item };
     this.isDragging = true;
     if (event.dataTransfer) {
@@ -578,6 +591,9 @@ export class ContainerVisualizationComponent implements OnInit {
     // Reset displayIndex to null so it uses getCentralPositionIndex again
     if (this.draggedItem) {
       this.draggedItem.item.displayIndex = undefined;
+
+      // UNDO/REDO: Record the drag operation
+      this.recordDragOperation(this.draggedItem.item.name, this.draggedItem.item.id);
     }
     
     this.draggedItem = null;
@@ -1473,5 +1489,103 @@ export class ContainerVisualizationComponent implements OnInit {
     // Close the modal after allocation
     this.closeConvPopup();
     // In future, this could trigger allocation logic if needed
+  }
+
+  // ========== UNDO/REDO INTEGRATION ==========
+
+  /**
+   * Capture state before a drag operation starts
+   */
+  capturePreviousState(): void {
+    if (this.shipData) {
+      this.previousStateBeforeDrag = JSON.parse(JSON.stringify(this.shipData));
+    }
+  }
+
+  /**
+   * Record a drag operation for undo/redo
+   */
+  recordDragOperation(itemName: string, itemId: string): void {
+    if (!this.shipData || !this.previousStateBeforeDrag) return;
+
+    // Check if state actually changed
+    if (JSON.stringify(this.previousStateBeforeDrag) === JSON.stringify(this.shipData)) {
+      return; // No actual change, don't record
+    }
+
+    this.undoRedoService.recordOperation(
+      'drag',
+      `Moved ${itemName} to new position`,
+      this.previousStateBeforeDrag,
+      JSON.parse(JSON.stringify(this.shipData)),
+      itemId,
+      itemName
+    );
+
+    this.previousStateBeforeDrag = null;
+  }
+
+  /**
+   * Record a package removal for undo/redo
+   */
+  recordRemovalOperation(itemName: string, itemId: string): void {
+    if (!this.shipData) return;
+
+    // We need the state before removal, which should have been captured
+    // For now, we'll just record with minimal context
+    const beforeState = JSON.parse(JSON.stringify(this.shipData));
+    this.undoRedoService.recordOperation(
+      'remove',
+      `Removed package ${itemName}`,
+      beforeState,
+      JSON.parse(JSON.stringify(this.shipData)),
+      itemId,
+      itemName
+    );
+  }
+
+  /**
+   * Record bulk import operation for undo/redo
+   */
+  recordBulkImportOperation(count: number): void {
+    if (!this.shipData) return;
+
+    this.undoRedoService.recordOperation(
+      'bulk-import',
+      `Imported ${count} packages`,
+      this.previousStateBeforeDrag || JSON.parse(JSON.stringify(this.shipData)),
+      JSON.parse(JSON.stringify(this.shipData))
+    );
+
+    this.previousStateBeforeDrag = null;
+  }
+
+  /**
+   * Restore state from undo/redo
+   */
+  restoreStateFromHistory(newState: ShipData): void {
+    if (newState) {
+      // Update shipData with the restored state
+      this.shipData = JSON.parse(JSON.stringify(newState));
+      this.applyFilters();
+      this.cdr.markForCheck();
+    }
+  }
+
+  /**
+   * Toggle history viewer panel
+   */
+  toggleHistoryViewer(): void {
+    this.historyViewerOpen = !this.historyViewerOpen;
+  }
+
+  /**
+   * Handle state selection from history viewer
+   */
+  onHistoryStateSelected(index: number): void {
+    const state = this.undoRedoService.getStateAtIndex(index);
+    if (state) {
+      this.restoreStateFromHistory(state);
+    }
   }
 }
