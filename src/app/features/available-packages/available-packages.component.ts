@@ -13,6 +13,8 @@ export class AvailablePackagesComponent implements OnInit {
   @Input() isCollapsed = false;
   @Output() toggleCollapse = new EventEmitter<void>();
   @Output() dragStart = new EventEmitter<{ item: Item; event: DragEvent }>();
+  @Output() packageRemoved = new EventEmitter<Item>();
+  @Output() packageAdded = new EventEmitter<Item>();
 
   availablePackages: Item[] = [];
   draggedPackage: Item | null = null;
@@ -116,5 +118,28 @@ export class AvailablePackagesComponent implements OnInit {
 
   getTotalAvailablePackages(): number {
     return this.availablePackages.length;
+  }
+
+  /**
+   * Remove a package from the available packages list (when it's placed in a container)
+   */
+  removePackageFromAvailable(packageId: string): void {
+    const index = this.availablePackages.findIndex(p => p.id === packageId);
+    if (index !== -1) {
+      const removedPackage = this.availablePackages.splice(index, 1)[0];
+      this.packageRemoved.emit(removedPackage);
+    }
+  }
+
+  /**
+   * Add a package back to the available packages list (when it's removed from a container)
+   */
+  addPackageToAvailable(item: Item): void {
+    // Only add if it's not already in the list
+    const alreadyExists = this.availablePackages.some(p => p.id === item.id);
+    if (!alreadyExists) {
+      this.availablePackages.push(item);
+      this.packageAdded.emit(item);
+    }
   }
 }

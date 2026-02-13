@@ -8,6 +8,7 @@ export interface Item {
   length: number; // length in compartment
   displayIndex?: number; // index to display below item (for Ofer's requirement)
   color?: string; // color for item visualization (default: #7dd3fc)
+  sourcePackageId?: string; // tracks which available package this item came from (for syncing state)
 }
 
 export interface Compartment {

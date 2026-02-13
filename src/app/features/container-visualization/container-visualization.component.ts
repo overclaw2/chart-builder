@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContainerService } from '../../core/services/container.service';
 import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
@@ -42,6 +42,9 @@ export class ContainerVisualizationComponent implements OnInit {
 
   // Side panel collapse state
   isSidePanelCollapsed: boolean = false;
+
+  // Reference to available packages component to sync state
+  @ViewChild(AvailablePackagesComponent) availablePackagesComponent!: AvailablePackagesComponent;
 
   constructor(private containerService: ContainerService) {}
 
@@ -685,6 +688,23 @@ export class ContainerVisualizationComponent implements OnInit {
       this.draggedPlacedItem.item.id
     );
 
+    // If the item came from available packages, add it back to the available packages list
+    if (this.draggedPlacedItem.item.sourcePackageId && this.availablePackagesComponent) {
+      const sourcePackageId = this.draggedPlacedItem.item.sourcePackageId;
+      // Create a package to add back to available packages
+      const packageToRestore: Item = {
+        id: sourcePackageId,
+        name: this.draggedPlacedItem.item.name,
+        dimensionMcm: this.draggedPlacedItem.item.dimensionMcm,
+        weightKg: this.draggedPlacedItem.item.weightKg,
+        destination: this.draggedPlacedItem.item.destination,
+        position: 0,
+        length: this.draggedPlacedItem.item.length,
+        color: this.draggedPlacedItem.item.color,
+      };
+      this.availablePackagesComponent.addPackageToAvailable(packageToRestore);
+    }
+
     this.draggedPlacedItem = null;
     this.dragOverRemoveZone = false;
   }
@@ -705,6 +725,23 @@ export class ContainerVisualizationComponent implements OnInit {
             compartment.id,
             item.id
           );
+
+          // If the item came from available packages, add it back to the available packages list
+          if (item.sourcePackageId && this.availablePackagesComponent) {
+            const sourcePackageId = item.sourcePackageId;
+            // Create a package to add back to available packages
+            const packageToRestore: Item = {
+              id: sourcePackageId,
+              name: item.name,
+              dimensionMcm: item.dimensionMcm,
+              weightKg: item.weightKg,
+              destination: item.destination,
+              position: 0,
+              length: item.length,
+              color: item.color,
+            };
+            this.availablePackagesComponent.addPackageToAvailable(packageToRestore);
+          }
           return;
         }
       }
@@ -809,6 +846,7 @@ export class ContainerVisualizationComponent implements OnInit {
       length: availablePackage.length,
       displayIndex,
       color: availablePackage.color,
+      sourcePackageId: availablePackage.id, // Track which available package this came from
     };
   }
 
@@ -912,6 +950,11 @@ export class ContainerVisualizationComponent implements OnInit {
           compartment.widthUtilization = parseFloat(
             ((totalPackageWidth / compartment.widthMcm) * 100).toFixed(1)
           );
+
+          // Remove package from available packages list since it's now placed in the container
+          if (this.availablePackagesComponent && this.draggedAvailablePackage) {
+            this.availablePackagesComponent.removePackageFromAvailable(this.draggedAvailablePackage.id);
+          }
 
           // Trigger change detection
           this.shipData = { ...this.shipData };
