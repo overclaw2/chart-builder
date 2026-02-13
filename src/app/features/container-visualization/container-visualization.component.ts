@@ -56,6 +56,9 @@ export class ContainerVisualizationComponent implements OnInit {
     y: 0, 
     item: null 
   };
+  
+  // Track initial tooltip position during drag to keep it fixed below package
+  initialTooltipY: number = 0;
 
   constructor(private containerService: ContainerService) {}
 
@@ -184,6 +187,19 @@ export class ContainerVisualizationComponent implements OnInit {
     // Store grab offset as a fraction (0 = left edge, 1 = right edge)
     // This will be used during drop to maintain the exact grab point
     this.grabOffset = mouseXInItem / itemWidthPixels;
+
+    // TASK 2 ENHANCEMENT FIX: Set initial tooltip position below the package (will be fixed during drag)
+    // Position tooltip 15px below the package bottom
+    const tooltipX = itemRect.left + itemRect.width / 2;
+    const tooltipY = itemRect.bottom + 15;
+    
+    this.initialTooltipY = tooltipY;
+    this.tooltipState = {
+      visible: true,
+      x: Math.round(tooltipX),
+      y: Math.round(tooltipY),
+      item: item
+    };
   }
 
   onDragOver(event: DragEvent, compartmentId?: string): void {
@@ -248,20 +264,16 @@ export class ContainerVisualizationComponent implements OnInit {
     this.dragTooltip.startIndex = startIndex;
     this.dragTooltip.stopIndex = stopIndex;
 
-    // TASK 2 ENHANCEMENT: Also show hover tooltip while dragging, positioned below the cursor
-    // This allows user to see full package details while dragging
+    // TASK 2 ENHANCEMENT: Show hover tooltip while dragging
+    // Keep tooltip at FIXED Y position (below package), only update X position as package moves
     if (this.draggedItem) {
-      const dropZone = event.currentTarget as HTMLElement;
-      const rect = dropZone.getBoundingClientRect();
-      
-      // Position tooltip below the cursor position (following the package)
+      // Center tooltip horizontally on cursor, but keep Y position fixed below the initial package position
       const tooltipX = event.clientX;
-      const tooltipY = event.clientY + 20; // 20px below cursor
       
       this.tooltipState = {
         visible: true,
         x: Math.round(tooltipX),
-        y: Math.round(tooltipY),
+        y: Math.round(this.initialTooltipY), // Keep Y fixed at initial position
         item: this.draggedItem.item
       };
     }
@@ -334,6 +346,7 @@ export class ContainerVisualizationComponent implements OnInit {
           this.draggedItem = null;
           this.dragTooltip.visible = false;
           this.tooltipState = { visible: false, x: 0, y: 0, item: null }; // Clear hover tooltip on reject
+          this.initialTooltipY = 0; // Reset initial tooltip Y position
           this.isDragging = false;
           this.grabOffset = 0;
           this.hoveredItemId = null;
@@ -372,6 +385,7 @@ export class ContainerVisualizationComponent implements OnInit {
     this.draggedItem = null;
     this.dragTooltip.visible = false;
     this.tooltipState = { visible: false, x: 0, y: 0, item: null }; // Clear hover tooltip on drag end
+    this.initialTooltipY = 0; // Reset initial tooltip Y position
     this.isDragging = false;
     this.grabOffset = 0; // Reset grab offset for next drag
     // Clear hovered item after drag completes
