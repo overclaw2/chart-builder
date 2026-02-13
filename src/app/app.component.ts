@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContainerVisualizationComponent } from './features/container-visualization/container-visualization.component';
 import { SplashScreenComponent } from './shared/components/splash-screen/splash-screen.component';
+import { GatewayHealthService } from './core/services/gateway-health.service';
 
 @Component({
   selector: 'app-root',
@@ -16,8 +17,15 @@ import { SplashScreenComponent } from './shared/components/splash-screen/splash-
   `,
   styles: [],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   appReady = false;
+
+  constructor(private gatewayHealthService: GatewayHealthService) {}
+
+  ngOnInit(): void {
+    // Gateway health monitoring will start automatically
+    console.log('App initialized - Gateway health monitoring active');
+  }
 
   onSplashComplete(): void {
     this.appReady = true;
