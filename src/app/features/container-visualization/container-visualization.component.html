@@ -204,6 +204,7 @@
                 draggable="true"
                 (dragstart)="onDragStart($event, container.id, compartment.id, item)"
                 (mouseenter)="onItemMouseEnter(item.id, $event)"
+                (mousemove)="onItemMouseMove(item.id, $event)"
                 (mouseleave)="onItemMouseLeave()"
                 (contextmenu)="onItemContextMenu($event, container.id, compartment.id, item.id)"
                 [style.backgroundColor]="getItemColor(item)"

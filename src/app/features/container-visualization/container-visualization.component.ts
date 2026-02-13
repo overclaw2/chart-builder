@@ -414,15 +414,34 @@ export class ContainerVisualizationComponent implements OnInit {
       }
 
       if (foundItem) {
-        // Position tooltip above the item, centered horizontally
+        // Position tooltip BELOW the item, centered horizontally (per Avihai's requirement)
         const tooltipX = itemRect.left + itemRect.width / 2;
-        const tooltipY = itemRect.top - 10; // 10px above the item
+        const tooltipY = itemRect.bottom + 15; // 15px below the item
         
         this.tooltipState = {
           visible: true,
           x: Math.round(tooltipX),
           y: Math.round(tooltipY),
           item: foundItem
+        };
+      }
+    }
+  }
+
+  onItemMouseMove(itemId: string, event: MouseEvent): void {
+    // Update tooltip position as user moves mouse over item
+    if (this.hoveredItemId === itemId && this.tooltipState.item) {
+      const itemElement = (event.target as HTMLElement).closest('.item');
+      if (itemElement) {
+        const itemRect = itemElement.getBoundingClientRect();
+        // Position tooltip BELOW the item, centered horizontally
+        const tooltipX = itemRect.left + itemRect.width / 2;
+        const tooltipY = itemRect.bottom + 15; // 15px below the item
+        
+        this.tooltipState = {
+          ...this.tooltipState,
+          x: Math.round(tooltipX),
+          y: Math.round(tooltipY)
         };
       }
     }
