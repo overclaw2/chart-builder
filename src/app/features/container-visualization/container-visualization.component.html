@@ -471,4 +471,10 @@
       </div>
     </div>
   </div>
+
+  <!-- Bulk Import Component -->
+  <app-bulk-import 
+    [existingPackages]="getExistingPackagesForBulkImport()"
+    (packagesImported)="onBulkImportComplete($event)">
+  </app-bulk-import>
 </div>

@@ -1,0 +1,384 @@
+<!-- Bulk Import Modal -->
+<div class="bulk-import-overlay" *ngIf="isModalOpen" (click)="closeImportModal()">
+  <div class="bulk-import-modal" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">📦 Bulk Import Packages</h2>
+      <button class="close-btn" (click)="closeImportModal()" title="Close">&times;</button>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div 
+          class="progress-fill" 
+          [ngClass]="{
+            'step-1': currentStep === 'upload',
+            'step-2': currentStep === 'mapping',
+            'step-3': currentStep === 'validation',
+            'step-4': currentStep === 'preview',
+            'step-5': currentStep === 'import'
+          }"
+        ></div>
+      </div>
+      <div class="step-indicators">
+        <span [class.active]="currentStep === 'upload'">1. Upload</span>
+        <span [class.active]="currentStep === 'mapping'">2. Map</span>
+        <span [class.active]="currentStep === 'validation'">3. Validate</span>
+        <span [class.active]="currentStep === 'preview'">4. Preview</span>
+        <span [class.active]="currentStep === 'import'">5. Import</span>
+      </div>
+    </div>
+
+    <!-- Modal Content -->
+    <div class="modal-content">
+      <!-- STEP 1: UPLOAD -->
+      <div class="step-content" *ngIf="currentStep === 'upload'">
+        <div class="upload-section">
+          <div class="upload-icon">📤</div>
+          <h3>Select CSV/Excel File</h3>
+          <p class="upload-description">Choose a CSV, TSV, or Excel file with your package data</p>
+
+          <!-- File Input -->
+          <div class="file-input-wrapper">
+            <input 
+              type="file" 
+              id="csv-file-input"
+              accept=".csv,.xlsx,.xls,.tsv,.txt"
+              (change)="onFileSelected($event)"
+              #fileInput
+            />
+            <label for="csv-file-input" class="file-input-label">
+              📎 Choose File
+            </label>
+          </div>
+
+          <!-- Selected File Info -->
+          <div class="file-info" *ngIf="selectedFile">
+            <p>✅ File: <strong>{{ selectedFile.name }}</strong></p>
+            <p>Size: {{ (selectedFile.size / 1024).toFixed(2) }} KB</p>
+          </div>
+
+          <!-- Delimiter Selection -->
+          <div class="delimiter-section" *ngIf="selectedFile">
+            <label for="delimiter-select">Delimiter:</label>
+            <select 
+              id="delimiter-select"
+              [(ngModel)]="delimiter" 
+              (ngModelChange)="onDelimiterChange()"
+              class="delimiter-select"
+            >
+              <option value=",">Comma (,)</option>
+              <option value=";">Semicolon (;)</option>
+              <option value="	">Tab</option>
+            </select>
+          </div>
+
+          <!-- File Format Help -->
+          <div class="format-help">
+            <h4>📋 Expected Format:</h4>
+            <p>Your CSV should have columns like: Name, Weight, Destination, Dimensions</p>
+            <table class="example-table">
+              <tr>
+                <th>Name</th>
+                <th>Weight (Kg)</th>
+                <th>Destination</th>
+                <th>Dimensions (Mcm)</th>
+              </tr>
+              <tr>
+                <td>Xiaomi Package</td>
+                <td>180</td>
+                <td>SINGAPORE</td>
+                <td>35</td>
+              </tr>
+              <tr>
+                <td>Samsung Box</td>
+                <td>220</td>
+                <td>THAILAND</td>
+                <td>42</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: COLUMN MAPPING -->
+      <div class="step-content" *ngIf="currentStep === 'mapping'">
+        <div class="mapping-section">
+          <h3>Map CSV Columns to Package Fields</h3>
+          <p class="mapping-description">Match your CSV columns to the package fields below</p>
+
+          <div class="mapping-grid">
+            <div class="mapping-item" *ngFor="let mapping of columnMappings">
+              <div class="csv-column">
+                <label>CSV Column:</label>
+                <div class="column-name">{{ mapping.csvColumn }}</div>
+              </div>
+              <div class="arrow">→</div>
+              <div class="field-select">
+                <label>Maps To:</label>
+                <select [(ngModel)]="mapping.packageField" (ngModelChange)="onMappingChange()">
+                  <option value="ignore">🚫 Ignore</option>
+                  <option value="name">📦 Name (Required)</option>
+                  <option value="weight">⚖️ Weight (Required)</option>
+                  <option value="destination">🌍 Destination (Required)</option>
+                  <option value="dimensions">📏 Dimensions (Required)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Required Fields Status -->
+          <div class="required-fields-status" [class.complete]="requiredFieldsMapped">
+            <h4>Required Fields:</h4>
+            <ul>
+              <li [class.mapped]="isNameMapped()">
+                ✓ Name
+              </li>
+              <li [class.mapped]="isWeightMapped()">
+                ✓ Weight
+              </li>
+              <li [class.mapped]="isDestinationMapped()">
+                ✓ Destination
+              </li>
+              <li [class.mapped]="isDimensionsMapped()">
+                ✓ Dimensions
+              </li>
+            </ul>
+          </div>
+
+          <!-- Preview of First Row -->
+          <div class="preview-first-row" *ngIf="csvData.length > 0">
+            <h4>Preview (First Row):</h4>
+            <div class="preview-table">
+              <div class="preview-header">
+                <span *ngFor="let mapping of columnMappings" [class.important]="mapping.packageField !== 'ignore'">
+                  {{ mapping.packageField !== 'ignore' ? mapping.packageField : 'ignored' }}
+                </span>
+              </div>
+              <div class="preview-row">
+                <span *ngFor="let mapping of columnMappings" [class.important]="mapping.packageField !== 'ignore'">
+                  {{ csvData[0][mapping.csvColumn] }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: VALIDATION -->
+      <div class="step-content" *ngIf="currentStep === 'validation'">
+        <div class="validation-section">
+          <h3>Validation Results</h3>
+          
+          <!-- Validation Stats -->
+          <div class="validation-stats">
+            <div class="stat-item total">
+              <span class="stat-label">Total Rows</span>
+              <span class="stat-value">{{ getValidationStats().total }}</span>
+            </div>
+            <div class="stat-item valid">
+              <span class="stat-label">Valid</span>
+              <span class="stat-value">{{ getValidationStats().valid }}</span>
+            </div>
+            <div class="stat-item errors" *ngIf="getValidationStats().errors > 0">
+              <span class="stat-label">Errors</span>
+              <span class="stat-value">{{ getValidationStats().errors }}</span>
+            </div>
+            <div class="stat-item duplicates" *ngIf="getValidationStats().duplicates > 0">
+              <span class="stat-label">Duplicates</span>
+              <span class="stat-value">{{ getValidationStats().duplicates }}</span>
+            </div>
+          </div>
+
+          <!-- Error List -->
+          <div class="errors-container" *ngIf="validationErrors.length > 0">
+            <h4>⚠️ Validation Errors ({{ validationErrors.length }})</h4>
+            <div class="error-list">
+              <div class="error-item" *ngFor="let error of validationErrors">
+                <div class="error-row">Row {{ error.row }}</div>
+                <div class="error-field">{{ error.field }}</div>
+                <div class="error-message">{{ error.message }}</div>
+                <div class="error-value" *ngIf="error.value">Value: <code>{{ error.value }}</code></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Duplicates Warning -->
+          <div class="duplicates-container" *ngIf="duplicateIds.length > 0">
+            <h4>🔄 Duplicate Detection ({{ duplicateIds.length }})</h4>
+            <p>The following packages already exist and were excluded:</p>
+            <div class="duplicates-list">
+              <span class="duplicate-id" *ngFor="let id of duplicateIds">{{ id }}</span>
+            </div>
+          </div>
+
+          <!-- Success Message -->
+          <div class="success-message" *ngIf="validationErrors.length === 0 && validatedPackages.length > 0">
+            <h4>✅ All validations passed!</h4>
+            <p>{{ validatedPackages.length }} packages are ready to import.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: PREVIEW -->
+      <div class="step-content" *ngIf="currentStep === 'preview'">
+        <div class="preview-section">
+          <h3>Import Preview ({{ validatedPackages.length }} packages)</h3>
+          <p class="preview-description">Review the packages that will be imported</p>
+
+          <!-- Preview Table -->
+          <div class="preview-table-container">
+            <table class="preview-table-full">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Weight (Kg)</th>
+                  <th>Destination</th>
+                  <th>Dimensions (Mcm)</th>
+                  <th>Color</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let pkg of getPreviewedPackages()">
+                  <td>{{ pkg.name }}</td>
+                  <td>{{ pkg.weightKg }}</td>
+                  <td><span class="destination-badge">{{ pkg.destination }}</span></td>
+                  <td>{{ pkg.dimensionMcm }}</td>
+                  <td>
+                    <div class="color-preview" [style.backgroundColor]="pkg.color || '#7dd3fc'"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" *ngIf="getTotalPreviewPages() > 1">
+            <button 
+              class="page-btn" 
+              (click)="onPreviousPage()" 
+              [disabled]="previewCurrentPage === 0"
+              title="Previous"
+            >
+              ← Previous
+            </button>
+            <span class="page-info">
+              Page {{ previewCurrentPage + 1 }} of {{ getTotalPreviewPages() }}
+            </span>
+            <button 
+              class="page-btn" 
+              (click)="onNextPage()" 
+              [disabled]="previewCurrentPage === getTotalPreviewPages() - 1"
+              title="Next"
+            >
+              Next →
+            </button>
+          </div>
+
+          <!-- Summary -->
+          <div class="import-summary">
+            <h4>Import Summary:</h4>
+            <ul>
+              <li>Packages to import: <strong>{{ validatedPackages.length }}</strong></li>
+              <li>Total weight: <strong>{{ (validatedPackages | reduce: 'weightKg' : 0) }} Kg</strong></li>
+              <li>Average dimensions: <strong>{{ (validatedPackages | reduce: 'dimensionMcm' : 0) / validatedPackages.length | number: '1.0-0' }} Mcm</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: IMPORT COMPLETE -->
+      <div class="step-content" *ngIf="currentStep === 'import'">
+        <div class="import-complete-section">
+          <div *ngIf="isProcessing" class="processing">
+            <div class="spinner"></div>
+            <h3>Importing Packages...</h3>
+            <p>Please wait while we add {{ validatedPackages.length }} packages to your system</p>
+          </div>
+
+          <div *ngIf="!isProcessing" class="import-success">
+            <div class="success-icon">✅</div>
+            <h3>Import Successful!</h3>
+            <p class="success-message-text">
+              {{ successCount }} packages have been successfully added to your available packages list.
+            </p>
+            <div class="success-details">
+              <p>Total packages imported: <strong>{{ successCount }}</strong></p>
+              <p>Total weight added: <strong>{{ (validatedPackages | reduce: 'weightKg' : 0) }} Kg</strong></p>
+            </div>
+            <p class="auto-close-message">Closing in 2 seconds...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button 
+        class="btn btn-secondary" 
+        (click)="closeImportModal()"
+        *ngIf="currentStep !== 'import' || !isProcessing"
+      >
+        Cancel
+      </button>
+
+      <!-- Upload Step Buttons -->
+      <button 
+        class="btn btn-primary" 
+        (click)="proceedToValidation()"
+        [disabled]="!selectedFile || !csvData.length"
+        *ngIf="currentStep === 'upload'"
+      >
+        Next: Map Columns →
+      </button>
+
+      <!-- Mapping Step Buttons -->
+      <button 
+        class="btn btn-primary" 
+        (click)="proceedToValidation()"
+        [disabled]="!canProceedToValidation()"
+        *ngIf="currentStep === 'mapping'"
+      >
+        Next: Validate →
+      </button>
+
+      <!-- Validation Step Buttons -->
+      <div class="validation-buttons" *ngIf="currentStep === 'validation'">
+        <button class="btn btn-secondary" (click)="retryValidation()">
+          ← Back to Mapping
+        </button>
+        <button 
+          class="btn btn-primary" 
+          (click)="currentStep = 'preview'"
+          [disabled]="!canProceedToImport()"
+        >
+          Next: Preview →
+        </button>
+      </div>
+
+      <!-- Preview Step Buttons -->
+      <div class="preview-buttons" *ngIf="currentStep === 'preview'">
+        <button class="btn btn-secondary" (click)="retryValidation()">
+          ← Back to Mapping
+        </button>
+        <button 
+          class="btn btn-success" 
+          (click)="proceedToImport()"
+          [disabled]="!canProceedToImport()"
+        >
+          ✓ Import {{ validatedPackages.length }} Packages
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Import Button -->
+<button 
+  class="floating-import-btn" 
+  (click)="openImportModal()"
+  title="Bulk Import Packages (CSV/Excel)"
+>
+  📥 Bulk Import
+</button>
