@@ -247,6 +247,24 @@ export class ContainerVisualizationComponent implements OnInit {
     this.dragTooltip.index = Math.round(currentIndex);
     this.dragTooltip.startIndex = startIndex;
     this.dragTooltip.stopIndex = stopIndex;
+
+    // TASK 2 ENHANCEMENT: Also show hover tooltip while dragging, positioned below the cursor
+    // This allows user to see full package details while dragging
+    if (this.draggedItem) {
+      const dropZone = event.currentTarget as HTMLElement;
+      const rect = dropZone.getBoundingClientRect();
+      
+      // Position tooltip below the cursor position (following the package)
+      const tooltipX = event.clientX;
+      const tooltipY = event.clientY + 20; // 20px below cursor
+      
+      this.tooltipState = {
+        visible: true,
+        x: Math.round(tooltipX),
+        y: Math.round(tooltipY),
+        item: this.draggedItem.item
+      };
+    }
   }
 
   onDragLeave(event: DragEvent, compartmentId: string): void {
@@ -315,6 +333,7 @@ export class ContainerVisualizationComponent implements OnInit {
           console.warn('Cannot drop item: insufficient space or collision detected');
           this.draggedItem = null;
           this.dragTooltip.visible = false;
+          this.tooltipState = { visible: false, x: 0, y: 0, item: null }; // Clear hover tooltip on reject
           this.isDragging = false;
           this.grabOffset = 0;
           this.hoveredItemId = null;
@@ -352,6 +371,7 @@ export class ContainerVisualizationComponent implements OnInit {
 
     this.draggedItem = null;
     this.dragTooltip.visible = false;
+    this.tooltipState = { visible: false, x: 0, y: 0, item: null }; // Clear hover tooltip on drag end
     this.isDragging = false;
     this.grabOffset = 0; // Reset grab offset for next drag
     // Clear hovered item after drag completes
