@@ -114,6 +114,10 @@ export class ContainerVisualizationComponent implements OnInit {
   // NEW: Help System
   helpPanelOpen: boolean = false;
 
+  // NEW: Capacity Warnings
+  capacityWarnings: { [compartmentId: string]: { level: 'green' | 'yellow' | 'red' | 'danger'; weight: number; width: number } } = {};
+  toastNotification: { visible: boolean; message: string; type: 'warning' | 'danger' } = { visible: false, message: '', type: 'warning' };
+
   constructor(
     private containerService: ContainerService, 
     private cdr: ChangeDetectorRef,
@@ -956,6 +960,61 @@ export class ContainerVisualizationComponent implements OnInit {
     this.shipData = { ...this.shipData! };
   }
 
+  // NEW: Calculate capacity warning level for a compartment
+  calculateCapacityWarning(compartment: Compartment): 'green' | 'yellow' | 'red' | 'danger' {
+    const weightThreshold = compartment.weightThreshold || 90;
+    const widthThreshold = compartment.widthThreshold || 90;
+    
+    const maxUtilization = Math.max(compartment.weightUtilization, compartment.widthUtilization);
+    
+    if (maxUtilization > 100) {
+      return 'danger';
+    } else if (maxUtilization >= 90) {
+      return 'red';
+    } else if (maxUtilization >= 70) {
+      return 'yellow';
+    }
+    return 'green';
+  }
+
+  // NEW: Show toast notification for capacity warnings
+  showCapacityWarning(compartment: Compartment, willExceed: boolean): void {
+    const utilizationPercent = Math.max(compartment.weightUtilization, compartment.widthUtilization);
+    
+    if (willExceed || utilizationPercent > 100) {
+      this.toastNotification = {
+        visible: true,
+        message: `⚠️ Compartment at ${Math.round(utilizationPercent)}% capacity!`,
+        type: 'danger'
+      };
+      setTimeout(() => {
+        this.toastNotification.visible = false;
+      }, 4000);
+    }
+  }
+
+  // NEW: Check if dropping item would exceed capacity
+  wouldExceedCapacity(compartment: Compartment, itemWeight: number, itemWidth: number): boolean {
+    const projectedWeight = compartment.weightKg + itemWeight;
+    const projectedWeightUtil = (projectedWeight / compartment.totalCapacity) * 100;
+    
+    const projectedWidth = compartment.widthUtilization + ((itemWidth / compartment.widthMcm) * 100);
+    
+    return projectedWeightUtil > 100 || projectedWidth > 100;
+  }
+
+  // NEW: Get capacity warning color for compartment header
+  getCapacityWarningColor(compartment: Compartment): string {
+    const level = this.calculateCapacityWarning(compartment);
+    switch (level) {
+      case 'green': return '#4caf50';
+      case 'yellow': return '#ff9800';
+      case 'red': return '#f44336';
+      case 'danger': return '#d32f2f';
+      default: return 'transparent';
+    }
+  }
+
   // TODO 4: Calculate tooltip positioning - check if tooltip fits above or needs to go below
   calculateTooltipPosition(itemId: string): void {
     // Use setTimeout to allow DOM to update before calculating position
@@ -1283,6 +1342,22 @@ export class ContainerVisualizationComponent implements OnInit {
       const minPosition = compartmentStart;
       const maxPosition = compartmentEnd - itemWidth;
       newPosition = Math.max(minPosition, Math.min(newPosition, maxPosition));
+
+      // NEW: CAPACITY WARNING - Check if drop would exceed capacity
+      const wouldExceedCapacity = this.wouldExceedCapacity(
+        targetCompartment,
+        this.draggedAvailablePackage.weightKg,
+        itemWidth
+      );
+      
+      if (wouldExceedCapacity) {
+        this.showCapacityWarning(targetCompartment, true);
+        console.warn(`⚠️ Cannot drop: Compartment would exceed capacity at ${Math.max(targetCompartment.weightUtilization, targetCompartment.widthUtilization)}%`);
+        this.draggedAvailablePackage = null;
+        this.dragTooltip.visible = false;
+        this.dragOverCompartmentId = null;
+        return;
+      }
 
       // COLLISION DETECTION: Check if the new position would overlap with other items
       const wouldOverlap = this.containerService.doesItemOverlapWithOthers(

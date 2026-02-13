@@ -553,4 +553,9 @@
 
   <!-- Tour Overlay -->
   <app-tour-overlay></app-tour-overlay>
+
+  <!-- Toast Notification for Capacity Warnings -->
+  <div class="capacity-toast" [class.visible]="toastNotification.visible" [class]="'type-' + toastNotification.type">
+    {{ toastNotification.message }}
+  </div>
 </div>

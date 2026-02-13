@@ -23,6 +23,9 @@ export interface Compartment {
   items: Item[];
   totalCapacity: number;
   backgroundColor?: string; // Color of the compartment bar (TODO 3)
+  weightThreshold?: number; // Max weight % to trigger warning (default: 90%)
+  widthThreshold?: number; // Max width % to trigger warning (default: 90%)
+  warningLevel?: 'none' | 'yellow' | 'red' | 'danger'; // Current warning state
 }
 
 export interface Container {
