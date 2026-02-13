@@ -563,25 +563,17 @@ export class ContainerService {
     let movedItem: Item | undefined;
     let itemWeight = 0;
     let itemWidth = 0;
-    let targetCompartmentData: any;
 
-    // Find target compartment to get its range for validation
-    const targetContainer = currentData.containers.find((c) => c.id === toContainerId);
-    if (targetContainer) {
-      targetCompartmentData = targetContainer.compartments.find((comp) => comp.id === toCompartmentId);
-    }
-
-    // Update containers
+    // STEP 1: Extract item from source compartment
     let updatedContainers = currentData.containers.map((container) => {
-      if (container.id === fromContainerId || container.id === toContainerId) {
+      if (container.id === fromContainerId) {
         const updatedCompartments = container.compartments.map((compartment) => {
-          // Remove from source compartment
           if (compartment.id === fromCompartmentId) {
             const items = compartment.items.filter((item) => {
               if (item.id === itemId) {
                 movedItem = { ...item };
                 itemWeight = item.weightKg;
-                itemWidth = item.dimensionMcm || 27; // FIX: Use dimensionMcm for width calculation
+                itemWidth = item.dimensionMcm || 27;
                 if (newPosition !== undefined) {
                   movedItem.position = newPosition;
                 }
@@ -592,8 +584,6 @@ export class ContainerService {
 
             const newWeight = compartment.weightKg - itemWeight;
             const newUtilization = (newWeight / compartment.totalCapacity) * 100;
-            
-            // FIX: Recalculate widthUtilization using dimensionMcm instead of length
             const totalPackageWidth = items.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
             const newWidthUtilization = (totalPackageWidth / compartment.widthMcm) * 100;
 
@@ -605,65 +595,6 @@ export class ContainerService {
               widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
             };
           }
-
-          // Add to target compartment
-          if (compartment.id === toCompartmentId && movedItem) {
-            // FIX: Properly validate and clamp position to compartment range
-            let finalPosition = newPosition;
-            
-            if (finalPosition === undefined || finalPosition === null) {
-              // Default position: center of compartment
-              finalPosition =
-                compartment.widthindexStart +
-                (compartment.widthindexEnd - compartment.widthindexStart) / 2;
-            } else {
-              // Clamp position to ensure it's within compartment bounds
-              // Leave margin for item width to avoid extending beyond compartment
-              const itemDimension = movedItem.dimensionMcm || 27;
-              const minPosition = compartment.widthindexStart;
-              const compartmentEnd = compartment.widthindexEnd;
-              
-              // FIX: When item is larger than compartment, allow it to overflow slightly
-              // but keep it mostly within bounds. This prevents invisible items.
-              let maxPosition = compartmentEnd - itemDimension;
-              
-              // If item is larger than compartment, ensure position is reasonable
-              // Position item to start at or near the compartment start
-              if (itemDimension > (compartmentEnd - minPosition)) {
-                // Item is too large for compartment - position at start
-                finalPosition = minPosition;
-              } else {
-                // Normal clamping
-                finalPosition = Math.max(minPosition, Math.min(finalPosition, maxPosition));
-              }
-            }
-            
-            movedItem.position = finalPosition;
-            
-            // Set displayIndex to final position if not explicitly provided
-            if (displayIndex !== undefined) {
-              movedItem.displayIndex = displayIndex;
-            } else {
-              movedItem.displayIndex = Math.round(finalPosition);
-            }
-
-            const newItems = [...compartment.items, movedItem];
-            const newWeight = compartment.weightKg + itemWeight;
-            const newUtilization = (newWeight / compartment.totalCapacity) * 100;
-            
-            // FIX: Calculate widthUtilization using dimensionMcm (package width) instead of length
-            const totalPackageWidth = newItems.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
-            const newWidthUtilization = (totalPackageWidth / compartment.widthMcm) * 100;
-
-            return {
-              ...compartment,
-              items: newItems,
-              weightKg: newWeight,
-              weightUtilization: parseFloat(newUtilization.toFixed(2)),
-              widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
-            };
-          }
-
           return compartment;
         });
 
@@ -674,6 +605,65 @@ export class ContainerService {
       }
       return container;
     });
+
+    // STEP 2: Add item to target compartment (use updated containers from step 1)
+    if (movedItem) {
+      updatedContainers = updatedContainers.map((container) => {
+        if (container.id === toContainerId) {
+          const updatedCompartments = container.compartments.map((compartment) => {
+            if (compartment.id === toCompartmentId && movedItem) {
+              let finalPosition = newPosition;
+              
+              if (finalPosition === undefined || finalPosition === null) {
+                finalPosition =
+                  compartment.widthindexStart +
+                  (compartment.widthindexEnd - compartment.widthindexStart) / 2;
+              } else {
+                const itemDimension = movedItem.dimensionMcm || 27;
+                const minPosition = compartment.widthindexStart;
+                const compartmentEnd = compartment.widthindexEnd;
+                let maxPosition = compartmentEnd - itemDimension;
+                
+                if (itemDimension > (compartmentEnd - minPosition)) {
+                  finalPosition = minPosition;
+                } else {
+                  finalPosition = Math.max(minPosition, Math.min(finalPosition, maxPosition));
+                }
+              }
+              
+              movedItem.position = finalPosition;
+              
+              if (displayIndex !== undefined) {
+                movedItem.displayIndex = displayIndex;
+              } else {
+                movedItem.displayIndex = Math.round(finalPosition);
+              }
+
+              const newItems = [...compartment.items, movedItem];
+              const newWeight = compartment.weightKg + itemWeight;
+              const newUtilization = (newWeight / compartment.totalCapacity) * 100;
+              const totalPackageWidth = newItems.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
+              const newWidthUtilization = (totalPackageWidth / compartment.widthMcm) * 100;
+
+              return {
+                ...compartment,
+                items: newItems,
+                weightKg: newWeight,
+                weightUtilization: parseFloat(newUtilization.toFixed(2)),
+                widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
+              };
+            }
+            return compartment;
+          });
+
+          return {
+            ...container,
+            compartments: updatedCompartments,
+          };
+        }
+        return container;
+      });
+    }
 
     this.shipDataSubject.next({
       ...currentData,
