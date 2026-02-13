@@ -137,10 +137,13 @@
 
         <!-- Top Axis with Range and Package Highlighting (Avihai's requirement) -->
         <div class="axis-wrapper">
-          <!-- Start label (positioned outside/above) -->
-          <div class="axis-range-label axis-start-label">{{ compartment.widthindexStart }}</div>
+          <!-- Range labels above timeline strip -->
+          <div class="axis-labels-top">
+            <div class="axis-range-label axis-start-label">{{ compartment.widthindexStart }}</div>
+            <div class="axis-range-label axis-end-label">{{ compartment.widthindexEnd }}</div>
+          </div>
           
-          <!-- Timeline strip (track only, no labels) -->
+          <!-- Timeline strip (full width, no labels) -->
           <div class="top-axis">
             <div class="axis-track">
               <!-- Highlight areas where packages are located -->
@@ -151,9 +154,6 @@
               ></div>
             </div>
           </div>
-          
-          <!-- End label (positioned outside/above) -->
-          <div class="axis-range-label axis-end-label">{{ compartment.widthindexEnd }}</div>
         </div>
         
         <!-- Width Index Tooltips Below Axis with Vertical Connectors -->

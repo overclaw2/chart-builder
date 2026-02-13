@@ -191,9 +191,6 @@
   position: relative;
   margin: 1rem 0 4.5rem 0;
   padding-bottom: 2.5rem; /* Space for item tooltips + position labels below */
-  /* Match the axis-wrapper's left/right spacing (50px min-width labels + 0.5rem gaps) */
-  padding-left: 58px;
-  padding-right: 58px;
 }
 
 .position-label {
@@ -592,19 +589,21 @@
 /* TASK 4: Top axis styling for range display and package highlighting (Avihai) */
 .axis-wrapper {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.3rem;
   margin-bottom: 1rem;
   margin-top: 0.5rem;
   width: 100%;
-  /* Align with container-bar below */
-  padding-left: 0;
-  padding-right: 0;
+}
+
+.axis-labels-top {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  padding: 0 0.5rem;
 }
 
 .axis-range-label {
-  min-width: 50px;
-  text-align: center;
   font-size: 0.8rem;
   color: var(--text-secondary);
   font-weight: 600;
@@ -612,23 +611,22 @@
 }
 
 .axis-start-label {
-  order: 1;
+  text-align: left;
+}
+
+.axis-end-label {
+  text-align: right;
 }
 
 .top-axis {
   display: flex;
   align-items: center;
-  flex: 1;
-  order: 2;
+  width: 100%;
   min-width: 0;
 }
 
-.axis-end-label {
-  order: 3;
-}
-
 .axis-track {
-  flex: 1;
+  width: 100%;
   position: relative;
   height: 20px;
   background: var(--bg-tertiary);
@@ -637,7 +635,6 @@
   overflow: hidden;
   display: flex;
   align-items: center;
-  width: 100%;
 }
 
 .axis-highlight {
