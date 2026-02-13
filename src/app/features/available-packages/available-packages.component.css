@@ -355,3 +355,192 @@
     display: none !important;
   }
 }
+
+/* TASK 4: Mobile Responsive Styles */
+/* Tablet Breakpoint (768px and below) */
+@media (max-width: 768px) {
+  .available-packages-panel {
+    width: 280px;
+    border-right: 1px solid var(--border-color);
+    box-shadow: 1px 0 4px var(--shadow-sm);
+  }
+
+  .available-packages-panel.collapsed {
+    width: 50px;
+  }
+
+  .panel-header {
+    padding: 1rem;
+    min-height: 60px;
+  }
+
+  .panel-title {
+    font-size: 0.9rem;
+    gap: 0.5rem;
+  }
+
+  .collapse-btn {
+    padding: 0.375rem;
+    font-size: 0.875rem;
+  }
+
+  .collapse-indicator {
+    font-size: 0.8rem;
+  }
+
+  .package-count {
+    font-size: 0.875rem;
+  }
+
+  .packages-list {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .package-item {
+    padding: 0.75rem;
+  }
+
+  .package-header {
+    padding: 0.5rem 0;
+  }
+
+  .package-name {
+    font-size: 0.85rem;
+  }
+
+  .package-specs {
+    font-size: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .package-destination {
+    font-size: 0.75rem;
+  }
+
+  .drag-handle {
+    padding: 0.25rem;
+    font-size: 0.8rem;
+  }
+
+  .empty-state {
+    font-size: 0.85rem;
+    padding: 1rem 0.75rem;
+  }
+
+  .placeholder {
+    height: 80px;
+  }
+}
+
+/* Mobile Breakpoint (480px and below) */
+@media (max-width: 480px) {
+  .available-packages-panel {
+    width: 100%;
+    height: auto;
+    max-height: 250px;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: none;
+    margin-bottom: 0.5rem;
+  }
+
+  .available-packages-panel.collapsed {
+    width: 100%;
+    max-height: 50px;
+  }
+
+  .panel-header {
+    padding: 0.75rem;
+    min-height: 50px;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .available-packages-panel.collapsed .panel-header {
+    flex-direction: row;
+  }
+
+  .panel-title {
+    font-size: 0.85rem;
+    gap: 0.375rem;
+  }
+
+  .collapse-btn {
+    padding: 0.3125rem 0.625rem;
+    font-size: 0.8rem;
+    border-radius: 3px;
+  }
+
+  .collapse-indicator {
+    font-size: 0.75rem;
+  }
+
+  .package-count {
+    font-size: 0.8rem;
+  }
+
+  .packages-list {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .available-packages-panel.collapsed .packages-list {
+    display: none;
+  }
+
+  .package-item {
+    padding: 0.5rem;
+    min-height: auto;
+  }
+
+  .package-header {
+    padding: 0.375rem 0;
+    margin-bottom: 0.375rem;
+  }
+
+  .package-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .package-specs {
+    font-size: 0.7rem;
+    gap: 0.375rem;
+  }
+
+  .package-destination {
+    font-size: 0.7rem;
+  }
+
+  .package-color {
+    width: 20px;
+    height: 20px;
+  }
+
+  .drag-handle {
+    padding: 0.2rem;
+    font-size: 0.7rem;
+  }
+
+  .empty-state {
+    font-size: 0.8rem;
+    padding: 0.75rem;
+  }
+
+  .placeholder {
+    height: 60px;
+  }
+
+  /* Ensure panel doesn't take up too much space on mobile */
+  .available-packages-panel {
+    flex-shrink: 0;
+  }
+
+  /* Make single column for packages on very small screens */
+  .packages-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
