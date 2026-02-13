@@ -214,8 +214,8 @@
                   📍 {{ getCentralPositionIndex(item) }}
                 </div>
                 
-                <!-- AVIHAI FIX #1: Hover tooltip with package data (appears on hover, not just drag) -->
-                <!-- TODO 4: Positioned above or below package depending on available space -->
+                <!-- HOVER TOOLTIP: Package data displayed on mouse hover -->
+                <!-- Positioned above or below package depending on available space -->
                 <div class="item-hover-tooltip" [class.visible]="hoveredItemId === item.id" [ngClass]="getTooltipPositioning(item.id)">
                   <div class="tooltip-title">{{ item.name }}</div>
                   <div class="tooltip-row">
@@ -229,6 +229,14 @@
                   <div class="tooltip-row">
                     <span class="tooltip-label">Destination:</span>
                     <span class="tooltip-value">{{ item.destination }}</span>
+                  </div>
+                  <div class="tooltip-row">
+                    <span class="tooltip-label">Position:</span>
+                    <span class="tooltip-value">{{ getCentralPositionIndex(item) }}</span>
+                  </div>
+                  <div class="tooltip-row">
+                    <span class="tooltip-label">Compartment Use:</span>
+                    <span class="tooltip-value">{{ compartment.widthUtilization }}%</span>
                   </div>
                 </div>
               </div>
