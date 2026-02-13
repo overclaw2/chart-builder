@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Item } from '../../core/models/container.model';
 
 @Component({
   selector: 'app-available-packages',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './available-packages.component.html',
   styleUrls: ['./available-packages.component.css'],
 })
@@ -18,6 +19,8 @@ export class AvailablePackagesComponent implements OnInit {
 
   availablePackages: Item[] = [];
   draggedPackage: Item | null = null;
+  searchQuery: string = '';
+  searchOpen: boolean = false;
 
   ngOnInit(): void {
     this.initializeAvailablePackages();
@@ -117,7 +120,37 @@ export class AvailablePackagesComponent implements OnInit {
   }
 
   getTotalAvailablePackages(): number {
-    return this.availablePackages.length;
+    return this.getDisplayData().length;
+  }
+
+  toggleSearchOpen(): void {
+    this.searchOpen = !this.searchOpen;
+    if (!this.searchOpen) {
+      this.searchQuery = '';
+    }
+  }
+
+  onSearchChange(query: string): void {
+    this.searchQuery = query;
+  }
+
+  matchesSearch(item: Item): boolean {
+    if (!this.searchQuery.trim()) {
+      return true;
+    }
+    
+    const query = this.searchQuery.toLowerCase();
+    return (
+      item.name.toLowerCase().includes(query) ||
+      item.destination.toLowerCase().includes(query) ||
+      item.id.toLowerCase().includes(query) ||
+      item.weightKg.toString().includes(query) ||
+      item.dimensionMcm.toString().includes(query)
+    );
+  }
+
+  getDisplayData(): Item[] {
+    return this.availablePackages.filter(item => this.matchesSearch(item));
   }
 
   /**

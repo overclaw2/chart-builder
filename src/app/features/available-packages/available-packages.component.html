@@ -6,11 +6,25 @@
       <span class="title-text">Available Packages</span>
     </h2>
     <div class="header-controls">
+      <button class="search-toggle-btn" (click)="toggleSearchOpen()" [title]="searchOpen ? 'Close Search' : 'Open Search'" *ngIf="!isCollapsed">
+        {{ searchOpen ? '✕' : '🔍' }}
+      </button>
       <span class="count-badge">{{ getTotalAvailablePackages() }}</span>
       <button class="collapse-btn" (click)="onToggleCollapse()" [title]="isCollapsed ? 'Expand' : 'Collapse'">
         {{ isCollapsed ? '⬅️' : '➡️' }}
       </button>
     </div>
+  </div>
+
+  <!-- Search Bar (collapsed by default) -->
+  <div class="search-bar" *ngIf="!isCollapsed && searchOpen">
+    <input 
+      type="text" 
+      class="search-input" 
+      placeholder="Search by name, destination, ID, weight, dimensions..."
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="onSearchChange(searchQuery)"
+    />
   </div>
 
   <!-- Panel Content (hidden when collapsed) -->
@@ -24,7 +38,7 @@
     <div class="packages-list">
       <div
         class="package-item"
-        *ngFor="let pkg of availablePackages"
+        *ngFor="let pkg of getDisplayData()"
         draggable="true"
         (dragstart)="onDragStart($event, pkg)"
         (dragend)="onDragEnd()"
@@ -49,8 +63,8 @@
       </div>
 
       <!-- Empty State -->
-      <div class="empty-state" *ngIf="availablePackages.length === 0">
-        <p>No packages available</p>
+      <div class="empty-state" *ngIf="getDisplayData().length === 0">
+        <p>{{ searchQuery ? 'No packages match your search' : 'No packages available' }}</p>
       </div>
     </div>
   </div>
