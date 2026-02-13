@@ -462,7 +462,7 @@
           <!-- Area Nodes (Level 1) -->
           <div class="tree-node tree-level-0" *ngFor="let area of conveyorData.areas">
             <!-- Area Header with Expand/Collapse Toggle -->
-            <div class="tree-node-header" (click)="toggleConveyorAreaExpansion(area.id)">
+            <div class="tree-node-header" [class.selected]="selectedConveyorArea === area.id" (click)="toggleConveyorAreaExpansion(area.id)">
               <div class="tree-expand-icon" [class.expanded]="area.expanded">
                 <span class="expand-toggle">{{ area.expanded ? '▼' : '▶' }}</span>
               </div>

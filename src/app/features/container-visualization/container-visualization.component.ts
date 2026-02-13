@@ -1408,6 +1408,9 @@ export class ContainerVisualizationComponent implements OnInit {
 
   // Tree structure state for conveyor window areas
   conveyorExpandedAreas: { [areaId: string]: boolean } = {};
+  
+  // Track selected area for visual feedback (only one area selected at a time)
+  selectedConveyorArea: string | null = null;
 
   // NEW: Get conveyor visualization data for a package with hierarchical tree structure
   getConveyorData(item: Item): any {
@@ -1534,18 +1537,21 @@ export class ContainerVisualizationComponent implements OnInit {
     return sections;
   }
 
-  // Toggle area expansion in conveyor tree
+  // Toggle area expansion in conveyor tree with visual selection
   toggleConveyorAreaExpansion(areaId: string): void {
-    // Allow only one area expanded at a time (optional - change if user wants multiple)
-    if (this.conveyorExpandedAreas[areaId]) {
+    // Allow only one area selected/expanded at a time
+    if (this.selectedConveyorArea === areaId) {
+      // Clicking same area: deselect and close it
       this.conveyorExpandedAreas[areaId] = false;
+      this.selectedConveyorArea = null;
     } else {
-      // Close all other areas
+      // Clicking different area: close previous, open new one, set as selected
       Object.keys(this.conveyorExpandedAreas).forEach(key => {
         this.conveyorExpandedAreas[key] = false;
       });
-      // Open this area
+      // Open and select this area
       this.conveyorExpandedAreas[areaId] = true;
+      this.selectedConveyorArea = areaId;
     }
   }
 

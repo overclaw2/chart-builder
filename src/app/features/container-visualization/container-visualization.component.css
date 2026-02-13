@@ -1449,6 +1449,35 @@
   transform: translateY(1px);
 }
 
+/* Selected Area Header - Visual Feedback */
+.tree-node-header.selected {
+  background: #2196F3;
+  color: white;
+  border-color: #1976D2;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.tree-node-header.selected:hover {
+  background: #1976D2;
+  border-color: #1565C0;
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+}
+
+.tree-node-header.selected .area-name {
+  color: white;
+  font-weight: 700;
+}
+
+.tree-node-header.selected .area-range {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tree-node-header.selected .tree-node-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 /* Section Header - Non-clickable */
 .tree-node-header.section-header {
   cursor: default;
