@@ -1,0 +1,106 @@
+<div class="help-panel-wrapper" [class.open]="isOpen">
+  <div class="help-panel-container">
+    <!-- Header -->
+    <div class="help-header">
+      <h2>❓ Help & Documentation</h2>
+      <button class="close-btn" (click)="closePanel()" title="Close help">✕</button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="help-search">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="onSearch()"
+        placeholder="Search help topics..."
+        class="search-input"
+      />
+      <button *ngIf="searchQuery" class="clear-btn" (click)="resetSearch()" title="Clear search">
+        ✕
+      </button>
+    </div>
+
+    <!-- Content Tabs -->
+    <div class="help-content">
+      <!-- Tips View (Default) -->
+      <div class="tips-section" *ngIf="viewMode === 'tips'">
+        <h3>💡 Suggested Tips</h3>
+        <p class="section-hint">Based on features you haven't explored yet</p>
+        <div class="tips-list">
+          <div *ngFor="let tip of suggestedTips" class="tip-card" (click)="trackInteraction(tip.id)">
+            <div class="tip-icon">{{ tip.icon }}</div>
+            <div class="tip-content">
+              <h4>{{ tip.title }}</h4>
+              <p>{{ tip.description }}</p>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="suggestedTips.length === 0">
+            <p>You've explored all features! 🎉</p>
+            <button class="btn-primary" (click)="startTour()">Take the Guided Tour</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Results View -->
+      <div class="search-results" *ngIf="viewMode === 'search'">
+        <h3>🔍 Search Results</h3>
+        <p class="result-count">{{ filteredItems.length }} result(s)</p>
+        <div class="items-list">
+          <div *ngFor="let item of filteredItems" class="help-item" (click)="trackInteraction(item.id)">
+            <div class="item-icon">{{ item.icon }}</div>
+            <div class="item-content">
+              <h4>{{ item.title }}</h4>
+              <p>{{ item.description }}</p>
+              <span class="item-category">{{ item.category }}</span>
+            </div>
+          </div>
+          <div class="no-results" *ngIf="filteredItems.length === 0">
+            No results found. Try different keywords.
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories View -->
+      <div class="categories-view" *ngIf="viewMode === 'categories' && !selectedCategory">
+        <h3>📚 Browse by Category</h3>
+        <div class="categories-grid">
+          <button
+            *ngFor="let category of categories"
+            class="category-btn"
+            (click)="selectCategory(category)"
+          >
+            <span class="category-icon">📖</span>
+            <span class="category-name">{{ category }}</span>
+            <span class="category-count">{{ getHelpByCategory(category).length }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Items View -->
+      <div class="category-items" *ngIf="viewMode === 'categories' && selectedCategory">
+        <button class="back-btn" (click)="clearCategory()">&lt; Back</button>
+        <h3>{{ selectedCategory }}</h3>
+        <div class="items-list">
+          <div *ngFor="let item of filteredItems" class="help-item" (click)="trackInteraction(item.id)">
+            <div class="item-icon">{{ item.icon }}</div>
+            <div class="item-content">
+              <h4>{{ item.title }}</h4>
+              <p>{{ item.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="help-footer">
+      <button class="btn-tour" (click)="startTour()">🎓 Start Guided Tour</button>
+      <button class="btn-secondary" (click)="closePanel()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Helper methods -->
+<ng-container *ngIf="false">
+  {{ getHelpByCategory(category) }}
+</ng-container>

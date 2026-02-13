@@ -1,0 +1,43 @@
+<div class="tour-overlay" *ngIf="isTourActive">
+  <!-- Backdrop -->
+  <div class="tour-backdrop"></div>
+
+  <!-- Highlight Box -->
+  <div
+    class="tour-highlight"
+    *ngIf="highlightBox"
+    [style.top.px]="highlightBox.top"
+    [style.left.px]="highlightBox.left"
+    [style.width.px]="highlightBox.width"
+    [style.height.px]="highlightBox.height"
+  ></div>
+
+  <!-- Tour Card -->
+  <div class="tour-card" [class.at-bottom]="currentStep > 3">
+    <div class="tour-header">
+      <h3>{{ currentTourStep?.title }}</h3>
+      <button class="tour-close" (click)="skipTour()" title="Skip tour">✕</button>
+    </div>
+
+    <div class="tour-body">
+      <p>{{ currentTourStep?.description }}</p>
+      <p *ngIf="currentTourStep?.action" class="tour-action">{{ currentTourStep.action }}</p>
+    </div>
+
+    <div class="tour-footer">
+      <button class="btn-prev" [disabled]="currentStep === 0" (click)="previousStep()" title="Previous step">
+        ← Previous
+      </button>
+      <div class="tour-progress">{{ getProgress() }}</div>
+      <button
+        class="btn-next"
+        [ngClass]="{ 'btn-finish': currentStep === totalSteps - 1 }"
+        (click)="nextStep()"
+      >
+        {{ currentStep === totalSteps - 1 ? 'Finish' : 'Next →' }}
+      </button>
+    </div>
+
+    <button class="btn-skip" (click)="skipTour()">Skip Tour</button>
+  </div>
+</div>

@@ -60,7 +60,7 @@
       <div class="header-section">
         <h1 class="title">{{ shipData?.title }}</h1>
     
-    <!-- JSON Upload & History Section -->
+    <!-- JSON Upload & History & Help Section -->
     <div class="upload-section">
       <div class="upload-controls">
         <input
@@ -78,6 +78,9 @@
         </button>
         <button class="history-btn" (click)="toggleHistoryViewer()" title="Toggle history viewer (Ctrl+Z to undo, Ctrl+Y to redo)">
           📜 History
+        </button>
+        <button class="help-btn" (click)="toggleHelpPanel()" title="Open help & documentation">
+          ❓ Help
         </button>
         <span class="upload-status" *ngIf="loadingMessage">{{ loadingMessage }}</span>
       </div>
@@ -534,4 +537,13 @@
     (isOpenChange)="historyViewerOpen = $event"
     (stateSelected)="onHistoryStateSelected($event)">
   </app-history-viewer>
+
+  <!-- Help Panel -->
+  <app-help-panel 
+    [isOpen]="helpPanelOpen"
+    (isOpenChange)="helpPanelOpen = $event">
+  </app-help-panel>
+
+  <!-- Tour Overlay -->
+  <app-tour-overlay></app-tour-overlay>
 </div>

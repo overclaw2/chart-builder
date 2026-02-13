@@ -94,6 +94,29 @@
   transform: translateY(0);
 }
 
+.help-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border: 1px solid #FF9800;
+  background: rgba(255, 152, 0, 0.1);
+  color: #FF9800;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+
+.help-btn:hover {
+  background: #FF9800;
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.help-btn:active {
+  transform: translateY(0);
+}
+
 .upload-status {
   font-size: 0.9rem;
   font-weight: 500;

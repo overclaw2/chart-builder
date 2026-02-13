@@ -3,15 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContainerService } from '../../core/services/container.service';
 import { UndoRedoService } from '../../core/services/undo-redo.service';
+import { HelpService } from '../../core/services/help.service';
 import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
 import { AvailablePackagesComponent } from '../available-packages/available-packages.component';
 import { BulkImportComponent } from '../bulk-import/bulk-import.component';
 import { HistoryViewerComponent } from '../history-viewer/history-viewer.component';
+import { HelpPanelComponent } from '../help-panel/help-panel.component';
+import { TourOverlayComponent } from '../tour-overlay/tour-overlay.component';
 
 @Component({
   selector: 'app-container-visualization',
   standalone: true,
-  imports: [CommonModule, FormsModule, AvailablePackagesComponent, BulkImportComponent, HistoryViewerComponent],
+  imports: [CommonModule, FormsModule, AvailablePackagesComponent, BulkImportComponent, HistoryViewerComponent, HelpPanelComponent, TourOverlayComponent],
   templateUrl: './container-visualization.component.html',
   styleUrls: ['./container-visualization.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
@@ -90,10 +93,14 @@ export class ContainerVisualizationComponent implements OnInit {
   historyViewerOpen: boolean = false;
   previousStateBeforeDrag: ShipData | null = null;
 
+  // NEW: Help System
+  helpPanelOpen: boolean = false;
+
   constructor(
     private containerService: ContainerService, 
     private cdr: ChangeDetectorRef,
-    private undoRedoService: UndoRedoService
+    private undoRedoService: UndoRedoService,
+    private helpService: HelpService
   ) {}
 
   ngOnInit(): void {
@@ -1587,5 +1594,21 @@ export class ContainerVisualizationComponent implements OnInit {
     if (state) {
       this.restoreStateFromHistory(state);
     }
+  }
+
+  // ========== HELP SYSTEM ==========
+
+  /**
+   * Toggle help panel
+   */
+  toggleHelpPanel(): void {
+    this.helpPanelOpen = !this.helpPanelOpen;
+  }
+
+  /**
+   * Start guided tour
+   */
+  startGuidedTour(): void {
+    this.helpService.startTour();
   }
 }
