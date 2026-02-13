@@ -61,6 +61,9 @@ export class ContainerVisualizationComponent implements OnInit {
   // Track initial tooltip position during drag to keep it fixed below package
   initialTooltipY: number = 0;
 
+  // Ghost highlight for package being dragged (follows cursor on timeline strip)
+  ghostHighlight: { left: string; width: string } | null = null;
+
   constructor(private containerService: ContainerService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
@@ -291,6 +294,34 @@ export class ContainerVisualizationComponent implements OnInit {
       };
     }
 
+    // PACKAGE HIGHLIGHTS GHOST: Calculate ghost highlight position on timeline strip
+    // Ghost shows where the package would be positioned during drag
+    if (this.draggedItem) {
+      // Get the item dimensions
+      const itemWidth = this.draggedItem.item.dimensionMcm || 27;
+      
+      // Calculate ghost position as percentage of compartment
+      const compartmentStart = targetCompartment.widthindexStart;
+      const compartmentEnd = targetCompartment.widthindexEnd;
+      const compartmentWidth = compartmentEnd - compartmentStart;
+      
+      // Calculate left edge in index coordinates
+      const itemLeftEdgeIndex = mouseIndexPosition - (this.grabOffset * itemWidth);
+      
+      // Convert to percentage for timeline strip
+      const ghostLeftPercent = ((itemLeftEdgeIndex - compartmentStart) / compartmentWidth) * 100;
+      const ghostWidthPercent = (itemWidth / compartmentWidth) * 100;
+      
+      // Clamp to valid range [0-100]
+      const clampedLeft = Math.max(0, Math.min(100, ghostLeftPercent));
+      const clampedWidth = Math.max(3, Math.min(100 - clampedLeft, ghostWidthPercent));
+      
+      this.ghostHighlight = {
+        left: `${clampedLeft}%`,
+        width: `${clampedWidth}%`
+      };
+    }
+
     // Trigger change detection to update position badge in real-time during drag
     // Use markForCheck to ensure component is checked on next change detection cycle
     this.cdr.markForCheck();
@@ -368,6 +399,7 @@ export class ContainerVisualizationComponent implements OnInit {
           this.dragTooltip.visible = false;
           this.tooltipState = { visible: false, x: 0, y: 0, item: null }; // Clear hover tooltip on reject
           this.initialTooltipY = 0; // Reset initial tooltip Y position
+          this.ghostHighlight = null; // Clear ghost highlight on reject
           this.isDragging = false;
           this.grabOffset = 0;
           this.hoveredItemId = null;
@@ -412,6 +444,7 @@ export class ContainerVisualizationComponent implements OnInit {
     this.dragTooltip.visible = false;
     this.tooltipState = { visible: false, x: 0, y: 0, item: null }; // Clear hover tooltip on drag end
     this.initialTooltipY = 0; // Reset initial tooltip Y position
+    this.ghostHighlight = null; // Clear ghost highlight on drag end
     this.isDragging = false;
     this.grabOffset = 0; // Reset grab offset for next drag
     // Clear hovered item after drag completes
