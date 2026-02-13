@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { ContainerService } from '../../core/services/container.service';
 import { UndoRedoService } from '../../core/services/undo-redo.service';
 import { HelpService } from '../../core/services/help.service';
@@ -18,6 +19,17 @@ import { TourOverlayComponent } from '../tour-overlay/tour-overlay.component';
   templateUrl: './container-visualization.component.html',
   styleUrls: ['./container-visualization.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
+  animations: [
+    trigger('slideDown', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)', maxHeight: '0' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)', maxHeight: '1000px' }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)', maxHeight: '0' }))
+      ])
+    ])
+  ]
 })
 export class ContainerVisualizationComponent implements OnInit {
   shipData: ShipData | null = null;
@@ -1372,7 +1384,10 @@ export class ContainerVisualizationComponent implements OnInit {
     return 0;
   }
 
-  // NEW: Get conveyor visualization data for a package
+  // Tree structure state for conveyor window areas
+  conveyorExpandedAreas: { [areaId: string]: boolean } = {};
+
+  // NEW: Get conveyor visualization data for a package with hierarchical tree structure
   getConveyorData(item: Item): any {
     if (!this.shipData) return null;
 
@@ -1394,51 +1409,81 @@ export class ContainerVisualizationComponent implements OnInit {
 
     if (!compartment) return null;
 
-    // Generate conveyor structure
+    // Generate conveyor structure with hierarchical tree
     const areaStart = Math.floor(compartment.widthindexStart / 100) * 100;
     const areaEnd = Math.ceil(compartment.widthindexEnd / 100) * 100;
     const rangeSpan = areaEnd - areaStart;
 
-    // Create areas (currently just one main area, could be divided into sub-areas)
-    const areas = [
-      {
-        name: '1 - A',
-        width: '20%',
-        color: '#e0e0e0',
-        highlighted: false
-      },
-      {
-        name: '1 - B',
-        width: '30%',
-        color: '#2196F3',
-        highlighted: true
-      },
-      {
-        name: '1 - C',
-        width: '25%',
-        color: '#e0e0e0',
-        highlighted: false
-      },
-      {
-        name: '1 - D',
-        width: '25%',
-        color: '#e0e0e0',
-        highlighted: false
-      }
+    // Define 4 areas with their width ranges
+    const areaDefinitions = [
+      { id: '1-A', name: '1 - A', startIndex: 1000, endIndex: 1900, color: '#e0e0e0' },
+      { id: '1-B', name: '1 - B', startIndex: 1900, endIndex: 2800, color: '#2196F3' },
+      { id: '1-C', name: '1 - C', startIndex: 2800, endIndex: 3550, color: '#e0e0e0' },
+      { id: '1-D', name: '1 - D', startIndex: 3550, endIndex: 4400, color: '#e0e0e0' }
     ];
 
-    // Create sections (divide compartment into 4 sections B1-B4)
-    const cellsPerSection = Math.floor(rangeSpan / 4);
-    const sections = [];
-    
-    for (let i = 0; i < 4; i++) {
-      const sectionStart = areaStart + (i * cellsPerSection);
-      const sectionEnd = sectionStart + cellsPerSection;
-      const sectionName = `B${i + 1}`;
-      const sectionWidth = (cellsPerSection / rangeSpan) * 100;
-      const marginLeft = i === 0 ? 0 : (cellsPerSection / rangeSpan) * 100;
+    // Calculate which area contains the item (for default expansion)
+    let highlightedAreaId = '1-B';
+    for (const areaDef of areaDefinitions) {
+      if (item.position >= areaDef.startIndex && item.position <= areaDef.endIndex) {
+        highlightedAreaId = areaDef.id;
+        break;
+      }
+    }
 
-      // Create grid cells for this section (0-44 cells per section)
+    // Build hierarchical tree structure with areas and sections
+    const areas = areaDefinitions.map((areaDef) => {
+      const isExpanded = this.conveyorExpandedAreas[areaDef.id] !== undefined 
+        ? this.conveyorExpandedAreas[areaDef.id] 
+        : (areaDef.id === highlightedAreaId); // Expand highlighted area by default
+
+      // For expanded areas, create 4 sections (B1, B2, B3, B4)
+      const sections = isExpanded ? this.createAreaSections(areaDef, areaStart, areaEnd, item, compartmentIndex) : [];
+
+      return {
+        id: areaDef.id,
+        name: areaDef.name,
+        startIndex: areaDef.startIndex,
+        endIndex: areaDef.endIndex,
+        width: ((areaDef.endIndex - areaDef.startIndex) / rangeSpan) * 100,
+        color: areaDef.color,
+        highlighted: areaDef.id === highlightedAreaId,
+        expanded: isExpanded,
+        sections: sections
+      };
+    });
+
+    // Calculate total allocated cells across all sections
+    let allocatedCells = 0;
+    areas.forEach(area => {
+      area.sections.forEach((section: any) => {
+        allocatedCells += section.cells.filter((c: any) => c.allocated).length;
+      });
+    });
+
+    return {
+      title: `Conveyor ${compartmentIndex + 1}`,
+      areaStart: areaStart,
+      areaEnd: areaEnd,
+      areas: areas,
+      allocatedCells: allocatedCells
+    };
+  }
+
+  // Helper method to create sections for an expanded area
+  private createAreaSections(areaDef: any, globalStart: number, globalEnd: number, item: Item, compartmentIndex: number): any[] {
+    const areaWidth = areaDef.endIndex - areaDef.startIndex;
+    const cellsPerSection = Math.floor(areaWidth / 4);
+    const sections = [];
+
+    const sectionColors = ['#d32f2f', '#4caf50', '#ff9800', '#1565c0']; // Red, Green, Orange, Blue
+
+    for (let i = 0; i < 4; i++) {
+      const sectionStart = areaDef.startIndex + (i * cellsPerSection);
+      const sectionEnd = sectionStart + cellsPerSection;
+      const sectionName = `${areaDef.name.split(' - ')[1]}${i + 1}`; // e.g., "A1", "A2", etc.
+      
+      // Create grid cells for this section
       const cells = [];
       const cellCount = 45;
       
@@ -1447,15 +1492,7 @@ export class ContainerVisualizationComponent implements OnInit {
         const isInItemRange = cellValue >= item.position - (item.dimensionMcm / 2) && 
                               cellValue <= item.position + (item.dimensionMcm / 2);
         
-        // Color cells based on their position
-        let cellColor = '#d0d0d0';
-        if (isInItemRange) {
-          // Use item color for allocated cells
-          if (i === 0) cellColor = '#d32f2f'; // Red for B1
-          if (i === 1) cellColor = '#4caf50'; // Green for B2
-          if (i === 2) cellColor = '#ff9800'; // Orange for B3
-          if (i === 3) cellColor = '#1565c0'; // Blue for B4
-        }
+        const cellColor = isInItemRange ? sectionColors[i] : '#d0d0d0';
 
         cells.push({
           value: c,
@@ -1468,27 +1505,26 @@ export class ContainerVisualizationComponent implements OnInit {
         name: sectionName,
         startRange: sectionStart,
         endRange: sectionEnd,
-        width: sectionWidth,
-        marginLeft: i > 0 ? marginLeft : 0,
         cells: cells
       });
     }
 
-    // Calculate allocated cells count
-    const allocatedCells = sections.reduce((sum, section) => {
-      return sum + section.cells.filter(c => c.allocated).length;
-    }, 0);
+    return sections;
+  }
 
-    return {
-      title: `Conveyor ${compartmentIndex + 1}`,
-      areaStart: areaStart,
-      areaEnd: areaEnd,
-      sectionStart: areaStart,
-      sectionEnd: areaEnd,
-      areas: areas,
-      sections: sections,
-      allocatedCells: allocatedCells
-    };
+  // Toggle area expansion in conveyor tree
+  toggleConveyorAreaExpansion(areaId: string): void {
+    // Allow only one area expanded at a time (optional - change if user wants multiple)
+    if (this.conveyorExpandedAreas[areaId]) {
+      this.conveyorExpandedAreas[areaId] = false;
+    } else {
+      // Close all other areas
+      Object.keys(this.conveyorExpandedAreas).forEach(key => {
+        this.conveyorExpandedAreas[key] = false;
+      });
+      // Open this area
+      this.conveyorExpandedAreas[areaId] = true;
+    }
   }
 
   // NEW: Handle allocate button click

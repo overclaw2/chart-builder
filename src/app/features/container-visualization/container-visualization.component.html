@@ -447,62 +447,67 @@
         <span class="close-icon" (click)="closeConvPopup()" title="Close">✕</span>
       </div>
 
-      <!-- Conveyor Content -->
+      <!-- Conveyor Content with Hierarchical Tree Structure -->
       <div class="conveyor-content">
-        <!-- Area Section -->
-        <div class="conveyor-section">
-          <h3>Area</h3>
-          <div class="area-visualization">
-            <div class="area-scale">
-              <span class="scale-label">{{ conveyorData.areaStart }}</span>
-              <span class="scale-label">{{ conveyorData.areaEnd }}</span>
-            </div>
-            <div class="area-bars">
-              <div *ngFor="let area of conveyorData.areas" 
-                class="area-bar"
-                [style.width]="area.width"
-                [class.highlighted]="area.highlighted"
-                [style.backgroundColor]="area.color">
-                <span class="area-label">{{ area.name }}</span>
-              </div>
-            </div>
-          </div>
+        <!-- Tree Title -->
+        <div class="tree-title">
+          <h3>Allocation Areas & Sections</h3>
+          <span class="tree-subtitle">Expand areas to view sections</span>
         </div>
 
-        <!-- Sections Overview -->
-        <div class="conveyor-section">
-          <h3>Sections</h3>
-          <div class="sections-overview">
-            <div class="section-range-labels">
-              <span>{{ conveyorData.sectionStart }}</span>
-              <span>{{ conveyorData.sectionEnd }}</span>
-            </div>
-            <div class="sections-bars">
-              <div *ngFor="let section of conveyorData.sections" 
-                class="section-bar"
-                [style.width]="section.width"
-                [style.marginLeft]="section.marginLeft">
-                <span class="section-name">{{ section.name }}</span>
+        <!-- Hierarchical Tree Structure -->
+        <div class="conveyor-tree">
+          <!-- Area Nodes (Level 1) -->
+          <div class="tree-node tree-level-0" *ngFor="let area of conveyorData.areas">
+            <!-- Area Header with Expand/Collapse Toggle -->
+            <div class="tree-node-header" (click)="toggleConveyorAreaExpansion(area.id)">
+              <div class="tree-expand-icon" [class.expanded]="area.expanded">
+                <span class="expand-toggle">{{ area.expanded ? '▼' : '▶' }}</span>
+              </div>
+              <div class="tree-node-content">
+                <span class="area-name" [class.highlighted]="area.highlighted">
+                  {{ area.name }}
+                </span>
+                <span class="area-range">
+                  ({{ area.startIndex }} - {{ area.endIndex }})
+                </span>
+              </div>
+              <div class="tree-node-badge">
+                {{ area.expanded ? 'Expanded' : 'Collapsed' }}
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Section Details with Allocation Grid -->
-        <div class="conveyor-section" *ngFor="let section of conveyorData.sections">
-          <h3>{{ section.name }}</h3>
-          <div class="section-details">
-            <div class="section-range">
-              <span>{{ section.startRange }}</span>
-              <span>{{ section.endRange }}</span>
-            </div>
-            <div class="allocation-grid">
-              <div *ngFor="let cell of section.cells" 
-                class="grid-cell"
-                [class.allocated]="cell.allocated"
-                [style.backgroundColor]="cell.color"
-                [title]="cell.value">
-                {{ cell.value }}
+            <!-- Sections (Level 1 - shown when area is expanded) -->
+            <div class="tree-children" *ngIf="area.expanded" [@slideDown]>
+              <!-- Section Nodes -->
+              <div class="tree-node tree-level-1" *ngFor="let section of area.sections">
+                <!-- Section Header -->
+                <div class="tree-node-header section-header">
+                  <div class="tree-expand-icon disabled">
+                    <span class="section-icon">▸</span>
+                  </div>
+                  <div class="tree-node-content">
+                    <span class="section-name">{{ section.name }}</span>
+                    <span class="section-range">
+                      ({{ section.startRange }} - {{ section.endRange }})
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Allocation Grid (Level 2 - always shown for sections) -->
+                <div class="tree-children tree-grid-container">
+                  <div class="section-details">
+                    <div class="allocation-grid">
+                      <div *ngFor="let cell of section.cells" 
+                        class="grid-cell"
+                        [class.allocated]="cell.allocated"
+                        [style.backgroundColor]="cell.color"
+                        [title]="'Cell ' + cell.value">
+                        {{ cell.value }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
