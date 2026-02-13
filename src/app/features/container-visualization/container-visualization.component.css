@@ -1616,13 +1616,14 @@
 
 .allocation-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(45, minmax(18px, 1fr));
   gap: 2px;
   padding: 0.5rem;
   background: var(--bg-secondary);
   border-radius: 4px;
   border: 1px solid var(--border-color);
   transition: all 0.2s ease;
+  overflow-x: auto;
 }
 
 .grid-cell {
