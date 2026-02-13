@@ -84,7 +84,13 @@ export class ContainerVisualizationComponent implements OnInit {
   initialTooltipY: number = 0;
 
   // Ghost highlight for package being dragged (follows cursor on timeline strip)
-  ghostHighlight: { left: string; width: string } | null = null;
+  // Contains the position AND the container/compartment ID to ensure it's only shown on the correct timeline
+  ghostHighlight: { 
+    left: string; 
+    width: string; 
+    containerId?: string;
+    compartmentId?: string;
+  } | null = null;
 
   // TASK 2 - SEARCH: Search query state
   searchQuery: string = '';
@@ -468,6 +474,7 @@ export class ContainerVisualizationComponent implements OnInit {
 
     // PACKAGE HIGHLIGHTS GHOST: Calculate ghost highlight position on timeline strip
     // Ghost shows where the package would be positioned during drag
+    // IMPORTANT: Ghost highlight is now SCOPED TO THE TARGET COMPARTMENT ONLY
     if (this.draggedItem) {
       // Get the item dimensions
       const itemWidth = this.draggedItem.item.dimensionMcm || 27;
@@ -488,9 +495,13 @@ export class ContainerVisualizationComponent implements OnInit {
       const clampedLeft = Math.max(0, Math.min(100, ghostLeftPercent));
       const clampedWidth = Math.max(3, Math.min(100 - clampedLeft, ghostWidthPercent));
       
+      // CRITICAL FIX: Include container and compartment IDs so ghost only shows on the correct timeline
+      // This ensures ghost highlights don't appear on other containers' timeline strips
       this.ghostHighlight = {
         left: `${clampedLeft}%`,
-        width: `${clampedWidth}%`
+        width: `${clampedWidth}%`,
+        containerId: this.draggedItem.containerId,
+        compartmentId: compartmentId
       };
     }
 

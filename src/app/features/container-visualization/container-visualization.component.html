@@ -271,9 +271,11 @@
           <div class="top-axis">
             <div class="axis-track">
               <!-- Ghost highlight while dragging a package -->
+              <!-- FIX: Only show ghost highlight on the CORRECT container and compartment -->
+              <!-- This ensures ghost is properly isolated and doesn't appear on other containers' timeline strips -->
               <div 
                 class="axis-highlight-ghost" 
-                *ngIf="ghostHighlight"
+                *ngIf="ghostHighlight && ghostHighlight.containerId === container.id && ghostHighlight.compartmentId === compartment.id"
                 [ngStyle]="{ left: ghostHighlight.left, width: ghostHighlight.width }"
               ></div>
               
