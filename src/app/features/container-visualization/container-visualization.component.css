@@ -189,7 +189,7 @@
 
 .container-bar-wrapper {
   position: relative;
-  margin: 1rem 0 3rem 0;
+  margin: 1rem 0 4.5rem 0;
   padding-bottom: 2.5rem; /* Space for item tooltips + position labels below */
 }
 
@@ -287,12 +287,12 @@
   margin-top: 0.25rem;
 }
 
-/* AVIHAI FIX #2 (REVISED): Position indicator with connector line */
-/* Badge moved below container with vertical connector to timeline position */
+/* AVIHAI FIX #2 (REVISED): Position indicator repositioned below package rectangle */
+/* Badge now positioned below the package item itself, not the whole container */
 .item-central-position-badge {
   position: absolute;
-  /* Position below the container-bar, using data attributes for layout */
-  top: 120%;
+  /* Position below the package rectangle (within item-wrapper) */
+  bottom: -2.2rem;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.65rem;
@@ -311,20 +311,16 @@
   max-width: 90px;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* Add connector line above label */
-  display: flex;
-  align-items: flex-end;
-  padding-top: 8px;
 }
 
-/* Connector line extending from item to label below */
+/* Connector line extending from package to label below */
 .item-central-position-badge::before {
   content: '';
   position: absolute;
   width: 2px;
   height: 8px;
   background: linear-gradient(180deg, var(--info-color, #0066cc) 0%, rgba(0, 102, 204, 0.3) 100%);
-  top: -8px;
+  bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
   border-radius: 1px;
