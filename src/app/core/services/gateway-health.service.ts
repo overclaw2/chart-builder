@@ -42,15 +42,8 @@ export class GatewayHealthService {
   private performHealthCheck(): void {
     const checkStartTime = Date.now();
     
-    // Create a timeout promise for the health check
-    const timeoutPromise = new Promise<null>((resolve) => {
-      setTimeout(() => {
-        resolve(null);
-      }, this.HEALTH_CHECK_TIMEOUT);
-    });
-
     // Simple health check - ping an endpoint
-    const healthCheckRequest = this.http.get('/api/health')
+    this.http.get('/api/health')
       .pipe(
         tap(() => {
           const checkDuration = Date.now() - checkStartTime;
@@ -61,20 +54,7 @@ export class GatewayHealthService {
           return of(null);
         })
       )
-      .toPromise()
-      .then((result) => {
-        // If we get a result, clear the timeout
-        return result;
-      })
-      .catch((error) => {
-        // Already handled in catchError
-        return null;
-      });
-
-    // Set a timeout for the health check request
-    Promise.race([healthCheckRequest, timeoutPromise]).then(() => {
-      // Request completed or timed out
-    });
+      .subscribe();
   }
 
   private handleHealthCheckSuccess(duration: number): void {
