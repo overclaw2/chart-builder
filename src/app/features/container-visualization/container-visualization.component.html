@@ -79,10 +79,115 @@
         <span class="upload-status" *ngIf="loadingMessage">{{ loadingMessage }}</span>
       </div>
     </div>
+
+    <!-- TASK 2: Search and Filter Section -->
+    <div class="search-filter-section">
+      <div class="search-filter-container">
+        <!-- Search Filters Row 1: Name, Destination, ID -->
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="search-name">Package Name</label>
+            <input
+              id="search-name"
+              type="text"
+              placeholder="Search by name..."
+              [(ngModel)]="searchFilters.name"
+              (input)="onSearchFilterChange()"
+              class="filter-input"
+            />
+          </div>
+          <div class="filter-group">
+            <label for="search-destination">Destination</label>
+            <input
+              id="search-destination"
+              type="text"
+              placeholder="Search by destination..."
+              [(ngModel)]="searchFilters.destination"
+              (input)="onSearchFilterChange()"
+              class="filter-input"
+            />
+          </div>
+          <div class="filter-group">
+            <label for="search-id">Package ID</label>
+            <input
+              id="search-id"
+              type="text"
+              placeholder="Search by ID..."
+              [(ngModel)]="searchFilters.id"
+              (input)="onSearchFilterChange()"
+              class="filter-input"
+            />
+          </div>
+        </div>
+
+        <!-- Search Filters Row 2: Weight Range, Dimension Range -->
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="search-weight-min">Weight Min (Kg)</label>
+            <input
+              id="search-weight-min"
+              type="number"
+              placeholder="Min weight..."
+              [(ngModel)]="searchFilters.weightMin"
+              (input)="onSearchFilterChange()"
+              class="filter-input numeric"
+            />
+          </div>
+          <div class="filter-group">
+            <label for="search-weight-max">Weight Max (Kg)</label>
+            <input
+              id="search-weight-max"
+              type="number"
+              placeholder="Max weight..."
+              [(ngModel)]="searchFilters.weightMax"
+              (input)="onSearchFilterChange()"
+              class="filter-input numeric"
+            />
+          </div>
+          <div class="filter-group">
+            <label for="search-dimension-min">Dimension Min (Mcm)</label>
+            <input
+              id="search-dimension-min"
+              type="number"
+              placeholder="Min dimension..."
+              [(ngModel)]="searchFilters.dimensionMin"
+              (input)="onSearchFilterChange()"
+              class="filter-input numeric"
+            />
+          </div>
+          <div class="filter-group">
+            <label for="search-dimension-max">Dimension Max (Mcm)</label>
+            <input
+              id="search-dimension-max"
+              type="number"
+              placeholder="Max dimension..."
+              [(ngModel)]="searchFilters.dimensionMax"
+              (input)="onSearchFilterChange()"
+              class="filter-input numeric"
+            />
+          </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-controls">
+          <button
+            class="clear-filters-btn"
+            (click)="clearFilters()"
+            [disabled]="!hasActiveFilters()"
+            title="Clear all filters"
+          >
+            🔄 Clear Filters
+          </button>
+          <span class="filter-results-info" *ngIf="hasActiveFilters()">
+            Showing {{ getTotalFilteredItems() }} of {{ getTotalPlacedItems() }} packages
+          </span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="containers-list" *ngIf="shipData">
-    <div class="container-card" *ngFor="let container of shipData.containers; let idx = index">
+  <div class="containers-list" *ngIf="getDisplayShipData()">
+    <div class="container-card" *ngFor="let container of getDisplayShipData()!.containers; let idx = index">
       <!-- Compartments within container -->
       <div class="compartment-group" *ngFor="let compartment of container.compartments">
         <!-- Compartment Header -->
@@ -95,10 +200,10 @@
                 title="Move container up">
                 ↑
               </button>
-              <span class="container-order-index">{{ idx + 1 }}/{{ shipData.containers.length }}</span>
+              <span class="container-order-index">{{ idx + 1 }}/{{ getDisplayShipData()!.containers.length }}</span>
               <button class="order-btn" 
                 (click)="onMoveContainerDown(container.id)" 
-                [disabled]="idx === shipData.containers.length - 1"
+                [disabled]="idx === getDisplayShipData()!.containers.length - 1"
                 title="Move container down">
                 ↓
               </button>

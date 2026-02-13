@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ContainerService } from '../../core/services/container.service';
 import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
 import { AvailablePackagesComponent } from '../available-packages/available-packages.component';
@@ -7,7 +8,7 @@ import { AvailablePackagesComponent } from '../available-packages/available-pack
 @Component({
   selector: 'app-container-visualization',
   standalone: true,
-  imports: [CommonModule, AvailablePackagesComponent],
+  imports: [CommonModule, FormsModule, AvailablePackagesComponent],
   templateUrl: './container-visualization.component.html',
   styleUrls: ['./container-visualization.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
@@ -64,12 +65,147 @@ export class ContainerVisualizationComponent implements OnInit {
   // Ghost highlight for package being dragged (follows cursor on timeline strip)
   ghostHighlight: { left: string; width: string } | null = null;
 
+  // TASK 2 - SEARCH: Search query state
+  searchQuery: string = '';
+  filteredShipData: ShipData | null = null;
+  
+  // TASK 2 - SEARCH FILTERS
+  searchFilters = {
+    name: '',
+    destination: '',
+    id: '',
+    weightMin: '',
+    weightMax: '',
+    dimensionMin: '',
+    dimensionMax: ''
+  };
+
   constructor(private containerService: ContainerService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.containerService.getShipData().subscribe((data) => {
       this.shipData = data;
+      this.applyFilters();
     });
+  }
+
+  // TASK 2 - SEARCH & FILTER METHODS
+  applyFilters(): void {
+    if (!this.shipData) {
+      this.filteredShipData = null;
+      return;
+    }
+
+    // Deep clone the ship data to avoid modifying the original
+    const filtered: ShipData = JSON.parse(JSON.stringify(this.shipData));
+
+    // Apply filters to all containers and their compartments
+    filtered.containers = filtered.containers.map((container) => {
+      return {
+        ...container,
+        compartments: container.compartments.map((compartment) => {
+          return {
+            ...compartment,
+            items: compartment.items.filter((item) => this.matchesFilters(item))
+          };
+        })
+      };
+    });
+
+    this.filteredShipData = filtered;
+    this.cdr.markForCheck();
+  }
+
+  matchesFilters(item: Item): boolean {
+    // Check name filter
+    if (this.searchFilters.name.trim()) {
+      if (!item.name.toLowerCase().includes(this.searchFilters.name.toLowerCase())) {
+        return false;
+      }
+    }
+
+    // Check destination filter
+    if (this.searchFilters.destination.trim()) {
+      if (!item.destination.toLowerCase().includes(this.searchFilters.destination.toLowerCase())) {
+        return false;
+      }
+    }
+
+    // Check ID filter
+    if (this.searchFilters.id.trim()) {
+      if (!item.id.toLowerCase().includes(this.searchFilters.id.toLowerCase())) {
+        return false;
+      }
+    }
+
+    // Check weight range
+    if (this.searchFilters.weightMin.trim()) {
+      const minWeight = parseFloat(this.searchFilters.weightMin);
+      if (!isNaN(minWeight) && item.weightKg < minWeight) {
+        return false;
+      }
+    }
+    if (this.searchFilters.weightMax.trim()) {
+      const maxWeight = parseFloat(this.searchFilters.weightMax);
+      if (!isNaN(maxWeight) && item.weightKg > maxWeight) {
+        return false;
+      }
+    }
+
+    // Check dimension range
+    if (this.searchFilters.dimensionMin.trim()) {
+      const minDimension = parseFloat(this.searchFilters.dimensionMin);
+      if (!isNaN(minDimension) && (item.dimensionMcm || 0) < minDimension) {
+        return false;
+      }
+    }
+    if (this.searchFilters.dimensionMax.trim()) {
+      const maxDimension = parseFloat(this.searchFilters.dimensionMax);
+      if (!isNaN(maxDimension) && (item.dimensionMcm || 0) > maxDimension) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  onSearchFilterChange(): void {
+    this.applyFilters();
+  }
+
+  clearFilters(): void {
+    this.searchFilters = {
+      name: '',
+      destination: '',
+      id: '',
+      weightMin: '',
+      weightMax: '',
+      dimensionMin: '',
+      dimensionMax: ''
+    };
+    this.applyFilters();
+  }
+
+  // Helper method to get filtered ship data for display
+  getDisplayShipData(): ShipData | null {
+    return this.filteredShipData || this.shipData;
+  }
+
+  // Count total filtered items
+  getTotalFilteredItems(): number {
+    if (!this.filteredShipData) return 0;
+    let count = 0;
+    this.filteredShipData.containers.forEach((container) => {
+      container.compartments.forEach((compartment) => {
+        count += compartment.items.length;
+      });
+    });
+    return count;
+  }
+
+  // Check if any filters are active
+  hasActiveFilters(): boolean {
+    return Object.values(this.searchFilters).some((value) => value.trim() !== '');
   }
 
   onFileSelected(event: Event): void {
