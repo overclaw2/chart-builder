@@ -310,7 +310,7 @@
               <!-- Package Index Labels with Vertical Connectors (positioned absolutely for each item) -->
               <div class="axis-label-with-connector" 
                 *ngFor="let item of compartment.items"
-                [ngStyle]="{ left: getAxisLabelPosition(item, compartment) }">
+                [ngStyle]="getAxisLabelPosition(item, compartment)">
                 <div class="axis-label-connector"></div>
                 <div class="axis-label-text">{{ item.displayIndex || getCentralPositionIndex(item) }}</div>
               </div>
