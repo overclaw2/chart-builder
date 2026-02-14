@@ -4,10 +4,8 @@ import {
   HttpInterceptor,
   HttpHandler,
   HttpRequest,
-  HttpResponse,
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
 
 /**
  * HTTP Interceptor for request configuration
@@ -26,22 +24,7 @@ export class KeepAliveInterceptor implements HttpInterceptor {
       withCredentials: true,
     });
 
-    // Log request timing for diagnostics
-    const requestStartTime = Date.now();
-
-    return next.handle(modifiedReq).pipe(
-      tap(
-        (event) => {
-          if (event instanceof HttpResponse) {
-            const duration = Date.now() - requestStartTime;
-            console.debug(`Request to ${modifiedReq.url} completed in ${duration}ms`);
-          }
-        },
-        (error) => {
-          const duration = Date.now() - requestStartTime;
-          console.error(`Request to ${modifiedReq.url} failed after ${duration}ms:`, error);
-        }
-      )
-    );
+    // Pass through without verbose logging to avoid console spam
+    return next.handle(modifiedReq);
   }
 }
