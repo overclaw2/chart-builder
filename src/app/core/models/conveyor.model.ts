@@ -2,26 +2,51 @@
  * Conveyor Configuration and State Models
  */
 
+// Level 4 Detail: Individual cell within a section
+export interface ConveyorCell {
+  index: number;
+  centralWidthIndex: number; // Central Mcm position of cell
+  occupiedBy: string | null; // null or packageId
+}
+
+// Level 3 Detail: Section within an area
+export interface ConveyorSection {
+  name: string;
+  startWidthIndex: number;
+  stopWidthIndex: number;
+  cells?: ConveyorCell[]; // Optional: detailed cells array
+}
+
+// Level 2: Area within a conveyor (can have simplified OR detailed format)
 export interface ConveyorArea {
-  id: string;
-  start: number; // Mcm
-  end: number; // Mcm
+  name: string;
+  startWidthIndex: number;
+  stopWidthIndex: number;
+  Sections?: ConveyorSection[]; // Detailed format with sections
+  // Simplified format
+  id?: string;
+  start?: number;
+  end?: number;
 }
 
 export interface Conveyor {
-  id: string;
-  name: string;
-  areas: ConveyorArea[];
+  conveyorId: string;
+  conveyorName: string;
+  Areas: ConveyorArea[];
+  // Backward compat
+  id?: string;
+  name?: string;
+  areas?: ConveyorArea[];
 }
 
 export interface Level4Config {
-  total_cells: number;
-  cell_width: number; // Mcm
+  total_cells?: number;
+  cell_width?: number; // Mcm - default 5
 }
 
 export interface ConveyorConfig {
   conveyors: Conveyor[];
-  level4_config: Level4Config;
+  level4_config?: Level4Config; // Optional - can infer from detailed data
 }
 
 export interface AllocatedCell {

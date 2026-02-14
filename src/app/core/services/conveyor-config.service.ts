@@ -20,23 +20,23 @@ export class ConveyorConfigService {
     const defaultConfig: ConveyorConfig = {
       conveyors: [
         {
-          id: '1',
-          name: 'Conveyor 1',
-          areas: [
-            { id: 'A', start: 1000, end: 1900 },
-            { id: 'B', start: 1900, end: 2800 },
-            { id: 'C', start: 2800, end: 3700 },
-            { id: 'D', start: 3700, end: 4600 },
+          conveyorId: '1',
+          conveyorName: 'Conveyor 1',
+          Areas: [
+            { name: 'A', startWidthIndex: 1000, stopWidthIndex: 1900 },
+            { name: 'B', startWidthIndex: 1900, stopWidthIndex: 2800 },
+            { name: 'C', startWidthIndex: 2800, stopWidthIndex: 3700 },
+            { name: 'D', startWidthIndex: 3700, stopWidthIndex: 4600 },
           ],
         },
         {
-          id: '2',
-          name: 'Conveyor 2',
-          areas: [
-            { id: 'A', start: 1000, end: 1900 },
-            { id: 'B', start: 1900, end: 2800 },
-            { id: 'C', start: 2800, end: 3700 },
-            { id: 'D', start: 3700, end: 4600 },
+          conveyorId: '2',
+          conveyorName: 'Conveyor 2',
+          Areas: [
+            { name: 'A', startWidthIndex: 1000, stopWidthIndex: 1900 },
+            { name: 'B', startWidthIndex: 1900, stopWidthIndex: 2800 },
+            { name: 'C', startWidthIndex: 2800, stopWidthIndex: 3700 },
+            { name: 'D', startWidthIndex: 3700, stopWidthIndex: 4600 },
           ],
         },
       ],
@@ -101,20 +101,43 @@ export class ConveyorConfigService {
     if (!config.conveyors || !Array.isArray(config.conveyors)) {
       throw new Error('Invalid config: conveyors must be an array');
     }
-    if (!config.level4_config) {
-      throw new Error('Invalid config: level4_config is required');
-    }
-    if (!config.level4_config.total_cells || !config.level4_config.cell_width) {
-      throw new Error('Invalid config: level4_config must have total_cells and cell_width');
+    
+    // level4_config is optional if detailed cells data is provided
+    if (config.level4_config) {
+      if (!config.level4_config.total_cells || !config.level4_config.cell_width) {
+        throw new Error('Invalid config: level4_config must have total_cells and cell_width');
+      }
     }
 
     for (const conveyor of config.conveyors) {
-      if (!conveyor.id || !conveyor.name || !Array.isArray(conveyor.areas)) {
-        throw new Error('Invalid config: each conveyor must have id, name, and areas array');
+      if (!conveyor.conveyorId || !conveyor.conveyorName) {
+        throw new Error('Invalid config: each conveyor must have conveyorId and conveyorName');
       }
-      for (const area of conveyor.areas) {
-        if (!area.id || area.start === undefined || area.end === undefined) {
-          throw new Error('Invalid config: each area must have id, start, and end');
+      if (!Array.isArray(conveyor.Areas)) {
+        throw new Error('Invalid config: each conveyor must have Areas array');
+      }
+      
+      for (const area of conveyor.Areas) {
+        if (!area.name || area.startWidthIndex === undefined || area.stopWidthIndex === undefined) {
+          throw new Error('Invalid config: each area must have name, startWidthIndex, and stopWidthIndex');
+        }
+        
+        // Sections are optional but if present must be valid
+        if (area.Sections && Array.isArray(area.Sections)) {
+          for (const section of area.Sections) {
+            if (!section.name || section.startWidthIndex === undefined || section.stopWidthIndex === undefined) {
+              throw new Error('Invalid config: each section must have name, startWidthIndex, and stopWidthIndex');
+            }
+            
+            // Cells are optional but if present must be valid
+            if (section.cells && Array.isArray(section.cells)) {
+              for (const cell of section.cells) {
+                if (cell.index === undefined || cell.centralWidthIndex === undefined || cell.occupiedBy === undefined) {
+                  throw new Error('Invalid config: each cell must have index, centralWidthIndex, and occupiedBy');
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -139,7 +162,7 @@ export class ConveyorConfigService {
    */
   getArea(conveyorId: string, areaId: string): ConveyorArea | undefined {
     const conveyor = this.getConveyor(conveyorId);
-    return conveyor?.areas.find(a => a.id === areaId);
+    return conveyor?.Areas?.find(a => a.name === areaId || a.id === areaId);
   }
 
   /**
@@ -169,13 +192,13 @@ export class ConveyorConfigService {
    * Get total cells count from configuration
    */
   getTotalCells(): number {
-    return this.configSubject.value?.level4_config.total_cells || 45;
+    return this.configSubject.value?.level4_config?.total_cells || 45;
   }
 
   /**
    * Get cell width from configuration
    */
   getCellWidth(): number {
-    return this.configSubject.value?.level4_config.cell_width || 5;
+    return this.configSubject.value?.level4_config?.cell_width || 5;
   }
 }

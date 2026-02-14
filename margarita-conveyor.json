@@ -1,4 +1,8 @@
 {
+	"level4_config": {
+		"total_cells": 45,
+		"cell_width": 5
+	},
 	"conveyors": [
 		{
 			"conveyorId": "1",
