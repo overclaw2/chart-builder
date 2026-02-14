@@ -546,14 +546,11 @@ export class ContainerVisualizationComponent implements OnInit {
       y: Math.round(event.clientY + 15) // Minimal offset - labels at bottom of ghost
     };
 
-    // CRITICAL FIX: Update the dragged item's displayIndex directly in the data model
-    // This ensures the position badge in the template updates immediately
-    if (this.draggedItem) {
-      // Update the actual item object's displayIndex so the template reflects the change
-      this.draggedItem.item.displayIndex = Math.round(currentIndex);
-      // Trigger change detection to update the view immediately
-      this.cdr.markForCheck();
-    }
+    // NOTE: Do NOT update displayIndex on the dragged item during drag
+    // displayIndex should remain the original position so the yellow label doesn't change
+    // The floating ghost label (dragTooltip.index) already shows the current dragging position
+    // Trigger change detection to update views
+    this.cdr.markForCheck();
 
     // TASK 2 ENHANCEMENT: Show hover tooltip while dragging
     // Keep tooltip at FIXED Y position (below package), only update X position as package moves
