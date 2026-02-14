@@ -297,23 +297,23 @@
               <div 
                 class="axis-highlight-ghost" 
                 *ngIf="ghostHighlight && ghostHighlight.containerId === container.id && ghostHighlight.compartmentId === compartment.id"
-                [ngStyle]="{ left: ghostHighlight.left, width: ghostHighlight.width }">
-                <!-- Center index label for dragging package -->
-                <div class="highlight-center-label" *ngIf="draggedItem">
-                  {{ dragTooltip.index }}
-                </div>
+                [ngStyle]="{ left: ghostHighlight.left, width: ghostHighlight.width }"
+              ></div>
+              
+              <!-- Ghost Label with Vertical Connector (only visible when dragging) -->
+              <div class="axis-label-with-connector ghost-label" 
+                *ngIf="ghostHighlight && ghostHighlight.containerId === container.id && ghostHighlight.compartmentId === compartment.id && draggedItem"
+                [ngStyle]="getGhostLabelPosition()">
+                <div class="axis-label-connector"></div>
+                <div class="axis-label-text">{{ dragTooltip.index }}</div>
               </div>
               
               <!-- Highlight areas where packages are located -->
               <div 
                 class="axis-highlight" 
                 *ngFor="let item of compartment.items"
-                [ngStyle]="getAxisHighlightPosition(item, compartment)">
-                <!-- Center index label for placed packages -->
-                <div class="highlight-center-label">
-                  {{ item.displayIndex || getCentralPositionIndex(item) }}
-                </div>
-              </div>
+                [ngStyle]="getAxisHighlightPosition(item, compartment)"
+              ></div>
               
               <!-- Package Index Labels with Vertical Connectors (positioned absolutely for each item) -->
               <div class="axis-label-with-connector" 

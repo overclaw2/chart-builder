@@ -1042,6 +1042,26 @@ export class ContainerVisualizationComponent implements OnInit {
     };
   }
 
+  // Get position for ghost label (center of the ghost highlight box)
+  getGhostLabelPosition(): { left: string } {
+    if (!this.ghostHighlight) {
+      return { left: '0%' };
+    }
+
+    // Parse left and width from ghostHighlight (they are in percentage format like "15.5%")
+    const leftStr = this.ghostHighlight.left.replace('%', '');
+    const widthStr = this.ghostHighlight.width.replace('%', '');
+    const leftPercent = parseFloat(leftStr);
+    const widthPercent = parseFloat(widthStr);
+
+    // Calculate the center position (left + width/2)
+    const centerPercent = leftPercent + (widthPercent / 2);
+
+    return {
+      left: `${centerPercent}%`
+    };
+  }
+
   // TODO 1: Get drop zones visualization for valid drop areas
   // Creates a visual grid showing where packages can be dropped
   getDropZones(compartment: Compartment): Array<{ left: string; width: string }> {
