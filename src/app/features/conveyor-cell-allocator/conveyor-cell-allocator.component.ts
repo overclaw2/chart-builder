@@ -203,7 +203,7 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle area selection - opens all sections automatically
+   * Handle area selection - changes active area
    */
   toggleArea(areaId: string): void {
     if (this.uiState.activeArea === areaId) {
@@ -213,9 +213,8 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
     } else {
       // Select new area
       this.uiState.activeArea = areaId;
-      // Automatically open ALL sections for this area
-      const sections = this.configService.getSections(this.uiState.activeConveyor || '', areaId);
-      this.uiState.openSections = sections.map(s => s.name);
+      // DO NOT auto-open sections - user clicks individual sections to toggle them
+      this.uiState.openSections = [];
     }
     // Reset cell selections when area changes
     this.selectedCellsInSection = {};
@@ -223,28 +222,7 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Select a single section (activate it with blue highlight)
-   */
-  selectSection(sectionName: string): void {
-    // Clear previous selection
-    this.selectedCellsInSection = {};
-    
-    // Set this section as active (for cell grid display)
-    this.uiState.openSections = [sectionName];
-    
-    // Reset cell selection
-    this.uiState.selectedCells = null;
-  }
-
-  /**
-   * Get the currently active section ID (for highlighting)
-   */
-  getActiveSectionId(): string | null {
-    return this.uiState.openSections.length === 1 ? this.uiState.openSections[0] : null;
-  }
-
-  /**
-   * Handle section toggle (Level 3)
+   * Toggle a section open/close (Level 3 - multiple can be open simultaneously)
    */
   toggleSection(sectionName: string): void {
     const index = this.uiState.openSections.indexOf(sectionName);
@@ -252,15 +230,24 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
       // Close section
       this.uiState.openSections.splice(index, 1);
       delete this.selectedCellsInSection[sectionName];
-      
-      // If this was the selected section, clear selection
-      if (this.uiState.selectedCells?.sectionId === sectionName) {
-        this.uiState.selectedCells = null;
-      }
     } else {
       // Open section
       this.uiState.openSections.push(sectionName);
     }
+  }
+
+  /**
+   * Check if section is open (for displaying Level 4 panel)
+   */
+  isSectionOpen(sectionId: string): boolean {
+    return this.uiState.openSections.includes(sectionId);
+  }
+
+  /**
+   * Get toggle icon for section (▼ if open, ▶ if closed)
+   */
+  getSectionToggleIcon(sectionName: string): string {
+    return this.isSectionOpen(sectionName) ? '▼' : '▶';
   }
 
   /**
@@ -298,13 +285,6 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
    */
   getSectionId(section: ConveyorSection): string {
     return section.name;
-  }
-
-  /**
-   * Check if section is open
-   */
-  isSectionOpen(sectionId: string): boolean {
-    return this.uiState.openSections.includes(sectionId);
   }
 
   /**

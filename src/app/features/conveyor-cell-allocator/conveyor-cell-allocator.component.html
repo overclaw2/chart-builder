@@ -65,28 +65,27 @@
 
     <!-- Level 3 & 4: Sections and Cells -->
     <div *ngIf="uiState.activeConveyor && uiState.activeArea" class="level level-3">
-      <h3>Level 3: Select Section (Click to activate)</h3>
+      <h3>Level 3: Sections (Click to toggle open/close)</h3>
       
-      <!-- Sections Row (all sections displayed evenly) -->
+      <!-- Sections Row (aligned right, distributed evenly) -->
       <div class="sections-row">
         <div 
           *ngFor="let section of configService.getSections(uiState.activeConveyor, uiState.activeArea)"
-          class="section-card"
-          [class.active]="getActiveSectionId() === section.name"
+          class="section-wrapper"
         >
-          <!-- Section Box (clickable) -->
+          <!-- Section Toggle Button -->
           <button 
-            (click)="selectSection(section.name)"
-            [class.active]="getActiveSectionId() === section.name"
-            class="section-header"
+            (click)="toggleSection(section.name)"
+            [class.open]="isSectionOpen(section.name)"
+            class="section-button"
           >
+            <span class="toggle-icon">{{ getSectionToggleIcon(section.name) }}</span>
             <span class="section-name">{{ section.name }}</span>
-            <span class="section-range">{{ section.startWidthIndex }}-{{ section.stopWidthIndex }}</span>
-            <span class="section-cells-count">{{ section.cells.length }} cells</span>
+            <span class="section-range">({{ section.startWidthIndex }}-{{ section.stopWidthIndex }})</span>
           </button>
 
-          <!-- Section Panel (shown only for active section) -->
-          <div *ngIf="getActiveSectionId() === section.name" class="level-4-panel">
+          <!-- Section Panel (shown when section is open) -->
+          <div *ngIf="isSectionOpen(section.name)" class="level-4-panel">
             <!-- Package Info -->
             <div class="package-info">
               <div class="info-row">
@@ -143,7 +142,7 @@
               {{ getCellTooltip(section, tooltipCell.cellIndex) }}
             </div>
           </div>
-        </div>
+        </div> <!-- end section-wrapper -->
       </div> <!-- end sections-row -->
     </div>
 

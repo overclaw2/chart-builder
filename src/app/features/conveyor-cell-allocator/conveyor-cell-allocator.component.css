@@ -209,76 +209,71 @@
   color: white;
 }
 
-/* Level 3: Sections Row (all sections displayed evenly) */
+/* Level 3: Sections Row (aligned right, distributed evenly) */
 .sections-row {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
   align-items: flex-start;
-}
-
-/* Section Card: Container for each section */
-.section-card {
-  flex: 1;
-  min-width: 180px;
-  border: 2px solid #ddd;
-  border-radius: 6px;
-  background-color: white;
-  transition: all 0.3s ease;
-}
-
-.section-card.active {
-  border-color: #2196F3;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
-}
-
-/* Section Header (clickable box - Level 3) */
-.section-header {
+  flex-wrap: wrap;
   width: 100%;
+}
+
+/* Section Wrapper: Container for each section + its Level 4 panel */
+.section-wrapper {
+  flex: 1;
+  min-width: 140px;
+  max-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Section Toggle Button (Level 3) */
+.section-button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 12px 10px;
+  gap: 4px;
+  padding: 10px 8px;
   background-color: #f5f5f5;
-  border: none;
-  border-radius: 4px;
+  border: 2px solid #ddd;
+  border-radius: 6px 6px 0 0;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   transition: all 0.2s ease;
-  border-bottom: 2px solid transparent;
+  color: #333;
+  min-height: 70px;
+  justify-content: center;
 }
 
-.section-header:hover {
+.section-button:hover {
   background-color: #e8e8e8;
-  border-bottom-color: #2196F3;
+  border-color: #2196F3;
+  box-shadow: 0 2px 6px rgba(33, 150, 243, 0.2);
 }
 
-.section-header.active {
+.section-button.open {
   background-color: #2196F3;
+  border-color: #2196F3;
   color: white;
-  border-bottom-color: #1976D2;
+}
+
+.toggle-icon {
+  font-size: 16px;
+  font-weight: 700;
+  min-width: 20px;
 }
 
 .section-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .section-range {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.section-cells-count {
   font-size: 11px;
-  opacity: 0.7;
-}
-
-.section-header.active .section-range,
-.section-header.active .section-cells-count {
-  color: rgba(255, 255, 255, 0.9);
+  opacity: 0.85;
 }
 
 /* Level 3 Section Buttons (legacy compatibility) */
@@ -313,39 +308,18 @@
   text-align: right;
 }
 
-/* Level 4 Panels - Cell grid shown only for active section */
-.level-4-panels {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
+/* Level 4 Panels - Cell grid shown directly below section button */
 .level-4-panel {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  padding: 15px;
-  background-color: #fafafa;
-  border-top: 2px solid #2196F3;
-  border-radius: 0 0 4px 4px;
-  animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 2000px;
-  }
-}
-
-.level-4-panel.open {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  gap: 10px;
+  padding: 10px 8px;
+  background-color: white;
+  border: 2px solid #2196F3;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  animation: slideDown 0.25s ease;
+  min-height: auto;
 }
 
 .level-4-header {
@@ -379,65 +353,85 @@
   background-color: #e63946;
 }
 
+/* Slide Down Animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
+
 /* Package Info */
 .package-info {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+  font-size: 12px;
 }
 
 .info-row {
   display: flex;
-  gap: 10px;
-  font-size: 14px;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.3;
 }
 
 .info-row .label {
-  font-weight: bold;
+  font-weight: 600;
   color: #333;
-  min-width: 80px;
+  min-width: 55px;
 }
 
 .info-row .value {
-  color: #666;
+  color: #555;
   flex: 1;
 }
 
 /* Cell Grid */
 .cell-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-  gap: 5px;
-  padding: 10px;
-  background-color: white;
+  grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
+  gap: 3px;
+  padding: 6px;
+  background-color: #fafafa;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  max-height: 250px;
+  border-radius: 3px;
+  max-height: 180px;
   overflow-y: auto;
+  min-height: 80px;
 }
 
 /* Cell Range Display */
 .cell-range-display {
   display: flex;
   justify-content: space-between;
-  gap: 15px;
-  padding: 10px;
+  gap: 8px;
+  padding: 6px;
   background-color: #e3f2fd;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 3px;
+  font-size: 11px;
   color: #1976D2;
   font-weight: 600;
 }
 
 .range-label {
   flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cell-count {
   text-align: right;
+  flex-shrink: 0;
 }
 
 .cell-btn {
