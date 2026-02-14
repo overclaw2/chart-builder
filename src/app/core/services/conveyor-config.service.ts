@@ -74,15 +74,30 @@ export class ConveyorConfigService {
   /**
    * Load configuration from JSON data
    */
-  loadConfigFromData(configData: ConveyorConfig): void {
-    this.validateConfig(configData);
-    this.configSubject.next(configData);
+  loadConfigFromData(configData: any): void {
+    // Support both "conveyors" and "convayor" key names (handle typo variants)
+    const normalizedConfig = this.normalizeConfig(configData);
+    this.validateConfig(normalizedConfig);
+    this.configSubject.next(normalizedConfig as ConveyorConfig);
+  }
+
+  /**
+   * Normalize configuration: convert "convayor" to "conveyors" if needed
+   */
+  private normalizeConfig(config: any): any {
+    if (config.convayor && !config.conveyors) {
+      return {
+        ...config,
+        conveyors: config.convayor
+      };
+    }
+    return config;
   }
 
   /**
    * Validate configuration structure
    */
-  private validateConfig(config: ConveyorConfig): void {
+  private validateConfig(config: any): void {
     if (!config.conveyors || !Array.isArray(config.conveyors)) {
       throw new Error('Invalid config: conveyors must be an array');
     }
