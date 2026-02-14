@@ -540,10 +540,10 @@ export class ContainerVisualizationComponent implements OnInit {
 
     // FLOATING DRAG LABELS: Update position to be inside the drag preview
     // Position labels at the bottom inside the drag ghost (lower left and lower right corners)
-    // The drag ghost is positioned around the cursor, so we offset from cursor position
+    // The drag ghost appears at the cursor; position labels at bottom of ghost
     this.dragLabelPosition = {
       x: Math.round(event.clientX - 55), // Center inside the ~110px wide ghost
-      y: Math.round(event.clientY + 50) // Position at bottom inside the ghost
+      y: Math.round(event.clientY + 35) // Position at bottom inside the ghost (reduced from 50)
     };
 
     // CRITICAL FIX: Update the dragged item's displayIndex directly in the data model
