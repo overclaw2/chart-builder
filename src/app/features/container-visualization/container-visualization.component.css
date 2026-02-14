@@ -263,7 +263,7 @@
 /* PROBLEM 3 FIX: Container bar bounds synced with drop zones */
 .container-bar {
   position: relative;
-  height: 100%;
+  height: 100px;
   background: var(--compartment-bg, #e8e8e8); /* TODO 3: Use compartment color */
   border-radius: 3px;
   overflow: visible; /* Allow items and labels to extend beyond container */
@@ -800,7 +800,7 @@
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  height: 100px;
   pointer-events: none;
   z-index: 2;
   display: flex;
