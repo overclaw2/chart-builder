@@ -1,0 +1,170 @@
+<div class="conveyor-allocator-container">
+  <!-- Header -->
+  <div class="allocator-header">
+    <h2>Conveyor Cell Allocator</h2>
+    <button class="config-btn" (click)="showConfigUpload = !showConfigUpload" title="Load configuration">
+      ⚙️ Config
+    </button>
+  </div>
+
+  <!-- Config Upload Section -->
+  <div *ngIf="showConfigUpload" class="config-upload-section">
+    <label for="configFile">Load Configuration (JSON):</label>
+    <input 
+      #configFile 
+      type="file" 
+      id="configFile" 
+      accept=".json"
+      (change)="onConfigFileSelected($event)"
+      hidden
+    />
+    <button (click)="configFile.click()" class="upload-btn">Choose File</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="config" class="allocator-content">
+    <!-- Level 1: Conveyor Selection -->
+    <div class="level level-1">
+      <h3>Level 1: Select Conveyor</h3>
+      <div class="button-group">
+        <button 
+          *ngFor="let conveyor of conveyors"
+          [class.active]="uiState.activeConveyor === conveyor.id"
+          (click)="toggleConveyor(conveyor.id)"
+          class="level-btn"
+        >
+          {{ conveyor.name }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Level 2: Area Selection -->
+    <div *ngIf="uiState.activeConveyor" class="level level-2">
+      <h3>Level 2: Select Area</h3>
+      
+      <!-- Index width labels -->
+      <div class="index-width-labels">
+        <span class="label-left">{{ getAvailableAreas()[0]?.start }} Mcm</span>
+        <span class="label-right">{{ getAvailableAreas()[getAvailableAreas().length - 1]?.end }} Mcm</span>
+      </div>
+
+      <div class="button-group">
+        <button 
+          *ngFor="let area of getAvailableAreas()"
+          [class.active]="uiState.activeArea === area.id"
+          (click)="toggleArea(area.id)"
+          class="level-btn area-btn"
+          [style.flex]="'1'"
+        >
+          <span class="area-label">{{ uiState.activeConveyor }}-{{ area.id }}</span>
+          <span class="area-range">{{ area.start }}-{{ area.end }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Level 3: Section Selection -->
+    <div *ngIf="uiState.activeArea" class="level level-3">
+      <h3>Level 3: Select Section</h3>
+      <div class="button-group">
+        <button 
+          *ngFor="let sectionNumber of [1, 2, 3, 4]"
+          [class.active]="isSectionOpen(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))"
+          (click)="toggleSection(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))"
+          class="level-btn section-btn"
+        >
+          {{ getSectionLabel(uiState.activeConveyor, uiState.activeArea, sectionNumber) }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Level 4: Cell Allocation Grid (Multiple Sections) -->
+    <div class="level-4-panels">
+      <div 
+        *ngFor="let sectionNumber of [1, 2, 3, 4]"
+        [class.open]="isSectionOpen(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))"
+        class="level-4-panel"
+        *ngIf="uiState.activeArea"
+      >
+        <!-- Panel Header -->
+        <div class="level-4-header">
+          <h4>
+            Section {{ getSectionLabel(uiState.activeConveyor, uiState.activeArea, sectionNumber) }} :
+            {{ getSectionRange(getAvailableAreas().find(a => a.id === uiState.activeArea)?.start || 0, getAvailableAreas().find(a => a.id === uiState.activeArea)?.end || 0, sectionNumber).start }}
+            -
+            {{ getSectionRange(getAvailableAreas().find(a => a.id === uiState.activeArea)?.start || 0, getAvailableAreas().find(a => a.id === uiState.activeArea)?.end || 0, sectionNumber).end }}
+            [Mcm]
+          </h4>
+          <button (click)="toggleSection(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))" class="close-btn">✕</button>
+        </div>
+
+        <!-- Package Info -->
+        <div class="package-info">
+          <div class="info-row">
+            <span class="label">Package:</span>
+            <span class="value">{{ uiState.currentPackage?.name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Category:</span>
+            <span class="value">{{ uiState.currentPackage?.category }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Width:</span>
+            <span class="value">{{ uiState.currentPackage?.width }} Mcm</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Cells:</span>
+            <span class="value">{{ uiState.currentPackage?.cells }}</span>
+          </div>
+        </div>
+
+        <!-- Cell Grid -->
+        <div class="cell-grid">
+          <button
+            *ngFor="let cellIndex of (getTotalCells() | slice:0); let i = index"
+            [class.selected]="isCellSelected(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            [class.allocated]="getAllocatedCellInfo(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) !== null"
+            [class.disabled]="!canSelectCell(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            [style.backgroundColor]="isCellSelected(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) ? '#1976d2' : (getAllocatedCellColor(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) || '#e0e0e0')"
+            [style.color]="isCellSelected(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) ? '#fff' : '#333'"
+            (click)="isSectionOpen(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber)) && onCellClick(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            (mouseover)="showTooltip($event, getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            (mouseout)="hideTooltip()"
+            class="cell-btn"
+            [disabled]="!canSelectCell(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            [title]="getCellTooltip(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+          >
+            {{ i }}
+          </button>
+        </div>
+
+        <!-- Tooltip -->
+        <div 
+          *ngIf="tooltipCell && tooltipCell.sectionId === getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber)"
+          class="tooltip"
+          [style.left.px]="tooltipPosition?.x || 0"
+          [style.top.px]="tooltipPosition?.y || 0"
+        >
+          {{ getCellTooltip(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), tooltipCell.cellIndex) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button (click)="onCancel()" class="cancel-btn">Cancel</button>
+      <button 
+        (click)="onAllocate()" 
+        [disabled]="!isAllocateButtonEnabled()"
+        class="allocate-btn"
+      >
+        Allocate
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message if no config -->
+  <div *ngIf="!config" class="no-config-message">
+    <p>Please load a configuration file to get started.</p>
+    <button (click)="showConfigUpload = true" class="config-btn">Load Configuration</button>
+  </div>
+</div>

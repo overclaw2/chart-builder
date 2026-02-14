@@ -1,0 +1,437 @@
+.conveyor-allocator-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+.allocator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #1976d2;
+}
+
+.allocator-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.config-btn {
+  padding: 8px 16px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.config-btn:hover {
+  background-color: #1565c0;
+}
+
+/* Config Upload Section */
+.config-upload-section {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+}
+
+.config-upload-section label {
+  margin: 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.upload-btn {
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.upload-btn:hover {
+  background-color: #45a049;
+}
+
+/* Allocator Content */
+.allocator-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Levels */
+.level {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 4px;
+  border-left: 4px solid #1976d2;
+}
+
+.level h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Button Groups */
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.level-btn {
+  padding: 10px 20px;
+  background-color: #e0e0e0;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+
+.level-btn:hover {
+  background-color: #d0d0d0;
+}
+
+.level-btn.active {
+  background-color: #1976d2;
+  color: white;
+  border-color: #1565c0;
+}
+
+/* Level 1 Buttons */
+.level-1 .level-btn {
+  flex: 1;
+  min-width: 150px;
+}
+
+/* Level 2 Area Buttons */
+.area-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 15px 10px;
+  flex: 1;
+}
+
+.area-label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.area-range {
+  font-size: 12px;
+  color: #666;
+}
+
+.area-btn.active .area-range {
+  color: white;
+}
+
+/* Level 3 Section Buttons */
+.section-btn {
+  flex: 1;
+  min-width: 100px;
+  background-color: #fff3e0;
+  border-color: #f57c00;
+}
+
+.section-btn.active {
+  background-color: #f57c00;
+  color: white;
+  border-color: #e65100;
+}
+
+/* Index Width Labels */
+.index-width-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.label-left {
+  text-align: left;
+}
+
+.label-right {
+  text-align: right;
+}
+
+/* Level 4 Panels */
+.level-4-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.level-4-panel {
+  display: none;
+  padding: 15px;
+  background-color: white;
+  border: 2px solid #f57c00;
+  border-radius: 4px;
+  border-left: 4px solid #f57c00;
+}
+
+.level-4-panel.open {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.level-4-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f57c00;
+}
+
+.level-4-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+  flex: 1;
+}
+
+.close-btn {
+  padding: 4px 8px;
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.close-btn:hover {
+  background-color: #e63946;
+}
+
+/* Package Info */
+.package-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.info-row {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.info-row .label {
+  font-weight: bold;
+  color: #333;
+  min-width: 80px;
+}
+
+.info-row .value {
+  color: #666;
+  flex: 1;
+}
+
+/* Cell Grid */
+.cell-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  gap: 5px;
+  padding: 10px;
+  background-color: #fafafa;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.cell-btn {
+  padding: 10px;
+  background-color: #e0e0e0;
+  border: 2px solid #999;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.cell-btn:hover:not(:disabled) {
+  border-color: #1976d2;
+  transform: scale(1.05);
+}
+
+.cell-btn.selected {
+  background-color: #1976d2;
+  color: white;
+  border-color: #1565c0;
+  box-shadow: 0 0 8px rgba(25, 118, 210, 0.5);
+}
+
+.cell-btn.allocated {
+  cursor: not-allowed;
+}
+
+.cell-btn.disabled:not(.selected) {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.cell-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* Tooltip */
+.tooltip {
+  position: fixed;
+  background-color: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1000;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 15px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.cancel-btn {
+  padding: 10px 24px;
+  background-color: #9e9e9e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.cancel-btn:hover {
+  background-color: #757575;
+}
+
+.allocate-btn {
+  padding: 10px 24px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.allocate-btn:hover:not(:disabled) {
+  background-color: #1565c0;
+}
+
+.allocate-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* No Config Message */
+.no-config-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px;
+  background-color: white;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.no-config-message p {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .conveyor-allocator-container {
+    padding: 10px;
+  }
+
+  .allocator-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .level-btn {
+    width: 100%;
+  }
+
+  .level-1 .level-btn {
+    flex: none;
+  }
+
+  .package-info {
+    grid-template-columns: 1fr;
+  }
+
+  .cell-grid {
+    grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+  }
+
+  .action-buttons {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-btn,
+  .allocate-btn {
+    width: 100%;
+  }
+}
