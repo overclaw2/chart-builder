@@ -1477,8 +1477,10 @@ export class ContainerVisualizationComponent implements OnInit {
       if (container) {
         const compartment = container.compartments.find((comp) => comp.id === toCompartmentId);
         if (compartment) {
-          // Add the new item to the compartment
-          compartment.items.push(newItem);
+          // CRITICAL FIX: Create new array reference for items to trigger change detection
+          // Instead of mutating the array directly with push(), create a new array reference
+          // This ensures Angular's *ngFor binding detects the change and re-renders
+          compartment.items = [...compartment.items, newItem];
 
           // Recalculate compartment statistics
           const itemWeight = newItem.weightKg;
@@ -1502,8 +1504,13 @@ export class ContainerVisualizationComponent implements OnInit {
             this.availablePackagesComponent.removePackageFromAvailable(this.draggedAvailablePackage.id);
           }
 
-          // Trigger change detection
-          this.shipData = { ...this.shipData };
+          // Trigger change detection with new immutable reference
+          // Create new references at each level to ensure change detection works properly
+          const updatedCompartments = [...container.compartments];
+          container.compartments = updatedCompartments;
+          const updatedContainers = [...this.shipData.containers];
+          this.shipData = { ...this.shipData, containers: updatedContainers };
+          this.cdr.markForCheck();
         }
       }
     }
