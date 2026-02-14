@@ -862,8 +862,9 @@ export class ContainerVisualizationComponent implements OnInit {
       const itemWeight = itemToRemove.weightKg;
       const itemWidth = itemToRemove.dimensionMcm || 27;
       
-      // Remove from items array
-      compartment.items.splice(itemIndex, 1);
+      // CRITICAL FIX: Create new array reference instead of mutating with splice
+      // This ensures Angular's *ngFor binding detects the removal and re-renders
+      compartment.items = compartment.items.filter((item) => item.id !== this.contextMenu.itemId);
       
       // Recalculate compartment statistics
       const newWeight = compartment.weightKg - itemWeight;
@@ -873,6 +874,10 @@ export class ContainerVisualizationComponent implements OnInit {
       // Recalculate width utilization based on remaining items
       const totalPackageWidth = compartment.items.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
       compartment.widthUtilization = parseFloat(((totalPackageWidth / compartment.widthMcm) * 100).toFixed(1));
+      
+      // CRITICAL FIX: Apply filters to ensure filtered data is also updated
+      // If filters are active, the template uses getDisplayShipData() which returns filteredShipData
+      this.applyFilters();
       
       // Trigger change detection by creating a new reference
       this.shipData = { ...this.shipData };
@@ -1510,6 +1515,13 @@ export class ContainerVisualizationComponent implements OnInit {
           container.compartments = updatedCompartments;
           const updatedContainers = [...this.shipData.containers];
           this.shipData = { ...this.shipData, containers: updatedContainers };
+          
+          // CRITICAL FIX: Apply filters to ensure filtered data is also updated
+          // If filters are active, the template uses getDisplayShipData() which returns filteredShipData
+          // Without this, new items won't appear on the visualization when filters are active
+          this.applyFilters();
+          
+          // Trigger change detection
           this.cdr.markForCheck();
         }
       }
