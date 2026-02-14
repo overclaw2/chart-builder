@@ -22,6 +22,28 @@
   margin: 0;
   color: #333;
   font-size: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mode-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.mode-badge.new {
+  background-color: #4caf50;
+  color: white;
+}
+
+.mode-badge.edit {
+  background-color: #ff9800;
+  color: white;
 }
 
 .config-btn {
