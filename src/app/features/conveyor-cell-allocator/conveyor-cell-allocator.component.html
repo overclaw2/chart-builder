@@ -63,7 +63,7 @@
     </div>
 
     <!-- Level 3: Section Selection -->
-    <div *ngIf="uiState.activeArea" class="level level-3">
+    <div *ngIf="uiState.activeConveyor && uiState.activeArea" class="level level-3">
       <h3>Level 3: Select Section</h3>
       <div class="button-group">
         <button 
@@ -78,21 +78,16 @@
     </div>
 
     <!-- Level 4: Cell Allocation Grid (Multiple Sections) -->
-    <div class="level-4-panels">
+    <div class="level-4-panels" *ngIf="uiState.activeConveyor && uiState.activeArea">
       <div 
         *ngFor="let sectionNumber of [1, 2, 3, 4]"
         [class.open]="isSectionOpen(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))"
         class="level-4-panel"
-        *ngIf="uiState.activeArea"
       >
         <!-- Panel Header -->
         <div class="level-4-header">
           <h4>
-            Section {{ getSectionLabel(uiState.activeConveyor, uiState.activeArea, sectionNumber) }} :
-            {{ getSectionRange(getAvailableAreas().find(a => a.id === uiState.activeArea)?.start || 0, getAvailableAreas().find(a => a.id === uiState.activeArea)?.end || 0, sectionNumber).start }}
-            -
-            {{ getSectionRange(getAvailableAreas().find(a => a.id === uiState.activeArea)?.start || 0, getAvailableAreas().find(a => a.id === uiState.activeArea)?.end || 0, sectionNumber).end }}
-            [Mcm]
+            Section {{ getSectionLabel(uiState.activeConveyor, uiState.activeArea, sectionNumber) }} : {{ getSectionRangeDisplay(uiState.activeConveyor, uiState.activeArea, sectionNumber) }} [Mcm]
           </h4>
           <button (click)="toggleSection(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))" class="close-btn">✕</button>
         </div>
@@ -120,7 +115,7 @@
         <!-- Cell Grid -->
         <div class="cell-grid">
           <button
-            *ngFor="let cellIndex of (getTotalCells() | slice:0); let i = index"
+            *ngFor="let i of getCellIndicesArray()"
             [class.selected]="isCellSelected(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
             [class.allocated]="getAllocatedCellInfo(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) !== null"
             [class.disabled]="!canSelectCell(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
@@ -139,7 +134,7 @@
 
         <!-- Tooltip -->
         <div 
-          *ngIf="tooltipCell && tooltipCell.sectionId === getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber)"
+          *ngIf="tooltipCell && uiState.activeConveyor && uiState.activeArea && tooltipCell.sectionId === getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber)"
           class="tooltip"
           [style.left.px]="tooltipPosition?.x || 0"
           [style.top.px]="tooltipPosition?.y || 0"

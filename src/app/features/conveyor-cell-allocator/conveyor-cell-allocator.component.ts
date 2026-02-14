@@ -521,4 +521,23 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   getAreaLabel(areaId: string): string {
     return areaId;
   }
+
+  /**
+   * Get formatted section range display
+   */
+  getSectionRangeDisplay(conveyorId: string | null, areaId: string | null, sectionNumber: number): string {
+    if (!conveyorId || !areaId) return '';
+    const area = this.getArea(conveyorId, areaId);
+    if (!area) return '';
+    const range = this.getSectionRange(area.start, area.end, sectionNumber);
+    return `${range.start}-${range.end}`;
+  }
+
+  /**
+   * Get cell indices array for ngFor iteration
+   */
+  getCellIndicesArray(): number[] {
+    const total = this.getTotalCells();
+    return Array.from({ length: total }, (_, i) => i);
+  }
 }
