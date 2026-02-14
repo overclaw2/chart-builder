@@ -337,20 +337,20 @@
 /* Badge now positioned below the package item itself, not the whole container */
 .item-central-position-badge {
   position: absolute;
-  /* Position below the package rectangle (within item-wrapper) */
-  bottom: -2.2rem;
+  /* Position centered on the package element (not below, not at graph center) */
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.65rem;
-  font-weight: 700;
+  transform: translate(-50%, -50%);
+  font-size: 0.75rem;
+  font-weight: 600;
   color: #ffffff;
-  background: var(--info-color, #0066cc);
-  padding: 0.3rem 0.6rem;
+  background: rgba(0, 102, 204, 0.9);
+  padding: 0.35rem 0.7rem;
   border-radius: 3px;
-  border: 1px solid rgba(0, 82, 163, 0.8);
+  border: 1px solid #0052a3;
   white-space: nowrap;
-  z-index: 9;
-  box-shadow: 0 2px 4px rgba(0, 102, 204, 0.25);
+  z-index: 5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
   width: fit-content;
   pointer-events: none;
@@ -359,23 +359,15 @@
   text-overflow: ellipsis;
 }
 
-/* Connector line extending from package to label below */
+/* No connector line when badge is centered on package */
 .item-central-position-badge::before {
   content: '';
-  position: absolute;
-  width: 2px;
-  height: 8px;
-  background: linear-gradient(180deg, var(--info-color, #0066cc) 0%, rgba(0, 102, 204, 0.3) 100%);
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 1px;
+  display: none;
 }
 
 .item-central-position-badge:hover {
-  background: var(--compartment-border, #3b82f6);
-  box-shadow: 0 2px 6px rgba(0, 102, 204, 0.35);
-  transform: translateX(-50%) translateY(-2px);
+  background: rgba(0, 82, 163, 0.95);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* AVIHAI FIX #1: Hover tooltip with package data - positioned below the package shape */
