@@ -288,7 +288,7 @@
             <div class="axis-range-label axis-end-label">{{ compartment.widthindexEnd }}</div>
           </div>
           
-          <!-- Timeline strip (full width, no labels) -->
+          <!-- Timeline strip (full width, with labels overlay) -->
           <div class="top-axis">
             <div class="axis-track">
               <!-- Ghost highlight while dragging a package -->
@@ -307,15 +307,15 @@
                 [ngStyle]="getAxisHighlightPosition(item, compartment)"
               ></div>
             </div>
-          </div>
-          
-          <!-- Package Index Labels with Vertical Connectors (below timeline) -->
-          <div class="axis-labels-wrapper">
-            <div class="axis-label-with-connector" 
-              *ngFor="let item of compartment.items"
-              [ngStyle]="{ left: getAxisLabelPosition(item, compartment) }">
-              <div class="axis-label-connector"></div>
-              <div class="axis-label-text">{{ item.displayIndex || getCentralPositionIndex(item) }}</div>
+            
+            <!-- Package Index Labels with Vertical Connectors (overlay on top of timeline, positioned absolutely) -->
+            <div class="axis-labels-wrapper">
+              <div class="axis-label-with-connector" 
+                *ngFor="let item of compartment.items"
+                [ngStyle]="{ left: getAxisLabelPosition(item, compartment) }">
+                <div class="axis-label-connector"></div>
+                <div class="axis-label-text">{{ item.displayIndex || getCentralPositionIndex(item) }}</div>
+              </div>
             </div>
           </div>
         </div>

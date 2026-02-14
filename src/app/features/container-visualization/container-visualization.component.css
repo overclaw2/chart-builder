@@ -704,7 +704,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  margin-bottom: 1rem;
+  margin-bottom: 3.5rem;
   margin-top: 0.5rem;
   width: 100%;
 }
@@ -732,6 +732,7 @@
 }
 
 .top-axis {
+  position: relative;
   display: flex;
   align-items: center;
   width: 100%;
@@ -780,10 +781,12 @@
 
 /* Width Index Tooltips Below Axis with Vertical Connectors */
 .axis-labels-wrapper {
-  position: relative;
-  display: flex;
+  position: absolute;
+  bottom: -3rem;
+  left: 0;
   width: 100%;
   height: 3rem;
+  display: flex;
   gap: 0.5rem;
 }
 
