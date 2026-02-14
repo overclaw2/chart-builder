@@ -69,12 +69,6 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
           this.initializeUIState();
         }
       });
-
-    // Load initial state if package is provided
-    if (this.packageData) {
-      this.uiState.currentPackage = this.packageData;
-      this.detectMode();
-    }
   }
 
   ngOnDestroy(): void {
@@ -86,12 +80,21 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
    * Initialize UI state based on package data
    */
   private initializeUIState(): void {
+    // Select the first conveyor by default if available
+    if (this.conveyors && this.conveyors.length > 0 && !this.uiState.activeConveyor) {
+      this.uiState.activeConveyor = this.conveyors[0].id;
+    }
+
     if (!this.packageData) return;
 
     this.uiState.currentPackage = this.packageData;
     this.detectMode();
 
-    if (this.uiState.mode === 'edit' && this.packageData.allocation) {
+    // In NEW mode, reset all expansion state
+    if (this.uiState.mode === 'new') {
+      this.resetAllExpansionState();
+    } else if (this.uiState.mode === 'edit' && this.packageData.allocation) {
+      // In EDIT mode, auto-navigate to existing allocation
       this.autoNavigateEditMode();
     }
   }
@@ -106,6 +109,17 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
     } else {
       this.uiState.mode = 'new';
     }
+  }
+
+  /**
+   * Reset all expansion state - used for NEW mode
+   * Ensures all areas and sections start collapsed
+   */
+  private resetAllExpansionState(): void {
+    this.uiState.activeArea = null;
+    this.uiState.openSections = [];
+    this.selectedCellsInSection = {};
+    this.uiState.selectedCells = null;
   }
 
   /**
@@ -152,24 +166,38 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle conveyor selection
+   * Handle conveyor tab selection
+   * Switches to the specified conveyor and resets all Level 2-4 selections
+   */
+  selectConveyorTab(conveyorId: string): void {
+    // Only proceed if changing to a different conveyor
+    if (this.uiState.activeConveyor === conveyorId) {
+      return;
+    }
+    
+    // Switch to the selected conveyor
+    this.uiState.activeConveyor = conveyorId;
+    
+    // Reset all Level 2-4 selections when changing conveyors
+    this.resetAllExpansionState();
+  }
+
+  /**
+   * Reset all selections below the current level
+   * Used when switching conveyors or areas
+   */
+  private resetLevelSelectionsBelow(): void {
+    this.uiState.activeArea = null;
+    this.uiState.openSections = [];
+    this.selectedCellsInSection = {};
+    this.uiState.selectedCells = null;
+  }
+
+  /**
+   * Handle conveyor selection (kept for backward compatibility)
    */
   toggleConveyor(conveyorId: string): void {
-    if (this.uiState.activeConveyor === conveyorId) {
-      // Deselect
-      this.uiState.activeConveyor = null;
-      this.uiState.activeArea = null;
-      this.uiState.openSections = [];
-      this.selectedCellsInSection = {};
-      this.uiState.selectedCells = null;
-    } else {
-      // Select new conveyor
-      this.uiState.activeConveyor = conveyorId;
-      this.uiState.activeArea = null;
-      this.uiState.openSections = [];
-      this.selectedCellsInSection = {};
-      this.uiState.selectedCells = null;
-    }
+    this.selectConveyorTab(conveyorId);
   }
 
   /**
@@ -179,16 +207,14 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
     if (this.uiState.activeArea === areaId) {
       // Deselect
       this.uiState.activeArea = null;
-      this.uiState.openSections = [];
-      this.selectedCellsInSection = {};
-      this.uiState.selectedCells = null;
     } else {
       // Select new area
       this.uiState.activeArea = areaId;
-      this.uiState.openSections = [];
-      this.selectedCellsInSection = {};
-      this.uiState.selectedCells = null;
     }
+    // Reset sections and cell selections when area changes
+    this.uiState.openSections = [];
+    this.selectedCellsInSection = {};
+    this.uiState.selectedCells = null;
   }
 
   /**

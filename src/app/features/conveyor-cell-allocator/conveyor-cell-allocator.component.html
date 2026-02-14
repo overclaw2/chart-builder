@@ -23,15 +23,16 @@
 
   <!-- Main Content -->
   <div *ngIf="config" class="allocator-content">
-    <!-- Level 1: Conveyor Selection -->
-    <div class="level level-1">
-      <h3>Level 1: Select Conveyor</h3>
-      <div class="button-group">
-        <button 
+    <!-- Tab Bar: Conveyor Selection (Level 1) -->
+    <div class="level-1-tabs">
+      <h3 class="tabs-label">Select Conveyor</h3>
+      <div class="conveyor-tabs">
+        <button
           *ngFor="let conveyor of conveyors"
           [class.active]="uiState.activeConveyor === conveyor.id"
-          (click)="toggleConveyor(conveyor.id)"
-          class="level-btn"
+          (click)="selectConveyorTab(conveyor.id)"
+          class="tab-btn"
+          [title]="'Switch to ' + conveyor.name"
         >
           {{ conveyor.name }}
         </button>

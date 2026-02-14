@@ -391,14 +391,14 @@
   border-radius: 3px;
   border: 1px solid #0052a3;
   white-space: nowrap;
-  z-index: 10;
+  z-index: 2100;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
   width: fit-content;
   pointer-events: none;
   max-width: 90px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 /* No connector line when badge is centered on package */
