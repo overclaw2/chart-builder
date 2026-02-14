@@ -41,6 +41,7 @@ export class ContainerVisualizationComponent implements OnInit {
   dragOverCompartmentId: string | null = null;
   loadingMessage: string | null = null;
   dragTooltip: { index: number; visible: boolean; startIndex?: number; stopIndex?: number } = { index: 0, visible: false };
+  dragLabelPosition: { x: number; y: number } = { x: 0, y: 0 };
   hoveredItemId: string | null = null;
   isDragging: boolean = false;
   grabOffset: number = 0; // Offset between mouse position and item's left edge when grab occurs
@@ -535,6 +536,14 @@ export class ContainerVisualizationComponent implements OnInit {
       startIndex: startIndex,
       stopIndex: stopIndex,
       visible: true
+    };
+
+    // FLOATING DRAG LABELS: Update position to follow the drag preview
+    // Position labels below the drag preview (approximately where they would be in the item box)
+    const dragPreviewHeight = 80; // Approximate height of a package item
+    this.dragLabelPosition = {
+      x: Math.round(event.clientX - 50), // Center horizontally (approximate width of labels)
+      y: Math.round(event.clientY + dragPreviewHeight + 5) // Position below the drag preview
     };
 
     // CRITICAL FIX: Update the dragged item's displayIndex directly in the data model

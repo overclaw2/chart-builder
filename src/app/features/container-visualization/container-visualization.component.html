@@ -445,6 +445,19 @@
     </div>
   </div>
 
+  <!-- FLOATING DRAG LABELS: Compartment indicators that follow the dragged item -->
+  <div class="floating-drag-labels-overlay"
+    *ngIf="dragTooltip.visible && draggedItem"
+    [style.left.px]="dragLabelPosition.x"
+    [style.top.px]="dragLabelPosition.y">
+    <div class="drag-label-item drag-label-start">
+      {{ dragTooltip.startIndex }}
+    </div>
+    <div class="drag-label-item drag-label-stop">
+      {{ dragTooltip.stopIndex }}
+    </div>
+  </div>
+
   <!-- TASK 5: Conveyor Allocation Window - New Design -->
   <div class="conv-popup-backdrop" *ngIf="convPopup.visible" (click)="onConvPopupBackdropClick($event)">
     <div class="conveyor-window" *ngIf="convPopup.item && getConveyorData(convPopup.item) as conveyorData">
