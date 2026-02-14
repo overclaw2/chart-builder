@@ -538,12 +538,13 @@ export class ContainerVisualizationComponent implements OnInit {
       visible: true
     };
 
-    // FLOATING DRAG LABELS: Update position to follow the drag preview
-    // Position labels below the drag preview (approximately where they would be in the item box)
+    // FLOATING DRAG LABELS: Update position to be inside the drag preview
+    // Position labels at the bottom of the ghost preview (inside the box, lower corners)
     const dragPreviewHeight = 80; // Approximate height of a package item
+    const dragPreviewWidth = 120; // Approximate width of a package item
     this.dragLabelPosition = {
-      x: Math.round(event.clientX - 50), // Center horizontally (approximate width of labels)
-      y: Math.round(event.clientY + dragPreviewHeight + 5) // Position below the drag preview
+      x: Math.round(event.clientX - (dragPreviewWidth / 2)), // Align with left edge of ghost
+      y: Math.round(event.clientY + dragPreviewHeight - 22) // Position inside at bottom
     };
 
     // CRITICAL FIX: Update the dragged item's displayIndex directly in the data model
@@ -1007,6 +1008,18 @@ export class ContainerVisualizationComponent implements OnInit {
     // Central position = item.position + (item.dimensionMcm / 2)
     const centralPosition = item.position + (item.dimensionMcm / 2);
     return Math.round(centralPosition).toString();
+  }
+
+  // Get the original (placed) item's start index for tooltip display
+  getOriginalItemStartIndex(item: Item): number {
+    const centralPosition = item.position + (item.dimensionMcm / 2);
+    return Math.round(centralPosition - (item.dimensionMcm / 2));
+  }
+
+  // Get the original (placed) item's stop index for tooltip display
+  getOriginalItemStopIndex(item: Item): number {
+    const centralPosition = item.position + (item.dimensionMcm / 2);
+    return Math.round(centralPosition + (item.dimensionMcm / 2));
   }
 
   // Get position for axis label (tooltip below axis with connector line)

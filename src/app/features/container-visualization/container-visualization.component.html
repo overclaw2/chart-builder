@@ -349,15 +349,6 @@
           
           <div class="container-bar">
             <div class="item-wrapper" *ngFor="let item of compartment.items" [ngStyle]="getItemPosition(item, compartment)" [attr.data-item-id]="item.id">
-              <!-- TASK 4 UPDATE: Width Index Labels moved inside package box at lower corners -->
-              <div class="drag-index-labels" *ngIf="dragTooltip.visible && dragOverCompartmentId === compartment.id && draggedItem?.item?.id === item.id">
-                <div class="drag-index-label drag-start-label">
-                  {{ dragTooltip.startIndex }}
-                </div>
-                <div class="drag-index-label drag-stop-label">
-                  {{ dragTooltip.stopIndex }}
-                </div>
-              </div>
               
               <div
                 class="item"
@@ -442,6 +433,15 @@
     <div class="tooltip-row">
       <span class="tooltip-label">Compartment Use:</span>
       <span class="tooltip-value">{{ getTooltipCompartmentUtilization(tooltipState.item) }}%</span>
+    </div>
+    <!-- Compartment Indicators: Fixed values from placed item (not updated during drag) -->
+    <div class="tooltip-compartment-indicators">
+      <div class="tooltip-indicator tooltip-start-indicator">
+        {{ getOriginalItemStartIndex(tooltipState.item) }}
+      </div>
+      <div class="tooltip-indicator tooltip-stop-indicator">
+        {{ getOriginalItemStopIndex(tooltipState.item) }}
+      </div>
     </div>
   </div>
 
