@@ -81,15 +81,13 @@
     <div class="level-4-panels" *ngIf="uiState.activeConveyor && uiState.activeArea">
       <div 
         *ngFor="let sectionNumber of [1, 2, 3, 4]"
-        [class.open]="isSectionOpen(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))"
+        [class.open]="isSectionOpen(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))"
         class="level-4-panel"
       >
         <!-- Panel Header -->
         <div class="level-4-header">
-          <h4>
-            Section {{ getSectionLabel(uiState.activeConveyor, uiState.activeArea, sectionNumber) }} : {{ getSectionRangeDisplay(uiState.activeConveyor, uiState.activeArea, sectionNumber) }} [Mcm]
-          </h4>
-          <button (click)="toggleSection(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))" class="close-btn">✕</button>
+          <h4>Section {{ sectionNumber }}</h4>
+          <button (click)="toggleSection(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))" class="close-btn">✕</button>
         </div>
 
         <!-- Package Info -->
@@ -116,17 +114,17 @@
         <div class="cell-grid">
           <button
             *ngFor="let i of getCellIndicesArray()"
-            [class.selected]="isCellSelected(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            [class.allocated]="getAllocatedCellInfo(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) !== null"
-            [class.disabled]="!canSelectCell(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            [style.backgroundColor]="isCellSelected(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) ? '#1976d2' : (getAllocatedCellColor(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) || '#e0e0e0')"
-            [style.color]="isCellSelected(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) ? '#fff' : '#333'"
-            (click)="isSectionOpen(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber)) && onCellClick(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            (mouseover)="showTooltip($event, getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            [class.selected]="isCellSelected(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            [class.allocated]="getAllocatedCellInfo(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) !== null"
+            [class.disabled]="!canSelectCell(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            [style.backgroundColor]="getCellBackgroundColor(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            [style.color]="getCellTextColor(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            (click)="handleCellClick(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            (mouseover)="showTooltip($event, buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
             (mouseout)="hideTooltip()"
             class="cell-btn"
-            [disabled]="!canSelectCell(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            [title]="getCellTooltip(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            [disabled]="!canSelectCell(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
+            [title]="getCellTooltip(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
           >
             {{ i }}
           </button>
@@ -134,12 +132,12 @@
 
         <!-- Tooltip -->
         <div 
-          *ngIf="tooltipCell && uiState.activeConveyor && uiState.activeArea && tooltipCell.sectionId === getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber)"
+          *ngIf="tooltipCell && uiState.activeConveyor && uiState.activeArea && tooltipCell.sectionId === buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber)"
           class="tooltip"
           [style.left.px]="tooltipPosition?.x || 0"
           [style.top.px]="tooltipPosition?.y || 0"
         >
-          {{ getCellTooltip(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), tooltipCell.cellIndex) }}
+          {{ getCellTooltip(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), tooltipCell.cellIndex) }}
         </div>
       </div>
     </div>

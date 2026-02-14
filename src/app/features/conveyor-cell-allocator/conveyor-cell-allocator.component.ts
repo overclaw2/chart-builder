@@ -540,4 +540,46 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
     const total = this.getTotalCells();
     return Array.from({ length: total }, (_, i) => i);
   }
+
+  /**
+   * Build section ID from conveyor, area and section number
+   */
+  buildSectionId(conveyorId: string | null, areaId: string | null, sectionNumber: number): string {
+    if (!conveyorId || !areaId) return '';
+    return `${conveyorId}-${areaId}-${sectionNumber}`;
+  }
+
+  /**
+   * Get cell background color based on selection and allocation state
+   */
+  getCellBackgroundColor(sectionId: string, cellIndex: number): string {
+    if (this.isCellSelected(sectionId, cellIndex)) {
+      return '#1976d2';
+    }
+    const allocatedColor = this.getAllocatedCellColor(sectionId, cellIndex);
+    return allocatedColor || '#e0e0e0';
+  }
+
+  /**
+   * Get cell text color
+   */
+  getCellTextColor(sectionId: string, cellIndex: number): string {
+    return this.isCellSelected(sectionId, cellIndex) ? '#fff' : '#333';
+  }
+
+  /**
+   * Check if cell button should be clickable
+   */
+  isCellClickable(sectionId: string): boolean {
+    return this.isSectionOpen(sectionId);
+  }
+
+  /**
+   * Handle cell button click - integrates section open check and click handler
+   */
+  handleCellClick(sectionId: string, cellIndex: number): void {
+    if (this.isCellClickable(sectionId)) {
+      this.onCellClick(sectionId, cellIndex);
+    }
+  }
 }
