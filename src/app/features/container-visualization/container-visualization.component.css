@@ -780,25 +780,16 @@
 }
 
 /* Width Index Tooltips Below Axis with Vertical Connectors */
-.axis-labels-wrapper {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  height: 3rem;
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
-  pointer-events: none;
-}
-
 .axis-label-with-connector {
   position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
+  top: 100%;
+  margin-top: 0.5rem;
   transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .axis-label-connector {
