@@ -203,20 +203,44 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle area selection
+   * Handle area selection - opens all sections automatically
    */
   toggleArea(areaId: string): void {
     if (this.uiState.activeArea === areaId) {
       // Deselect
       this.uiState.activeArea = null;
+      this.uiState.openSections = [];
     } else {
       // Select new area
       this.uiState.activeArea = areaId;
+      // Automatically open ALL sections for this area
+      const sections = this.configService.getSections(this.uiState.activeConveyor || '', areaId);
+      this.uiState.openSections = sections.map(s => s.name);
     }
-    // Reset sections and cell selections when area changes
-    this.uiState.openSections = [];
+    // Reset cell selections when area changes
     this.selectedCellsInSection = {};
     this.uiState.selectedCells = null;
+  }
+
+  /**
+   * Select a single section (activate it with blue highlight)
+   */
+  selectSection(sectionName: string): void {
+    // Clear previous selection
+    this.selectedCellsInSection = {};
+    
+    // Set this section as active (for cell grid display)
+    this.uiState.openSections = [sectionName];
+    
+    // Reset cell selection
+    this.uiState.selectedCells = null;
+  }
+
+  /**
+   * Get the currently active section ID (for highlighting)
+   */
+  getActiveSectionId(): string | null {
+    return this.uiState.openSections.length === 1 ? this.uiState.openSections[0] : null;
   }
 
   /**

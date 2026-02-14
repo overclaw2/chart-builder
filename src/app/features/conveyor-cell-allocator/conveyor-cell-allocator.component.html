@@ -65,24 +65,28 @@
 
     <!-- Level 3 & 4: Sections and Cells -->
     <div *ngIf="uiState.activeConveyor && uiState.activeArea" class="level level-3">
-      <h3>Level 3: Select Section</h3>
-      <div class="sections-list">
+      <h3>Level 3: Select Section (Click to activate)</h3>
+      
+      <!-- Sections Row (all sections displayed evenly) -->
+      <div class="sections-row">
         <div 
           *ngFor="let section of configService.getSections(uiState.activeConveyor, uiState.activeArea)"
-          class="section-group"
+          class="section-card"
+          [class.active]="getActiveSectionId() === section.name"
         >
-          <!-- Section Button -->
+          <!-- Section Box (clickable) -->
           <button 
-            [class.active]="isSectionOpen(section.name)"
-            (click)="toggleSection(section.name)"
-            class="level-btn section-btn"
+            (click)="selectSection(section.name)"
+            [class.active]="getActiveSectionId() === section.name"
+            class="section-header"
           >
-            <span class="section-title">{{ section.name }} ({{ section.startWidthIndex }}-{{ section.stopWidthIndex }})</span>
-            <span class="section-toggle">{{ isSectionOpen(section.name) ? '▼' : '▶' }}</span>
+            <span class="section-name">{{ section.name }}</span>
+            <span class="section-range">{{ section.startWidthIndex }}-{{ section.stopWidthIndex }}</span>
+            <span class="section-cells-count">{{ section.cells.length }} cells</span>
           </button>
 
-          <!-- Section Panel (opened when section is active) -->
-          <div *ngIf="isSectionOpen(section.name)" class="level-4-panel">
+          <!-- Section Panel (shown only for active section) -->
+          <div *ngIf="getActiveSectionId() === section.name" class="level-4-panel">
             <!-- Package Info -->
             <div class="package-info">
               <div class="info-row">
@@ -140,7 +144,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> <!-- end sections-row -->
     </div>
 
     <!-- Action Buttons -->

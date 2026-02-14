@@ -209,7 +209,79 @@
   color: white;
 }
 
-/* Level 3 Section Buttons */
+/* Level 3: Sections Row (all sections displayed evenly) */
+.sections-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+/* Section Card: Container for each section */
+.section-card {
+  flex: 1;
+  min-width: 180px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.section-card.active {
+  border-color: #2196F3;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+/* Section Header (clickable box - Level 3) */
+.section-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px;
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.section-header:hover {
+  background-color: #e8e8e8;
+  border-bottom-color: #2196F3;
+}
+
+.section-header.active {
+  background-color: #2196F3;
+  color: white;
+  border-bottom-color: #1976D2;
+}
+
+.section-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.section-range {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.section-cells-count {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.section-header.active .section-range,
+.section-header.active .section-cells-count {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Level 3 Section Buttons (legacy compatibility) */
 .section-btn {
   flex: 1;
   min-width: 100px;
@@ -241,7 +313,7 @@
   text-align: right;
 }
 
-/* Level 4 Panels */
+/* Level 4 Panels - Cell grid shown only for active section */
 .level-4-panels {
   display: flex;
   flex-direction: column;
@@ -249,12 +321,25 @@
 }
 
 .level-4-panel {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
   padding: 15px;
-  background-color: white;
-  border: 2px solid #f57c00;
-  border-radius: 4px;
-  border-left: 4px solid #f57c00;
+  background-color: #fafafa;
+  border-top: 2px solid #2196F3;
+  border-radius: 0 0 4px 4px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 2000px;
+  }
 }
 
 .level-4-panel.open {
@@ -327,10 +412,32 @@
   grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
   gap: 5px;
   padding: 10px;
-  background-color: #fafafa;
+  background-color: white;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  max-height: 200px;
+  max-height: 250px;
   overflow-y: auto;
+}
+
+/* Cell Range Display */
+.cell-range-display {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 10px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #1976D2;
+  font-weight: 600;
+}
+
+.range-label {
+  flex: 1;
+}
+
+.cell-count {
+  text-align: right;
 }
 
 .cell-btn {
