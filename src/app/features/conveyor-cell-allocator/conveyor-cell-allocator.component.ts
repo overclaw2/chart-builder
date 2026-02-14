@@ -4,15 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { ConveyorConfigService } from '../../core/services/conveyor-config.service';
+import { ConveyorAdvancedService } from '../../core/services/conveyor-advanced.service';
 import { ConveyorStateService } from '../../core/services/conveyor-state.service';
 import {
-  ConveyorConfig,
-  Conveyor,
-  ConveyorArea,
+  ConveyorConfigAdvanced,
+  ConveyorAdvanced,
+  ConveyorAreaAdvanced,
+  ConveyorSection,
+} from '../../core/models/conveyor-advanced.model';
+import {
   PackageData,
   AllocationResult,
-  UIState,
   AllocatedCell,
 } from '../../core/models/conveyor.model';
 
@@ -29,17 +31,18 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   @Output() allocationCancelled = new EventEmitter<void>();
 
   // Configuration
-  config: ConveyorConfig | null = null;
-  conveyors: Conveyor[] = [];
+  config: ConveyorConfigAdvanced | null = null;
+  conveyors: ConveyorAdvanced[] = [];
 
   // UI State
-  uiState: UIState = {
-    mode: 'new',
-    activeConveyor: null,
-    activeArea: null,
-    openSections: [],
-    currentPackage: null as any,
-    selectedCells: null,
+  uiState = {
+    mode: 'new' as 'new' | 'edit',
+    activeConveyor: null as string | null,
+    activeArea: null as string | null,
+    openSections: [] as string[],
+    currentPackage: null as PackageData | null,
+    selectedCells: null as { sectionId: string; cellIndices: number[] } | null,
+    originalAllocation: null as any,
   };
 
   // Calculated data
@@ -54,10 +57,15 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  // Expose configService for template access
+  configService: ConveyorAdvancedService;
+
   constructor(
-    private configService: ConveyorConfigService,
+    configService: ConveyorAdvancedService,
     private stateService: ConveyorStateService
-  ) {}
+  ) {
+    this.configService = configService;
+  }
 
   ngOnInit(): void {
     this.configService.config$
@@ -65,7 +73,7 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
       .subscribe((config) => {
         this.config = config;
         if (config) {
-          this.conveyors = config.conveyors;
+          this.conveyors = config.convayor || [];
           this.initializeUIState();
         }
       });
@@ -82,7 +90,7 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   private initializeUIState(): void {
     // Select the first conveyor by default if available
     if (this.conveyors && this.conveyors.length > 0 && !this.uiState.activeConveyor) {
-      this.uiState.activeConveyor = this.conveyors[0].id;
+      this.uiState.activeConveyor = this.conveyors[0].conveyorId;
     }
 
     if (!this.packageData) return;
@@ -132,20 +140,14 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
     // Auto-select conveyor
     this.uiState.activeConveyor = allocation.conveyorId;
 
-    // Auto-select area
+    // Auto-select area (use areaId which is the area name in advanced format)
     this.uiState.activeArea = allocation.areaId;
 
-    // Auto-open all 4 sections
-    const area = this.getArea(allocation.conveyorId, allocation.areaId);
-    if (area) {
-      const conveyorIndex = this.conveyors.findIndex(c => c.id === allocation.conveyorId);
-      const areaIndex = this.conveyors[conveyorIndex]?.areas.findIndex(a => a.id === allocation.areaId);
-      
-      for (let i = 1; i <= 4; i++) {
-        const sectionId = `${allocation.conveyorId}-${allocation.areaId}-${i}`;
-        if (!this.uiState.openSections.includes(sectionId)) {
-          this.uiState.openSections.push(sectionId);
-        }
+    // Auto-open section if exists
+    const section = this.configService.getSection(allocation.conveyorId, allocation.areaId, allocation.sectionId);
+    if (section) {
+      if (!this.uiState.openSections.includes(allocation.sectionId)) {
+        this.uiState.openSections.push(allocation.sectionId);
       }
     }
 
@@ -158,11 +160,11 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get area by conveyor and area IDs
+   * Get area by conveyor and area name
    */
-  private getArea(conveyorId: string, areaId: string): ConveyorArea | null {
-    const conveyor = this.conveyors.find(c => c.id === conveyorId);
-    return conveyor?.areas.find(a => a.id === areaId) ?? null;
+  private getArea(conveyorId: string, areaName: string): ConveyorAreaAdvanced | null {
+    const conveyor = this.conveyors.find(c => c.conveyorId === conveyorId);
+    return conveyor?.Area.find(a => a.name === areaName) ?? null;
   }
 
   /**
@@ -220,56 +222,58 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   /**
    * Handle section toggle (Level 3)
    */
-  toggleSection(sectionId: string): void {
-    const index = this.uiState.openSections.indexOf(sectionId);
+  toggleSection(sectionName: string): void {
+    const index = this.uiState.openSections.indexOf(sectionName);
     if (index > -1) {
       // Close section
       this.uiState.openSections.splice(index, 1);
-      delete this.selectedCellsInSection[sectionId];
+      delete this.selectedCellsInSection[sectionName];
       
       // If this was the selected section, clear selection
-      if (this.uiState.selectedCells?.sectionId === sectionId) {
+      if (this.uiState.selectedCells?.sectionId === sectionName) {
         this.uiState.selectedCells = null;
       }
     } else {
       // Open section
-      this.uiState.openSections.push(sectionId);
+      this.uiState.openSections.push(sectionName);
     }
   }
 
   /**
-   * Get section label
+   * Get section label (section name)
    */
-  getSectionLabel(conveyorId: string, areaId: string, sectionNumber: number): string {
-    return `${areaId}${sectionNumber}`;
+  getSectionLabel(section: ConveyorSection): string {
+    return section.name;
   }
 
   /**
-   * Calculate section index width range
+   * Get section range from section object (no calculation needed)
    */
-  getSectionRange(areaStart: number, areaEnd: number, sectionNumber: number): { start: number; end: number } {
-    return this.configService.calculateSectionRange(areaStart, areaEnd, sectionNumber);
-  }
-
-  /**
-   * Get displayed index width labels
-   */
-  getIndexWidthLabels(
-    areaStart: number,
-    areaEnd: number
-  ): { position: 'left' | 'right' | 'both'; start: number; end: number } {
+  getSectionRange(section: ConveyorSection): { start: number; end: number } {
     return {
-      position: 'both',
-      start: areaStart,
-      end: areaEnd,
+      start: section.startWidthIndex,
+      end: section.stopWidthIndex,
     };
   }
 
   /**
-   * Get section ID
+   * Get displayed index width labels for area
    */
-  getSectionId(conveyorId: string, areaId: string, sectionNumber: number): string {
-    return `${conveyorId}-${areaId}-${sectionNumber}`;
+  getIndexWidthLabels(
+    area: ConveyorAreaAdvanced
+  ): { position: 'left' | 'right' | 'both'; start: number; end: number } {
+    return {
+      position: 'both',
+      start: area.startWidthIndex,
+      end: area.stopWidthIndex,
+    };
+  }
+
+  /**
+   * Get section ID from section name
+   */
+  getSectionId(section: ConveyorSection): string {
+    return section.name;
   }
 
   /**
@@ -280,31 +284,35 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get total cells
+   * Get total cells - from first section of first area of first conveyor
    */
   getTotalCells(): number {
-    return this.config?.level4_config.total_cells || 45;
+    const firstSection = this.conveyors[0]?.Area[0]?.Sections[0];
+    return firstSection?.cells.length || 45;
   }
 
   /**
-   * Get cell width
+   * Get cell width by calculating from first cell
    */
   getCellWidth(): number {
-    return this.config?.level4_config.cell_width || 5;
+    const firstSection = this.conveyors[0]?.Area[0]?.Sections[0];
+    if (!firstSection || firstSection.cells.length < 2) return 5;
+    return firstSection.cells[1].centralWidthIndex - firstSection.cells[0].centralWidthIndex;
   }
 
   /**
-   * Calculate cell index width
+   * Get cell central width index (already calculated in data)
    */
-  calculateCellStartWidth(sectionStart: number, cellIndex: number): number {
-    return sectionStart + cellIndex * this.getCellWidth();
+  getCellCentralWidth(section: ConveyorSection, cellIndex: number): number {
+    const cell = section.cells.find(c => c.index === cellIndex);
+    return cell?.centralWidthIndex || 0;
   }
 
   /**
    * Handle cell click
    */
-  onCellClick(sectionId: string, cellIndex: number): void {
-    const allocated = this.getAllocatedCellInfo(sectionId, cellIndex);
+  onCellClick(sectionName: string, cellIndex: number): void {
+    const allocated = this.getAllocatedCellInfo(sectionName, cellIndex);
     
     // Check if cell is occupied by another package
     if (allocated && allocated.packageId !== this.packageData?.id) {
@@ -312,21 +320,21 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
     }
 
     // Check if cell is already in selection
-    const currentSelection = this.selectedCellsInSection[sectionId] || [];
-    const cellIndex2 = currentSelection.indexOf(cellIndex);
+    const currentSelection = this.selectedCellsInSection[sectionName] || [];
+    const cellIndexPosition = currentSelection.indexOf(cellIndex);
 
-    if (cellIndex2 > -1) {
+    if (cellIndexPosition > -1) {
       // Cell is selected, deselect it
-      currentSelection.splice(cellIndex2, 1);
+      currentSelection.splice(cellIndexPosition, 1);
     } else {
       // Try to select consecutive cells starting from this cell
       const needed = this.packageData?.cells || 1;
-      const consecutive = this.findConsecutiveAvailableCells(sectionId, cellIndex, needed);
+      const consecutive = this.findConsecutiveAvailableCells(sectionName, cellIndex, needed);
       
       if (consecutive.length === needed) {
-        this.selectedCellsInSection[sectionId] = consecutive;
+        this.selectedCellsInSection[sectionName] = consecutive;
         this.uiState.selectedCells = {
-          sectionId,
+          sectionId: sectionName,
           cellIndices: consecutive,
         };
       }
@@ -338,17 +346,32 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   /**
    * Find consecutive available cells
    */
-  private findConsecutiveAvailableCells(sectionId: string, startIndex: number, count: number): number[] {
+  private findConsecutiveAvailableCells(sectionName: string, startIndex: number, count: number): number[] {
     const conveyorId = this.uiState.activeConveyor;
-    if (!conveyorId) return [];
+    const areaName = this.uiState.activeArea;
+    if (!conveyorId || !areaName) return [];
 
-    return this.stateService.findConsecutiveAvailableCells(
-      conveyorId,
-      sectionId,
-      startIndex,
-      count,
-      this.uiState.mode === 'edit' ? this.packageData?.id : undefined
-    );
+    const section = this.configService.getSection(conveyorId, areaName, sectionName);
+    if (!section) return [];
+
+    // Find consecutive cells starting from startIndex
+    const result: number[] = [];
+    const sortedCells = [...section.cells].sort((a, b) => a.index - b.index);
+    const startCell = sortedCells.find(c => c.index === startIndex);
+    if (!startCell) return [];
+
+    const startPos = sortedCells.indexOf(startCell);
+    for (let i = startPos; i < startPos + count && i < sortedCells.length; i++) {
+      const cell = sortedCells[i];
+      // Check if cell is available (not occupied or owned by current package)
+      if (cell.occupiedBy === null || (this.uiState.mode === 'edit' && cell.occupiedBy === this.packageData?.id)) {
+        result.push(cell.index);
+      } else {
+        break; // Stop if cell is occupied by another package
+      }
+    }
+
+    return result.length === count ? result : [];
   }
 
   /**
@@ -371,33 +394,33 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   /**
    * Check if cell is in current selection
    */
-  isCellSelected(sectionId: string, cellIndex: number): boolean {
-    return this.selectedCellsInSection[sectionId]?.includes(cellIndex) ?? false;
+  isCellSelected(sectionName: string, cellIndex: number): boolean {
+    return this.selectedCellsInSection[sectionName]?.includes(cellIndex) ?? false;
   }
 
   /**
    * Get allocated cell info
    */
-  getAllocatedCellInfo(sectionId: string, cellIndex: number): AllocatedCell | null {
+  getAllocatedCellInfo(sectionName: string, cellIndex: number): AllocatedCell | null {
     const conveyorId = this.uiState.activeConveyor;
     if (!conveyorId) return null;
 
-    return this.stateService.getAllocatedCellInfo(conveyorId, sectionId, cellIndex);
+    return this.stateService.getAllocatedCellInfo(conveyorId, sectionName, cellIndex);
   }
 
   /**
    * Get allocated cell color
    */
-  getAllocatedCellColor(sectionId: string, cellIndex: number): string | null {
-    const allocated = this.getAllocatedCellInfo(sectionId, cellIndex);
+  getAllocatedCellColor(sectionName: string, cellIndex: number): string | null {
+    const allocated = this.getAllocatedCellInfo(sectionName, cellIndex);
     return allocated?.color ?? null;
   }
 
   /**
    * Check if can select cell
    */
-  canSelectCell(sectionId: string, cellIndex: number): boolean {
-    const allocated = this.getAllocatedCellInfo(sectionId, cellIndex);
+  canSelectCell(sectionName: string, cellIndex: number): boolean {
+    const allocated = this.getAllocatedCellInfo(sectionName, cellIndex);
     if (!allocated) return true;
     // Can select if it's the current package's allocation
     return allocated.packageId === this.packageData?.id;
@@ -406,24 +429,17 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   /**
    * Get cell tooltip content
    */
-  getCellTooltip(sectionId: string, cellIndex: number): string {
-    const conveyorId = this.uiState.activeConveyor;
-    const areaId = this.uiState.activeArea;
-    if (!conveyorId || !areaId) return '';
+  getCellTooltip(section: ConveyorSection, cellIndex: number): string {
+    const cellCentral = this.getCellCentralWidth(section, cellIndex);
+    const cellWidth = this.getCellWidth();
+    const cellStart = cellCentral - cellWidth / 2;
+    const cellEnd = cellCentral + cellWidth / 2;
 
-    const area = this.getArea(conveyorId, areaId);
-    if (!area) return '';
-
-    const sectionNumber = parseInt(sectionId.split('-')[2]);
-    const sectionRange = this.getSectionRange(area.start, area.end, sectionNumber);
-    const cellStart = this.calculateCellStartWidth(sectionRange.start, cellIndex);
-    const cellEnd = cellStart + this.getCellWidth();
-
-    const allocated = this.getAllocatedCellInfo(sectionId, cellIndex);
+    const allocated = this.getAllocatedCellInfo(section.name, cellIndex);
     if (allocated) {
-      return `Cell ${cellIndex}: ${cellStart}-${cellEnd} [Mcm] (${allocated.packageName})`;
+      return `Cell ${cellIndex}: ${cellStart.toFixed(1)}-${cellEnd.toFixed(1)} [Mcm] (${allocated.packageName})`;
     }
-    return `Cell ${cellIndex}: ${cellStart}-${cellEnd} [Mcm]`;
+    return `Cell ${cellIndex}: ${cellStart.toFixed(1)}-${cellEnd.toFixed(1)} [Mcm]`;
   }
 
   /**
@@ -483,9 +499,7 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
     const conveyorId = this.uiState.activeConveyor!;
     const sectionId = this.uiState.selectedCells.sectionId;
     const cellIndices = this.uiState.selectedCells.cellIndices;
-
-    // Extract area ID from section ID
-    const areaId = sectionId.split('-')[1];
+    const areaId = this.uiState.activeArea!;
 
     // Update state
     if (this.uiState.mode === 'edit' && this.uiState.originalAllocation) {
@@ -535,66 +549,60 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   /**
    * Get available areas for active conveyor
    */
-  getAvailableAreas(): ConveyorArea[] {
+  getAvailableAreas(): ConveyorAreaAdvanced[] {
     if (!this.uiState.activeConveyor) return [];
-    const conveyor = this.conveyors.find(c => c.id === this.uiState.activeConveyor);
-    return conveyor?.areas ?? [];
+    const conveyor = this.conveyors.find(c => c.conveyorId === this.uiState.activeConveyor);
+    return conveyor?.Area ?? [];
   }
 
   /**
-   * Get area display label
+   * Get area display label (using area name)
    */
-  getAreaLabel(areaId: string): string {
-    return areaId;
+  getAreaLabel(areaName: string): string {
+    return areaName;
   }
 
   /**
    * Get formatted section range display
    */
-  getSectionRangeDisplay(conveyorId: string | null, areaId: string | null, sectionNumber: number): string {
-    if (!conveyorId || !areaId) return '';
-    const area = this.getArea(conveyorId, areaId);
-    if (!area) return '';
-    const range = this.getSectionRange(area.start, area.end, sectionNumber);
-    return `${range.start}-${range.end}`;
+  getSectionRangeDisplay(section: ConveyorSection): string {
+    return `${section.startWidthIndex}-${section.stopWidthIndex}`;
   }
 
   /**
    * Get cell indices array for ngFor iteration
    */
-  getCellIndicesArray(): number[] {
-    const total = this.getTotalCells();
-    return Array.from({ length: total }, (_, i) => i);
+  getCellIndicesArray(section: ConveyorSection): number[] {
+    return section.cells.map(c => c.index);
   }
 
   /**
-   * Build section ID from conveyor, area and section number
+   * Get section ID (section name)
    */
-  buildSectionId(conveyorId: string | null, areaId: string | null, sectionNumber: number): string {
-    if (!conveyorId || !areaId) return '';
-    return `${conveyorId}-${areaId}-${sectionNumber}`;
+  getSectionIdForTemplate(section: ConveyorSection): string {
+    return section.name;
   }
 
   /**
    * Get cell background color based on selection and allocation state
    */
-  getCellBackgroundColor(sectionId: string, cellIndex: number): string {
-    if (this.isCellSelected(sectionId, cellIndex)) {
+  getCellBackgroundColor(sectionName: string, cellIndex: number): string {
+    if (this.isCellSelected(sectionName, cellIndex)) {
       return '#1976d2';
     }
-    const allocatedColor = this.getAllocatedCellColor(sectionId, cellIndex);
+    const allocatedColor = this.getAllocatedCellColor(sectionName, cellIndex);
     return allocatedColor || '#e0e0e0';
   }
 
   /**
    * Get cell text color
    */
-  getCellTextColor(sectionId: string, cellIndex: number): string {
-    return this.isCellSelected(sectionId, cellIndex) ? '#fff' : '#333';
+  getCellTextColor(sectionName: string, cellIndex: number): string {
+    return this.isCellSelected(sectionName, cellIndex) ? '#fff' : '#333';
   }
 
   /**
-   * Check if cell button should be clickable
+   * Check if section is open (already defined above, keeping for backward compatibility)
    */
   isCellClickable(sectionId: string): boolean {
     return this.isSectionOpen(sectionId);
@@ -603,9 +611,9 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   /**
    * Handle cell button click - integrates section open check and click handler
    */
-  handleCellClick(sectionId: string, cellIndex: number): void {
-    if (this.isCellClickable(sectionId)) {
-      this.onCellClick(sectionId, cellIndex);
+  handleCellClick(sectionName: string, cellIndex: number): void {
+    if (this.isCellClickable(sectionName)) {
+      this.onCellClick(sectionName, cellIndex);
     }
   }
 }

@@ -29,12 +29,12 @@
       <div class="conveyor-tabs">
         <button
           *ngFor="let conveyor of conveyors"
-          [class.active]="uiState.activeConveyor === conveyor.id"
-          (click)="selectConveyorTab(conveyor.id)"
+          [class.active]="uiState.activeConveyor === conveyor.conveyorId"
+          (click)="selectConveyorTab(conveyor.conveyorId)"
           class="tab-btn"
-          [title]="'Switch to ' + conveyor.name"
+          [title]="'Switch to ' + conveyor.conveyorName"
         >
-          {{ conveyor.name }}
+          {{ conveyor.conveyorName }}
         </button>
       </div>
     </div>
@@ -44,101 +44,101 @@
       <h3>Level 2: Select Area</h3>
       
       <!-- Index width labels -->
-      <div class="index-width-labels">
-        <span class="label-left">{{ getAvailableAreas()[0]?.start }} Mcm</span>
-        <span class="label-right">{{ getAvailableAreas()[getAvailableAreas().length - 1]?.end }} Mcm</span>
+      <div class="index-width-labels" *ngIf="getAvailableAreas().length > 0">
+        <span class="label-left">{{ getAvailableAreas()[0].startWidthIndex }} Mcm</span>
+        <span class="label-right">{{ getAvailableAreas()[getAvailableAreas().length - 1].stopWidthIndex }} Mcm</span>
       </div>
 
       <div class="button-group">
         <button 
           *ngFor="let area of getAvailableAreas()"
-          [class.active]="uiState.activeArea === area.id"
-          (click)="toggleArea(area.id)"
+          [class.active]="uiState.activeArea === area.name"
+          (click)="toggleArea(area.name)"
           class="level-btn area-btn"
           [style.flex]="'1'"
         >
-          <span class="area-label">{{ uiState.activeConveyor }}-{{ area.id }}</span>
-          <span class="area-range">{{ area.start }}-{{ area.end }}</span>
+          <span class="area-label">{{ uiState.activeConveyor }}-{{ area.name }}</span>
+          <span class="area-range">{{ area.startWidthIndex }}-{{ area.stopWidthIndex }}</span>
         </button>
       </div>
     </div>
 
-    <!-- Level 3: Section Selection -->
+    <!-- Level 3 & 4: Sections and Cells -->
     <div *ngIf="uiState.activeConveyor && uiState.activeArea" class="level level-3">
       <h3>Level 3: Select Section</h3>
-      <div class="button-group">
-        <button 
-          *ngFor="let sectionNumber of [1, 2, 3, 4]"
-          [class.active]="isSectionOpen(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))"
-          (click)="toggleSection(getSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))"
-          class="level-btn section-btn"
-        >
-          {{ getSectionLabel(uiState.activeConveyor, uiState.activeArea, sectionNumber) }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Level 4: Cell Allocation Grid (Multiple Sections) -->
-    <div class="level-4-panels" *ngIf="uiState.activeConveyor && uiState.activeArea">
-      <div 
-        *ngFor="let sectionNumber of [1, 2, 3, 4]"
-        [class.open]="isSectionOpen(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))"
-        class="level-4-panel"
-      >
-        <!-- Panel Header -->
-        <div class="level-4-header">
-          <h4>Section {{ sectionNumber }}</h4>
-          <button (click)="toggleSection(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber))" class="close-btn">✕</button>
-        </div>
-
-        <!-- Package Info -->
-        <div class="package-info">
-          <div class="info-row">
-            <span class="label">Package:</span>
-            <span class="value">{{ uiState.currentPackage?.name }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Category:</span>
-            <span class="value">{{ uiState.currentPackage?.category }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Width:</span>
-            <span class="value">{{ uiState.currentPackage?.width }} Mcm</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Cells:</span>
-            <span class="value">{{ uiState.currentPackage?.cells }}</span>
-          </div>
-        </div>
-
-        <!-- Cell Grid -->
-        <div class="cell-grid">
-          <button
-            *ngFor="let i of getCellIndicesArray()"
-            [class.selected]="isCellSelected(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            [class.allocated]="getAllocatedCellInfo(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i) !== null"
-            [class.disabled]="!canSelectCell(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            [style.backgroundColor]="getCellBackgroundColor(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            [style.color]="getCellTextColor(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            (click)="handleCellClick(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            (mouseover)="showTooltip($event, buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            (mouseout)="hideTooltip()"
-            class="cell-btn"
-            [disabled]="!canSelectCell(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-            [title]="getCellTooltip(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), i)"
-          >
-            {{ i }}
-          </button>
-        </div>
-
-        <!-- Tooltip -->
+      <div class="sections-list">
         <div 
-          *ngIf="tooltipCell && uiState.activeConveyor && uiState.activeArea && tooltipCell.sectionId === buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber)"
-          class="tooltip"
-          [style.left.px]="tooltipPosition?.x || 0"
-          [style.top.px]="tooltipPosition?.y || 0"
+          *ngFor="let section of configService.getSections(uiState.activeConveyor, uiState.activeArea)"
+          class="section-group"
         >
-          {{ getCellTooltip(buildSectionId(uiState.activeConveyor, uiState.activeArea, sectionNumber), tooltipCell.cellIndex) }}
+          <!-- Section Button -->
+          <button 
+            [class.active]="isSectionOpen(section.name)"
+            (click)="toggleSection(section.name)"
+            class="level-btn section-btn"
+          >
+            <span class="section-title">{{ section.name }} ({{ section.startWidthIndex }}-{{ section.stopWidthIndex }})</span>
+            <span class="section-toggle">{{ isSectionOpen(section.name) ? '▼' : '▶' }}</span>
+          </button>
+
+          <!-- Section Panel (opened when section is active) -->
+          <div *ngIf="isSectionOpen(section.name)" class="level-4-panel">
+            <!-- Package Info -->
+            <div class="package-info">
+              <div class="info-row">
+                <span class="label">Package:</span>
+                <span class="value">{{ uiState.currentPackage?.name }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Category:</span>
+                <span class="value">{{ uiState.currentPackage?.category }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Width:</span>
+                <span class="value">{{ uiState.currentPackage?.width }} Mcm</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Cells Required:</span>
+                <span class="value">{{ uiState.currentPackage?.cells }}</span>
+              </div>
+            </div>
+
+            <!-- Cell Grid -->
+            <div class="cell-grid">
+              <button
+                *ngFor="let cell of section.cells"
+                [class.selected]="isCellSelected(section.name, cell.index)"
+                [class.allocated]="getAllocatedCellInfo(section.name, cell.index) !== null"
+                [class.disabled]="!canSelectCell(section.name, cell.index)"
+                [style.backgroundColor]="getCellBackgroundColor(section.name, cell.index)"
+                [style.color]="getCellTextColor(section.name, cell.index)"
+                (click)="handleCellClick(section.name, cell.index)"
+                (mouseover)="showTooltip($event, section.name, cell.index)"
+                (mouseout)="hideTooltip()"
+                class="cell-btn"
+                [disabled]="!canSelectCell(section.name, cell.index)"
+                [title]="getCellTooltip(section, cell.index)"
+              >
+                {{ cell.index }}
+              </button>
+            </div>
+
+            <!-- Cell Range Display -->
+            <div class="cell-range-display" *ngIf="isSectionOpen(section.name)">
+              <span class="range-label">Width Range: {{ section.startWidthIndex }} - {{ section.stopWidthIndex }} Mcm</span>
+              <span class="cell-count">Total Cells: {{ section.cells.length }}</span>
+            </div>
+
+            <!-- Tooltip -->
+            <div 
+              *ngIf="tooltipCell && tooltipCell.sectionId === section.name"
+              class="tooltip"
+              [style.left.px]="tooltipPosition?.x || 0"
+              [style.top.px]="tooltipPosition?.y || 0"
+            >
+              {{ getCellTooltip(section, tooltipCell.cellIndex) }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
