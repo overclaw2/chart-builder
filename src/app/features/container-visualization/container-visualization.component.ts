@@ -542,6 +542,8 @@ export class ContainerVisualizationComponent implements OnInit {
     if (this.draggedItem) {
       // Update the actual item object's displayIndex so the template reflects the change
       this.draggedItem.item.displayIndex = Math.round(currentIndex);
+      // Trigger change detection to update the view immediately
+      this.cdr.markForCheck();
     }
 
     // TASK 2 ENHANCEMENT: Show hover tooltip while dragging
