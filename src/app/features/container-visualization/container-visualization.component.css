@@ -233,9 +233,11 @@
   color: var(--text-primary);
 }
 
+/* PROBLEM 3 FIX: Tighten drop zone boundaries - reduce padding/margin for strict bounds */
 .container-bar-wrapper {
   position: relative;
   margin: 1rem 0 4.5rem 0;
+  padding: 0; /* PROBLEM 3 FIX: Remove padding to ensure drop zones fit strictly within visual bounds */
   padding-bottom: 2.5rem; /* Space for item tooltips + position labels below */
 }
 
@@ -255,13 +257,15 @@
   margin-top: 0.5rem;
 }
 
+/* PROBLEM 3 FIX: Sync visual boundary with droppable zone - ensure container-bar bounds match drop zones */
 .container-bar {
   position: relative;
   height: 100px;
   background: var(--compartment-bg, #e8e8e8); /* TODO 3: Use compartment color */
-  border-radius: 4px;
-  overflow: hidden;
+  border-radius: 3px;
+  overflow: visible; /* PROBLEM 3 FIX: Change from hidden to visible to ensure items don't clip at boundaries */
   transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .container-bar-wrapper.drag-over .container-bar {
@@ -310,27 +314,55 @@
   opacity: 0.8;
 }
 
+/* PROBLEM 1 FIX: Improved label rendering with smart truncation and conditional display */
 .item-content {
   text-align: center;
-  font-size: 0.75rem;
-  line-height: 1.2;
+  font-size: 0.7rem;
+  line-height: 1.1;
   color: #000000;
   font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 90%;
+  word-break: break-word;
+  /* PROBLEM 1 FIX: Prevent text overflow and wrap text properly */
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 .item-name {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
+  font-weight: 700;
+  margin: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
 }
 
 .item-detail {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
+  margin: 0;
+  font-weight: 500;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .item-destination {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  margin-top: 0.25rem;
+  margin: 0;
+  color: rgba(0, 0, 0, 0.75);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* AVIHAI FIX #2 (REVISED): Position indicator repositioned below package rectangle */
@@ -745,7 +777,7 @@
   pointer-events: none;
 }
 
-/* TODO 1: Drop zones visual feedback - shows valid drop areas while dragging */
+/* PROBLEM 3 FIX: Drop zones visual feedback - Tightened boundaries to match visual area exactly */
 .drop-zones-grid {
   position: absolute;
   top: 0;
@@ -755,44 +787,50 @@
   pointer-events: none;
   z-index: 2;
   display: flex;
-  border-radius: 4px;
+  border-radius: 3px;
+  /* Tighter background - Solution A: reduce padding/margin for strict boundary */
   background: linear-gradient(90deg, 
-    rgba(52, 211, 153, 0.08) 0%,
-    rgba(52, 211, 153, 0.12) 10%,
-    rgba(52, 211, 153, 0.08) 20%,
-    rgba(52, 211, 153, 0.12) 30%,
-    rgba(52, 211, 153, 0.08) 40%,
-    rgba(52, 211, 153, 0.12) 50%,
-    rgba(52, 211, 153, 0.08) 60%,
-    rgba(52, 211, 153, 0.12) 70%,
-    rgba(52, 211, 153, 0.08) 80%,
-    rgba(52, 211, 153, 0.12) 90%,
-    rgba(52, 211, 153, 0.08) 100%
+    rgba(52, 211, 153, 0.05) 0%,
+    rgba(52, 211, 153, 0.1) 10%,
+    rgba(52, 211, 153, 0.05) 20%,
+    rgba(52, 211, 153, 0.1) 30%,
+    rgba(52, 211, 153, 0.05) 40%,
+    rgba(52, 211, 153, 0.1) 50%,
+    rgba(52, 211, 153, 0.05) 60%,
+    rgba(52, 211, 153, 0.1) 70%,
+    rgba(52, 211, 153, 0.05) 80%,
+    rgba(52, 211, 153, 0.1) 90%,
+    rgba(52, 211, 153, 0.05) 100%
   );
   animation: zone-pulse 1.5s ease-in-out infinite;
+  /* PROBLEM 3 FIX: Match visual boundary exactly - no extra padding */
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(52, 211, 153, 0.5);
 }
 
 .drop-zone-grid-line {
   flex: 1;
-  border-right: 1px dashed rgba(52, 211, 153, 0.4);
+  border-right: 1px dashed rgba(52, 211, 153, 0.3);
   position: relative;
+  height: 100%;
 }
 
 .drop-zone-grid-line:last-child {
   border-right: none;
 }
 
-/* Add visual indicator at each zone to show where you can drop */
+/* PROBLEM 3 FIX: Visual drop zone indicator - add highlighting during drag */
 .drop-zone-grid-line::before {
-  content: '✓';
+  content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: rgba(52, 211, 153, 0.6);
   font-weight: bold;
-  opacity: 0;
+  opacity: 0.3;
   animation: zone-indicator-appear 0.3s ease forwards;
 }
 

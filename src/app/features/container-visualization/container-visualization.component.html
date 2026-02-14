@@ -363,20 +363,24 @@
                 (contextmenu)="onItemContextMenu($event, container.id, compartment.id, item.id)"
                 [style.backgroundColor]="getItemColor(item)"
                 [attr.data-item-id]="item.id"
+                [title]="item.name"
               >
+                <!-- FIX 1: Smart label rendering - truncates long names and uses compact vertical layout -->
                 <div class="item-content">
-                  <div class="item-name">{{ item.name }}</div>
-                  <div class="item-detail">{{ item.dimensionMcm }} [Mcm]</div>
-                  <div class="item-detail">{{ item.weightKg }} [Kg]</div>
-                  <div class="item-destination">{{ item.destination }}</div>
-                  <div class="item-color-picker">
-                    <input
-                      type="color"
-                      [value]="getItemColor(item)"
-                      (change)="onColorChange($event, item)"
-                      title="Click to change color"
-                      class="color-input"
-                    />
+                  <!-- PROBLEM 1 FIX: Truncate long package names to 15 chars with ellipsis -->
+                  <div class="item-name" [title]="item.name">
+                    {{ truncateText(item.name, 15) }}
+                  </div>
+                  <!-- Only show details if item is wide enough (> 80px) -->
+                  <div class="item-detail" *ngIf="shouldShowDetails(item, compartment)">
+                    {{ item.dimensionMcm }}Mcm
+                  </div>
+                  <div class="item-detail" *ngIf="shouldShowDetails(item, compartment)">
+                    {{ item.weightKg }}Kg
+                  </div>
+                  <!-- Destination only on very wide items (> 120px) -->
+                  <div class="item-destination" *ngIf="shouldShowDestination(item, compartment)">
+                    {{ truncateText(item.destination, 10) }}
                   </div>
                 </div>
                 <!-- AVIHAI FIX #2: Central position width index badge centered on package -->
@@ -389,31 +393,6 @@
                 <button class="conv-button" (click)="openConvPopup(item, $event)" title="Open package details window">
                   conv
                 </button>
-                
-                <!-- HOVER TOOLTIP: Moved to global overlay to prevent clipping -->
-                <!-- <div class="item-hover-tooltip" [class.visible]="hoveredItemId === item.id" [ngClass]="getTooltipPositioning(item.id)">
-                  <div class="tooltip-title">{{ item.name }}</div>
-                  <div class="tooltip-row">
-                    <span class="tooltip-label">Width:</span>
-                    <span class="tooltip-value">{{ item.dimensionMcm }} Mcm</span>
-                  </div>
-                  <div class="tooltip-row">
-                    <span class="tooltip-label">Weight:</span>
-                    <span class="tooltip-value">{{ item.weightKg }} Kg</span>
-                  </div>
-                  <div class="tooltip-row">
-                    <span class="tooltip-label">Destination:</span>
-                    <span class="tooltip-value">{{ item.destination }}</span>
-                  </div>
-                  <div class="tooltip-row">
-                    <span class="tooltip-label">Position:</span>
-                    <span class="tooltip-value">{{ getCentralPositionIndex(item) }}</span>
-                  </div>
-                  <div class="tooltip-row">
-                    <span class="tooltip-label">Compartment Use:</span>
-                    <span class="tooltip-value">{{ compartment.widthUtilization }}%</span>
-                  </div>
-                </div> -->
 
               </div>
               <!-- Display index below item (legacy) -->

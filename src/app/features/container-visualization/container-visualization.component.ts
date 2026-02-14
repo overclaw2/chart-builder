@@ -598,10 +598,24 @@ export class ContainerVisualizationComponent implements OnInit {
       const mouseIndexPosition = compartmentStart + dropPercent * compartmentWidth;
       let newPosition = mouseIndexPosition - (this.grabOffset * itemWidth);
       
-      // Ensure position stays within target compartment bounds to prevent invisible items
+      // ===== PROBLEM 2 FIX: Position Clamping to Prevent Boundary Escape =====
+      // Solution A: Clamp position on drop to ensure items stay within compartment bounds
       const minPosition = compartmentStart;
       const maxPosition = compartmentEnd - itemWidth;
       newPosition = Math.max(minPosition, Math.min(newPosition, maxPosition));
+      
+      // CRITICAL: Verify item won't extend beyond right boundary
+      const itemRightEdge = newPosition + itemWidth;
+      if (itemRightEdge > compartmentEnd) {
+        // Auto-snap to boundary (Solution C) - adjust position so item fits
+        newPosition = compartmentEnd - itemWidth;
+      }
+      
+      // CRITICAL: Verify item won't escape left boundary
+      if (newPosition < compartmentStart) {
+        // Auto-snap to left boundary
+        newPosition = compartmentStart;
+      }
 
       // COLLISION DETECTION: Check if the new position would overlap with other items
       // Only check against items that are NOT the one being dragged
@@ -1093,6 +1107,42 @@ export class ContainerVisualizationComponent implements OnInit {
     }
   }
 
+  // ========== PROBLEM 1 FIX: Label Truncation and Conditional Display ==========
+  
+  /**
+   * Truncate text to maximum length with ellipsis
+   * PROBLEM 1 FIX: Solution A - Truncate long package names (max 15 chars)
+   */
+  truncateText(text: string, maxLength: number): string {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  }
+
+  /**
+   * Determine if details (dimension & weight) should be shown
+   * PROBLEM 1 FIX: Solution B - Stack labels vertically based on item width
+   */
+  shouldShowDetails(item: Item, compartment: Compartment): boolean {
+    const compartmentSize = compartment.widthindexEnd - compartment.widthindexStart;
+    const itemDimension = item.dimensionMcm || 27;
+    const widthPercent = (itemDimension / compartmentSize) * 100;
+    // Show details if item is at least 12% of compartment width (roughly 80px on 150-wide compartment)
+    return widthPercent >= 12;
+  }
+
+  /**
+   * Determine if destination should be shown
+   * PROBLEM 1 FIX: Solution B - Show destination only on wide items
+   */
+  shouldShowDestination(item: Item, compartment: Compartment): boolean {
+    const compartmentSize = compartment.widthindexEnd - compartment.widthindexStart;
+    const itemDimension = item.dimensionMcm || 27;
+    const widthPercent = (itemDimension / compartmentSize) * 100;
+    // Show destination if item is at least 20% of compartment width (roughly 120px)
+    return widthPercent >= 20;
+  }
+
   // TODO 4: Calculate tooltip positioning - check if tooltip fits above or needs to go below
   calculateTooltipPosition(itemId: string): void {
     // Use setTimeout to allow DOM to update before calculating position
@@ -1416,10 +1466,22 @@ export class ContainerVisualizationComponent implements OnInit {
       const mouseIndexPosition = compartmentStart + dropPercent * compartmentWidth;
       let newPosition = mouseIndexPosition - (itemWidth / 2); // Center on drop point
 
-      // Ensure position stays within target compartment bounds
+      // ===== PROBLEM 2 FIX: Apply position clamping for available packages too =====
+      // Solution A: Clamp position on drop to ensure items stay within compartment bounds
       const minPosition = compartmentStart;
       const maxPosition = compartmentEnd - itemWidth;
       newPosition = Math.max(minPosition, Math.min(newPosition, maxPosition));
+      
+      // CRITICAL: Verify item won't extend beyond right boundary
+      const itemRightEdge = newPosition + itemWidth;
+      if (itemRightEdge > compartmentEnd) {
+        newPosition = compartmentEnd - itemWidth;
+      }
+      
+      // CRITICAL: Verify item won't escape left boundary
+      if (newPosition < compartmentStart) {
+        newPosition = compartmentStart;
+      }
 
       // NEW: CAPACITY WARNING - Check if drop would exceed capacity
       const wouldExceedCapacity = this.wouldExceedCapacity(
