@@ -540,10 +540,10 @@ export class ContainerVisualizationComponent implements OnInit {
 
     // FLOATING DRAG LABELS: Update position to be inside the drag preview
     // Position labels at the bottom inside the drag ghost (lower left and lower right corners)
-    // Labels need to align with the actual ghost image position
+    // The ghost image starts near the cursor; we need minimal offset to appear inside it
     this.dragLabelPosition = {
       x: Math.round(event.clientX - 55), // Center inside the ghost box
-      y: Math.round(event.clientY + 25) // Position at bottom inside ghost
+      y: Math.round(event.clientY + 15) // Minimal offset - labels at bottom of ghost
     };
 
     // CRITICAL FIX: Update the dragged item's displayIndex directly in the data model
