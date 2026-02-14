@@ -233,12 +233,14 @@
   color: var(--text-primary);
 }
 
-/* PROBLEM 3 FIX: Tighten drop zone boundaries - reduce padding/margin for strict bounds */
+/* PROBLEM 3 FIX: Tightened drop zone boundaries - strict alignment with visual bounds */
 .container-bar-wrapper {
   position: relative;
-  margin: 1rem 0 4.5rem 0;
-  padding: 0; /* PROBLEM 3 FIX: Remove padding to ensure drop zones fit strictly within visual bounds */
-  padding-bottom: 2.5rem; /* Space for item tooltips + position labels below */
+  margin: 1rem 0 5rem 0;
+  padding: 0; /* No padding to ensure drop zones fit strictly within visual bounds */
+  padding-bottom: 3rem; /* Space for item tooltips + position labels below */
+  /* Ensure drop zone boundaries match visual compartment rectangle exactly */
+  overflow: visible;
 }
 
 .position-label {
@@ -257,15 +259,17 @@
   margin-top: 0.5rem;
 }
 
-/* PROBLEM 3 FIX: Sync visual boundary with droppable zone - ensure container-bar bounds match drop zones */
+/* PROBLEM 3 FIX: Container bar bounds synced with drop zones */
 .container-bar {
   position: relative;
   height: 100px;
   background: var(--compartment-bg, #e8e8e8); /* TODO 3: Use compartment color */
   border-radius: 3px;
-  overflow: visible; /* PROBLEM 3 FIX: Change from hidden to visible to ensure items don't clip at boundaries */
+  overflow: visible; /* Allow items and labels to extend beyond container */
   transition: all 0.2s ease;
   border: 1px solid rgba(0, 0, 0, 0.1);
+  /* Ensure container-bar aligns perfectly with drop-zones-grid for consistent drop areas */
+  box-sizing: border-box;
 }
 
 .container-bar-wrapper.drag-over .container-bar {
@@ -281,6 +285,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* Ensure position badge below is not clipped */
+  overflow: visible;
 }
 
 .item {
@@ -299,7 +305,7 @@
   user-select: none;
   min-width: 80px;
   position: relative;
-  /* FIX 2: Ensure badge stays visible within item bounds */
+  /* PROBLEM 1 FIX: Allow position badge below to be visible */
   overflow: visible;
 }
 
@@ -365,14 +371,14 @@
   white-space: nowrap;
 }
 
-/* AVIHAI FIX #2 (REVISED): Position indicator repositioned below package rectangle */
-/* Badge now positioned below the package item itself, not the whole container */
+/* PROBLEM 1 FIX: Position indicator repositioned BELOW package rectangle */
+/* Badge now positioned directly underneath the package item, not overlapping it */
 .item-central-position-badge {
   position: absolute;
-  /* Position centered on the package element (not below, not at graph center) */
-  top: 50%;
+  /* Position directly BELOW the package (bottom: -2.5rem) */
+  bottom: -2.5rem;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   font-size: 0.75rem;
   font-weight: 600;
   color: #ffffff;
@@ -381,7 +387,7 @@
   border-radius: 3px;
   border: 1px solid #0052a3;
   white-space: nowrap;
-  z-index: 5;
+  z-index: 10;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
   width: fit-content;
@@ -592,16 +598,21 @@
   }
 }
 
-/* TASK 4: Width Index Labels while dragging (positioned at lower left of package) */
+/* PROBLEM 2 FIX: Width Index Labels while dragging - Ensure full visibility */
+/* Labels positioned below package with increased z-index to prevent clipping */
 .drag-index-labels {
   position: absolute;
-  bottom: -3rem;
+  bottom: -3.5rem;
   left: 0;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  z-index: 99;
+  z-index: 1000;
   pointer-events: none;
+  background: transparent;
+  padding: 0.5rem 0;
+  /* Ensure labels are not clipped by container boundaries */
+  overflow: visible;
 }
 
 .drag-index-label {
@@ -614,6 +625,11 @@
   white-space: nowrap;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   animation: label-fade-in 0.2s ease;
+  /* Ensure labels are fully visible and not clipped */
+  z-index: 1001;
+  position: relative;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .drag-start-label {
@@ -777,7 +793,7 @@
   pointer-events: none;
 }
 
-/* PROBLEM 3 FIX: Drop zones visual feedback - Tightened boundaries to match visual area exactly */
+/* PROBLEM 3 FIX: Drop zones visual feedback - Boundaries synced with visual compartment */
 .drop-zones-grid {
   position: absolute;
   top: 0;
@@ -788,25 +804,27 @@
   z-index: 2;
   display: flex;
   border-radius: 3px;
-  /* Tighter background - Solution A: reduce padding/margin for strict boundary */
+  /* Grid overlay background - subtle pattern inside the compartment */
   background: linear-gradient(90deg, 
-    rgba(52, 211, 153, 0.05) 0%,
-    rgba(52, 211, 153, 0.1) 10%,
-    rgba(52, 211, 153, 0.05) 20%,
-    rgba(52, 211, 153, 0.1) 30%,
-    rgba(52, 211, 153, 0.05) 40%,
-    rgba(52, 211, 153, 0.1) 50%,
-    rgba(52, 211, 153, 0.05) 60%,
-    rgba(52, 211, 153, 0.1) 70%,
-    rgba(52, 211, 153, 0.05) 80%,
-    rgba(52, 211, 153, 0.1) 90%,
-    rgba(52, 211, 153, 0.05) 100%
+    rgba(34, 139, 34, 0.03) 0%,
+    rgba(34, 139, 34, 0.05) 10%,
+    rgba(34, 139, 34, 0.03) 20%,
+    rgba(34, 139, 34, 0.05) 30%,
+    rgba(34, 139, 34, 0.03) 40%,
+    rgba(34, 139, 34, 0.05) 50%,
+    rgba(34, 139, 34, 0.03) 60%,
+    rgba(34, 139, 34, 0.05) 70%,
+    rgba(34, 139, 34, 0.03) 80%,
+    rgba(34, 139, 34, 0.05) 90%,
+    rgba(34, 139, 34, 0.03) 100%
   );
   animation: zone-pulse 1.5s ease-in-out infinite;
-  /* PROBLEM 3 FIX: Match visual boundary exactly - no extra padding */
+  /* PROBLEM 3 FIX A: Tighten boundaries to match visual area exactly */
   margin: 0;
   padding: 0;
-  border: 1px solid rgba(52, 211, 153, 0.5);
+  /* PROBLEM 3 FIX B: Sync visual boundary (green dashed) with actual droppable zone */
+  border: 1px dashed rgba(34, 139, 34, 0.6);
+  box-sizing: border-box;
 }
 
 .drop-zone-grid-line {
