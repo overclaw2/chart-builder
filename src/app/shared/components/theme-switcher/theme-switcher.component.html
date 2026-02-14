@@ -1,0 +1,86 @@
+<div class="theme-switcher">
+  <!-- Dark Mode Toggle -->
+  <button 
+    class="theme-button dark-mode-toggle"
+    (click)="toggleDarkMode()"
+    [attr.aria-pressed]="darkMode$ | async"
+    title="Toggle dark mode"
+  >
+    <span class="icon">
+      {{ (darkMode$ | async) ? '☀️' : '🌙' }}
+    </span>
+    <span class="tooltip">{{ (darkMode$ | async) ? 'Light Mode' : 'Dark Mode' }}</span>
+  </button>
+
+  <!-- Theme Selector -->
+  <div class="theme-selector">
+    <button 
+      class="theme-button theme-menu-toggle"
+      (click)="toggleThemeMenu()"
+      title="Select theme"
+    >
+      <span class="icon">🎨</span>
+      <span class="tooltip">Theme</span>
+    </button>
+
+    <!-- Theme Menu -->
+    <div class="theme-menu" *ngIf="showThemeMenu">
+      <div class="menu-header">
+        <h3>Select Theme</h3>
+        <button 
+          class="close-btn"
+          (click)="toggleThemeMenu()"
+          aria-label="Close theme menu"
+        >×</button>
+      </div>
+      
+      <div class="theme-options">
+        <button 
+          *ngFor="let t of availableThemes"
+          class="theme-option"
+          [class.active]="(theme$ | async) === t"
+          (click)="selectTheme(t)"
+        >
+          <span class="theme-name">{{ getThemeLabel(t) }}</span>
+          <span class="theme-description">
+            <ng-container [ngSwitch]="t">
+              <ng-container *ngSwitchCase="'default'">Standard colors</ng-container>
+              <ng-container *ngSwitchCase="'high-contrast'">Bold colors for better visibility</ng-container>
+              <ng-container *ngSwitchCase="'colorblind-friendly'">Accessible to colorblind users</ng-container>
+            </ng-container>
+          </span>
+        </button>
+      </div>
+
+      <!-- Brand Color Customization -->
+      <div class="brand-color-section">
+        <button 
+          class="brand-color-toggle"
+          (click)="toggleBrandColorInput()"
+        >
+          🏷️ Brand Color
+        </button>
+        
+        <div class="brand-color-input" *ngIf="showBrandColorInput">
+          <label for="brandColorPicker">Customize primary brand color:</label>
+          <input 
+            type="color"
+            id="brandColorPicker"
+            [value]="brandColor"
+            (change)="onBrandColorChange($event)"
+            title="Pick a brand color"
+          />
+          <span class="color-hex">{{ brandColor }}</span>
+        </div>
+      </div>
+
+      <!-- Reset Button -->
+      <button 
+        class="reset-theme-btn"
+        (click)="resetTheme()"
+      >
+        ↻ Reset to Default
+      </button>
+    </div>
+  </div>
+</div>

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Chart } from '../../core/models/chart.model';
 import { ChartStore } from '../../core/services/chart.store';
+import { DarkModeService } from '../../core/services/dark-mode.service';
 
 @Component({
   selector: 'app-root',
@@ -12,13 +13,17 @@ export class ChartCanvasComponent implements OnInit {
   charts$: Observable<Chart[]>;
   selectedChartId$: Observable<string | null>;
 
-  constructor(private chartStore: ChartStore) {
+  constructor(
+    private chartStore: ChartStore,
+    private darkModeService: DarkModeService
+  ) {
     this.charts$ = this.chartStore.charts;
     this.selectedChartId$ = this.chartStore.selectedChartId;
   }
 
   ngOnInit(): void {
-    // Initialize if needed
+    // Dark mode service is automatically initialized
+    // Theme preference is loaded from localStorage on service instantiation
   }
 
   onChartSelect(chartId: string): void {
