@@ -204,17 +204,17 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
 
   /**
    * Handle area selection - changes active area
+   * When area is selected, Level 3 (sections) appear but Level 4 (cells) panels are CLOSED
    */
   toggleArea(areaId: string): void {
     if (this.uiState.activeArea === areaId) {
-      // Deselect
+      // Deselect area
       this.uiState.activeArea = null;
-      this.uiState.openSections = [];
+      this.uiState.openSections = []; // Close all Level 4 panels
     } else {
-      // Select new area
+      // Select new area - Level 3 sections appear, but Level 4 panels stay closed
       this.uiState.activeArea = areaId;
-      // DO NOT auto-open sections - user clicks individual sections to toggle them
-      this.uiState.openSections = [];
+      this.uiState.openSections = []; // Explicitly close all Level 4 panels
     }
     // Reset cell selections when area changes
     this.selectedCellsInSection = {};
