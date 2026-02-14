@@ -803,6 +803,23 @@
   height: 0.75rem;
   background: linear-gradient(180deg, #0066cc 0%, rgba(0, 102, 204, 0.4) 100%);
   border: none;
+  flex-shrink: 0;
+}
+
+.axis-label-text {
+  background: #0066cc;
+  color: #ffffff;
+  padding: 0.3rem 0.6rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 102, 204, 0.2);
+  border: 1px solid rgba(0, 82, 163, 0.5);
+  transition: all 0.2s ease;
+  cursor: default;
+  pointer-events: none;
+  flex-shrink: 0;
 }
 
 .axis-label-tooltip {
