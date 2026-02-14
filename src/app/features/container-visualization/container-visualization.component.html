@@ -306,15 +306,15 @@
                 *ngFor="let item of compartment.items"
                 [ngStyle]="getAxisHighlightPosition(item, compartment)"
               ></div>
-            </div>
-            
-            <!-- Package Index Labels with Vertical Connectors (overlay on top of timeline, positioned absolutely) -->
-            <div class="axis-labels-wrapper">
-              <div class="axis-label-with-connector" 
-                *ngFor="let item of compartment.items"
-                [ngStyle]="{ left: getAxisLabelPosition(item, compartment) }">
-                <div class="axis-label-connector"></div>
-                <div class="axis-label-text">{{ item.displayIndex || getCentralPositionIndex(item) }}</div>
+              
+              <!-- Package Index Labels with Vertical Connectors (positioned absolutely inside track for correct alignment) -->
+              <div class="axis-labels-wrapper">
+                <div class="axis-label-with-connector" 
+                  *ngFor="let item of compartment.items"
+                  [ngStyle]="{ left: getAxisLabelPosition(item, compartment) }">
+                  <div class="axis-label-connector"></div>
+                  <div class="axis-label-text">{{ item.displayIndex || getCentralPositionIndex(item) }}</div>
+                </div>
               </div>
             </div>
           </div>
