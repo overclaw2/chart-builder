@@ -21,7 +21,9 @@ export class GatewayHealthService {
   private destroy$ = new Subject<void>();
 
   constructor(private http: HttpClient) {
-    this.startHealthMonitoring();
+    // Disabled: This app is frontend-only with no backend API
+    // No /api/health endpoint exists, causing 404 errors in console
+    // this.startHealthMonitoring();
   }
 
   private startHealthMonitoring(): void {
