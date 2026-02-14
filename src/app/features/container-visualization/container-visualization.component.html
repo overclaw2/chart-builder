@@ -78,8 +78,18 @@
           accept=".json"
           hidden
         />
+        <input
+          type="file"
+          #conveyorConfigInput
+          (change)="onConveyorConfigSelected($event)"
+          accept=".json"
+          hidden
+        />
         <button class="upload-btn" (click)="fileInput.click()" title="Load JSON data">
           📤 Load JSON Data
+        </button>
+        <button class="conveyor-config-btn" (click)="conveyorConfigInput.click()" title="Load conveyor configuration">
+          📋 Load Conveyor Config
         </button>
         <button class="reset-btn" (click)="onResetToMock()" title="Reset to mock data">
           🔄 Reset to Mock

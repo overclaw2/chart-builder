@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ContainerService } from '../../core/services/container.service';
+import { ConveyorConfigService } from '../../core/services/conveyor-config.service';
 import { UndoRedoService } from '../../core/services/undo-redo.service';
 import { HelpService } from '../../core/services/help.service';
 import { CapacityWarningService } from '../../core/services/capacity-warning.service';
@@ -126,7 +127,8 @@ export class ContainerVisualizationComponent implements OnInit {
   snapshotTimelineOpen: boolean = false;
 
   constructor(
-    private containerService: ContainerService, 
+    private containerService: ContainerService,
+    private conveyorConfigService: ConveyorConfigService,
     private cdr: ChangeDetectorRef,
     private undoRedoService: UndoRedoService,
     private helpService: HelpService,
@@ -324,6 +326,46 @@ export class ContainerVisualizationComponent implements OnInit {
     setTimeout(() => {
       this.loadingMessage = null;
     }, 2000);
+  }
+
+  onConveyorConfigSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    this.loadingMessage = '📋 Loading conveyor config...';
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const jsonContent = e.target?.result as string;
+        const config = JSON.parse(jsonContent);
+        
+        // Load config into the service
+        this.conveyorConfigService.loadConfigFromData(config);
+        
+        this.loadingMessage = '✅ Conveyor config loaded successfully!';
+        setTimeout(() => {
+          this.loadingMessage = null;
+        }, 3000);
+      } catch (error) {
+        this.loadingMessage = `❌ Error parsing config: ${(error as Error).message}`;
+        setTimeout(() => {
+          this.loadingMessage = null;
+        }, 5000);
+      }
+    };
+
+    reader.onerror = () => {
+      this.loadingMessage = '❌ Error reading file';
+      setTimeout(() => {
+        this.loadingMessage = null;
+      }, 5000);
+    };
+
+    reader.readAsText(file);
+    input.value = '';
   }
 
   getItemPosition(item: Item, compartment: Compartment): { left: string; width: string } {
