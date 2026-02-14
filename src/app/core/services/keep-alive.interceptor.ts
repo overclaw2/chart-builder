@@ -10,21 +10,19 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 /**
- * HTTP Interceptor to add keep-alive headers to all requests
- * This helps prevent gateway timeout by maintaining active connection
+ * HTTP Interceptor for request configuration
+ * Note: Browser forbids setting 'Connection' and 'Keep-Alive' headers for security
+ * Browsers handle keep-alive automatically via HTTP/1.1 persistent connections
  */
 @Injectable()
 export class KeepAliveInterceptor implements HttpInterceptor {
   constructor() {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Add keep-alive headers to every request
+    // Note: 'Connection' and 'Keep-Alive' are forbidden headers in browsers
+    // Browsers handle keep-alive automatically and don't allow JavaScript to set these headers
+    // We keep withCredentials for credential handling
     let modifiedReq = req.clone({
-      setHeaders: {
-        'Connection': 'keep-alive',
-        'Keep-Alive': 'timeout=300, max=100', // 5 minute timeout, up to 100 requests
-      },
-      // Ensure we don't timeout on long-running requests
       withCredentials: true,
     });
 
