@@ -625,46 +625,43 @@
   }
 }
 
-/* PROBLEM 2 FIX: Width Index Labels while dragging - Ensure full visibility */
-/* Labels positioned below package with increased z-index to prevent clipping */
+/* TASK 4 UPDATE: Width Index Labels positioned inside package box at lower corners */
 .drag-index-labels {
   position: absolute;
-  bottom: -3.5rem;
+  bottom: 2px;
   left: 0;
+  right: 0;
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  justify-content: space-between;
   z-index: 2000;
   pointer-events: none;
-  background: transparent;
-  padding: 0.5rem 0;
-  /* Ensure labels are not clipped by container boundaries */
-  overflow: visible;
+  padding: 0 4px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .drag-index-label {
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.85);
   color: #ffffff;
-  padding: 0.35rem 0.6rem;
-  border-radius: 3px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 2px;
+  font-size: 0.75rem;
+  font-weight: 700;
   white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
   animation: label-fade-in 0.2s ease;
-  /* Ensure labels are fully visible and not clipped */
   z-index: 2001;
   position: relative;
-  overflow: visible;
-  text-overflow: clip;
 }
 
 .drag-start-label {
-  border-left: 3px solid #4ade80;
+  border-left: 2px solid #4ade80;
+  /* Aligned to lower left corner */
 }
 
 .drag-stop-label {
-  border-left: 3px solid #f87171;
+  border-left: 2px solid #f87171;
+  /* Aligned to lower right corner */
 }
 
 @keyframes label-fade-in {
