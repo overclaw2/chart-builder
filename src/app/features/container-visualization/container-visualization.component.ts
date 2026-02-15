@@ -150,8 +150,9 @@ export class ContainerVisualizationComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Load default configuration on app startup
-    this.loadDefaultConveyorConfig();
+    // NOTE: Removed auto-load of default configuration.
+    // User must upload conveyorConfig.json via bulk import or upload dialog.
+    console.log('🔍 ContainerVisualizationComponent.ngOnInit() - NO auto-load of conveyor config');
 
     this.containerService.getShipData().subscribe((data) => {
       this.shipData = data;
@@ -384,18 +385,21 @@ export class ContainerVisualizationComponent implements OnInit {
     input.value = '';
   }
 
-  // Load default conveyor configuration from assets on app startup
-  loadDefaultConveyorConfig(): void {
-    this.http.get('/assets/conveyorConfig.json').subscribe(
-      (config: any) => {
-        this.conveyorConfigService.loadConfigFromData(config);
-        console.log('✅ Default conveyor config loaded successfully');
-      },
-      (error) => {
-        console.warn('⚠️ Could not load default conveyor config:', error);
-      }
-    );
-  }
+  // NOTE: Removed loadDefaultConveyorConfig() method
+  // User must upload conveyorConfig.json explicitly via upload dialog or bulk import
+  // This method is kept below for reference only - DO NOT CALL:
+  // ============================================================================
+  // OLD METHOD (DO NOT USE):
+  // private loadDefaultConveyorConfig(): void {
+  //   this.http.get('/assets/conveyorConfig.json').subscribe(
+  //     (config: any) => {
+  //       this.conveyorConfigService.loadConfigFromData(config);
+  //     },
+  //     (error) => {
+  //       console.warn('⚠️ Could not load default conveyor config:', error);
+  //     }
+  //   );
+  // }
 
   getItemPosition(item: Item, compartment: Compartment): { left: string; width: string } {
     // Use widthindex range (not totalCapacity) for position calculation
@@ -1719,9 +1723,22 @@ export class ContainerVisualizationComponent implements OnInit {
     this.containerService.moveContainerDown(containerId);
   }
 
-  // TASK 5: Conv popup methods
+  // TASK 5: Conv popup methods with validation
   openConvPopup(item: Item, event: Event): void {
     event.stopPropagation(); // Prevent event bubbling
+    
+    // VALIDATION: Check if conveyor config has been uploaded
+    const currentConfig = this.conveyorConfigService.getConfig();
+    
+    if (!currentConfig || !currentConfig.conveyors || currentConfig.conveyors.length === 0) {
+      // No config uploaded - show alert
+      console.warn('⚠️ Conv window: No config uploaded. User must upload conveyorConfig.json first.');
+      alert('Please upload a conveyorConfig.json file first to use the conveyor allocation window');
+      return; // Don't open the window
+    }
+    
+    // Config exists - open the window
+    console.log('✅ Conv window opening - config is available:', currentConfig.conveyors[0].conveyorName);
     this.convPopup = { visible: true, item };
   }
 

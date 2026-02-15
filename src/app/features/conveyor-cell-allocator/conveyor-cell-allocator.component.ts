@@ -69,6 +69,7 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log('🪟 ConveyorCellAllocatorComponent: ngOnInit() called - component is opening');
+    console.log('🪟 ConveyorCellAllocatorComponent: Waiting for user to upload conveyor config...');
     
     this.configService.config$
       .pipe(takeUntil(this.destroy$))
@@ -76,15 +77,16 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
         console.log('🪟 ConveyorCellAllocatorComponent: Received config from service', config);
         
         this.config = config;
-        if (config) {
+        if (config && config.convayor && config.convayor.length > 0) {
           this.conveyors = config.convayor || [];
-          console.log('🪟 ConveyorCellAllocatorComponent: Set conveyors array, length:', this.conveyors.length);
-          if (this.conveyors.length > 0) {
-            console.log('🪟 ConveyorCellAllocatorComponent: First conveyor name:', this.conveyors[0].conveyorName);
-          }
+          console.log('✅ ConveyorCellAllocatorComponent: Config loaded successfully!');
+          console.log('📊 ConveyorCellAllocatorComponent: Set conveyors array, length:', this.conveyors.length);
+          console.log('📝 ConveyorCellAllocatorComponent: First conveyor name:', this.conveyors[0].conveyorName);
           this.initializeUIState();
         } else {
-          console.log('🪟 ConveyorCellAllocatorComponent: Config is null/undefined');
+          console.log('⚠️ ConveyorCellAllocatorComponent: Config is null/empty/not loaded yet');
+          this.conveyors = [];
+          this.config = null;
         }
       });
   }
@@ -578,7 +580,6 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   getHeaderConveyorName(): string {
     console.log('🎯 getHeaderConveyorName() called');
     console.log('   - this.conveyors length:', this.conveyors?.length || 0);
-    console.log('   - this.conveyors data:', this.conveyors);
     console.log('   - this.config:', this.config);
     
     // Priority 1: Use the loaded conveyors array (should be populated from config subscription)
@@ -588,16 +589,16 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
       return name;
     }
     
-    // Priority 2: Fallback to config object directly
+    // Priority 2: Fallback to config object directly (for safety)
     if (this.config && this.config.convayor && this.config.convayor.length > 0) {
       const name = this.config.convayor[0].conveyorName || 'Conveyor';
       console.log('   ✅ FALLBACK: Using config.convayor[0].conveyorName =', name);
       return name;
     }
     
-    // Priority 3: No data available, use default
-    console.log('   ❌ ERROR: No conveyor data found! conveyors array is empty or undefined');
-    return 'Conveyor Cell Allocator';
+    // Priority 3: No data available - show error state
+    console.log('⚠️ WARNING: No conveyor config loaded yet - header will show empty state');
+    return '[Config Not Loaded]';
   }
 
   getAvailableAreas(): ConveyorAreaAdvanced[] {

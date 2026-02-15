@@ -17,39 +17,7 @@ export class ConveyorAdvancedService {
   public config$ = this.configSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    this.loadDefaultConfig();
-  }
-
-  /**
-   * Load default advanced conveyor configuration from assets/conveyorConfig.json
-   */
-  private loadDefaultConfig(): void {
-    console.log('🔍 ConveyorAdvancedService: Attempting to load configuration...');
-    
-    // Load from assets/conveyorConfig.json
-    this.http
-      .get<any>('assets/conveyorConfig.json')
-      .subscribe(
-        (config) => {
-          console.log('✅ ConveyorAdvancedService: Configuration loaded successfully!', config);
-          
-          // Normalize config: handle both "conveyors" and "convayor" property names
-          const normalizedConfig = this.normalizeConfig(config);
-          
-          console.log('📊 Conveyor data:', normalizedConfig.convayor);
-          if (normalizedConfig.convayor && normalizedConfig.convayor.length > 0) {
-            console.log('📝 First conveyor name:', normalizedConfig.convayor[0].conveyorName);
-          }
-          
-          this.validateConfig(normalizedConfig);
-          this.configSubject.next(normalizedConfig);
-        },
-        (error) => {
-          console.error('❌ ConveyorAdvancedService: Failed to load default conveyor config from assets/conveyorConfig.json:', error);
-          // Fallback to empty config
-          this.configSubject.next({ convayor: [] });
-        }
-      );
+    console.log('✅ ConveyorAdvancedService initialized - NO auto-load. Waiting for user to upload conveyorConfig.json');
   }
 
   /**

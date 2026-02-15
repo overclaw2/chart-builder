@@ -12,6 +12,7 @@ export interface Item {
   materialType?: string; // material type (default: custom for user-defined packages)
   containerId?: string; // ID of container this item belongs to
   compartmentId?: string; // ID of compartment this item belongs to
+  location?: string; // display location string (e.g., "Container Name (1/2)")
 }
 
 export interface MaterialType {
