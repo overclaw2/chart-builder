@@ -10,6 +10,8 @@ export interface Item {
   color?: string; // color for item visualization (default: #7dd3fc)
   sourcePackageId?: string; // tracks which available package this item came from (for syncing state)
   materialType?: string; // material type (default: custom for user-defined packages)
+  containerId?: string; // ID of container this item belongs to
+  compartmentId?: string; // ID of compartment this item belongs to
 }
 
 export interface MaterialType {
