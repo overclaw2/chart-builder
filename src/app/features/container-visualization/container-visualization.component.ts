@@ -1908,14 +1908,24 @@ export class ContainerVisualizationComponent implements OnInit {
       this.capacityWarningService.updateWarnings(this.shipData.containers);
 
       // CRITICAL FIX: Create new references to trigger change detection
-      // The spread operator on compartment ensures Angular detects the change
-      container.compartments = [...container.compartments];
+      // IMPORTANT: Create new reference for compartment.items array FIRST
+      // This ensures the *ngFor binding detects the change and re-renders the item width
+      compartment.items = [...compartment.items];
+      console.log('🔄 compartment.items array reference updated');
       
-      // Trigger change detection with new shipData reference
+      // Then update container and ship data references
+      container.compartments = [...container.compartments];
       this.shipData = { ...this.shipData };
+      console.log('🔄 container.compartments and shipData references updated');
+      
+      // Apply filters to keep filtered view in sync
       this.applyFilters();
-      this.cdr.markForCheck();
-      console.log('🔄 Change detection triggered');
+      
+      // Force immediate change detection with detectChanges() instead of markForCheck()
+      // detectChanges() runs change detection immediately, not waiting for the next cycle
+      // This ensures the visual width bar updates immediately on screen
+      this.cdr.detectChanges();
+      console.log('🔄 Change detection triggered with detectChanges()');
 
       this.showToast(`✅ Package type changed to ${newMaterialType.type}!`, 'warning');
       this.closeTypeModal();
@@ -1926,6 +1936,7 @@ export class ContainerVisualizationComponent implements OnInit {
 
       if (confirm(message)) {
         // Remove item from compartment
+        // CRITICAL: Create new array reference when modifying items
         compartment.items = compartment.items.filter(i => i.id !== item.id);
 
         // Recalculate compartment statistics
@@ -1953,10 +1964,11 @@ export class ContainerVisualizationComponent implements OnInit {
         // Update capacity warnings
         this.capacityWarningService.updateWarnings(this.shipData.containers);
 
-        // Trigger change detection
+        // Trigger change detection with new references
+        container.compartments = [...container.compartments];
         this.shipData = { ...this.shipData };
         this.applyFilters();
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
 
         this.showToast(`⚠️ Package removed from container due to insufficient ${reason} capacity!`, 'warning');
         this.closeTypeModal();
