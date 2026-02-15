@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ConveyorConfig, Conveyor, ConveyorArea } from '../models/conveyor.model';
 
@@ -9,43 +10,46 @@ export class ConveyorConfigService {
   private configSubject = new BehaviorSubject<ConveyorConfig | null>(null);
   public config$ = this.configSubject.asObservable();
 
-  constructor() {
+  constructor(private http: HttpClient) {
     this.loadDefaultConfig();
   }
 
   /**
-   * Load default conveyor configuration
+   * Load default conveyor configuration from assets/conveyorConfig.json
    */
   private loadDefaultConfig(): void {
-    const defaultConfig: ConveyorConfig = {
-      conveyors: [
-        {
-          conveyorId: '1',
-          conveyorName: 'Conveyor 1',
-          Areas: [
-            { name: 'A', startWidthIndex: 1000, stopWidthIndex: 1900 },
-            { name: 'B', startWidthIndex: 1900, stopWidthIndex: 2800 },
-            { name: 'C', startWidthIndex: 2800, stopWidthIndex: 3700 },
-            { name: 'D', startWidthIndex: 3700, stopWidthIndex: 4600 },
-          ],
-        },
-        {
-          conveyorId: '2',
-          conveyorName: 'Conveyor 2',
-          Areas: [
-            { name: 'A', startWidthIndex: 1000, stopWidthIndex: 1900 },
-            { name: 'B', startWidthIndex: 1900, stopWidthIndex: 2800 },
-            { name: 'C', startWidthIndex: 2800, stopWidthIndex: 3700 },
-            { name: 'D', startWidthIndex: 3700, stopWidthIndex: 4600 },
-          ],
-        },
-      ],
-      level4_config: {
-        total_cells: 45,
-        cell_width: 5,
+    this.http.get<any>('assets/conveyorConfig.json').subscribe(
+      (loadedConfig) => {
+        console.log('✅ Loading default config from assets/conveyorConfig.json', loadedConfig);
+        const normalizedConfig = this.normalizeConfig(loadedConfig);
+        this.validateConfig(normalizedConfig);
+        this.configSubject.next(normalizedConfig);
+        console.log('✅ Config loaded successfully. First conveyor name:', normalizedConfig.conveyors[0]?.conveyorName);
       },
-    };
-    this.configSubject.next(defaultConfig);
+      (error) => {
+        console.warn('⚠️ Failed to load config from assets, using fallback mock data', error);
+        // Fallback to minimal mock data (not Conveyor 2)
+        const fallbackConfig: ConveyorConfig = {
+          conveyors: [
+            {
+              conveyorId: '1',
+              conveyorName: 'Conveyor 1',
+              Areas: [
+                { name: 'A', startWidthIndex: 1000, stopWidthIndex: 1900 },
+                { name: 'B', startWidthIndex: 1900, stopWidthIndex: 2800 },
+                { name: 'C', startWidthIndex: 2800, stopWidthIndex: 3700 },
+                { name: 'D', startWidthIndex: 3700, stopWidthIndex: 4600 },
+              ],
+            },
+          ],
+          level4_config: {
+            total_cells: 45,
+            cell_width: 5,
+          },
+        };
+        this.configSubject.next(fallbackConfig);
+      }
+    );
   }
 
   /**
