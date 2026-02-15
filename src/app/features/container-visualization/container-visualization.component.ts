@@ -1723,6 +1723,9 @@ export class ContainerVisualizationComponent implements OnInit {
   // Track which section cells are open (Level 4 visibility)
   sectionCellsOpen: { [key: string]: boolean } = {}; // key format: "areaId_sectionIdx"
   
+  // Track if sections have been opened for this area (for auto-open on first selection)
+  sectionsInitializedForArea: { [areaId: string]: boolean } = {};
+  
   // Track selected area for visual feedback (only one area selected at a time)
   selectedConveyorArea: string | null = null;
 
@@ -1875,21 +1878,39 @@ export class ContainerVisualizationComponent implements OnInit {
       // Clicking same area: deselect and close it
       this.conveyorExpandedAreas[areaId] = false;
       this.selectedConveyorArea = null;
+      // Reset section initialization for this area (so next time all sections auto-open)
+      this.sectionsInitializedForArea[areaId] = false;
     } else {
       // Clicking different area: close previous, open new one, set as selected
       Object.keys(this.conveyorExpandedAreas).forEach(key => {
         this.conveyorExpandedAreas[key] = false;
+        // Reset section initialization when switching areas
+        this.sectionsInitializedForArea[key] = false;
       });
       // Open and select this area
       this.conveyorExpandedAreas[areaId] = true;
       this.selectedConveyorArea = areaId;
+      // Reset section initialization for this new area (first click will open all)
+      this.sectionsInitializedForArea[areaId] = false;
     }
   }
 
   // Toggle section cells (Level 4) open/close
   toggleSectionCells(areaId: string, sectionIdx: number): void {
-    const key = `${areaId}_${sectionIdx}`;
-    this.sectionCellsOpen[key] = !this.sectionCellsOpen[key];
+    // On first section selection for this area, auto-open all 4 sections
+    if (!this.sectionsInitializedForArea[areaId]) {
+      this.sectionsInitializedForArea[areaId] = true;
+      // Open all sections for this area
+      const sections = this.getSelectedAreaSections();
+      for (let i = 0; i < sections.length; i++) {
+        const key = `${areaId}_${i}`;
+        this.sectionCellsOpen[key] = true;
+      }
+    } else {
+      // Normal toggle behavior after first selection
+      const key = `${areaId}_${sectionIdx}`;
+      this.sectionCellsOpen[key] = !this.sectionCellsOpen[key];
+    }
   }
 
   // Check if section cells are open
