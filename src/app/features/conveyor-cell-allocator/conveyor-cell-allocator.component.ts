@@ -444,18 +444,11 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
 
   /**
    * Get cell tooltip content
+   * Returns ONLY the centralWidthIndex value (e.g., "2437.5")
    */
   getCellTooltip(section: ConveyorSection, cellIndex: number): string {
     const cellCentral = this.getCellCentralWidth(section, cellIndex);
-    const cellWidth = this.getCellWidth();
-    const cellStart = cellCentral - cellWidth / 2;
-    const cellEnd = cellCentral + cellWidth / 2;
-
-    const allocated = this.getAllocatedCellInfo(section.name, cellIndex);
-    if (allocated) {
-      return `Cell ${cellIndex}: ${cellStart.toFixed(1)}-${cellEnd.toFixed(1)} [Mcm] (${allocated.packageName})`;
-    }
-    return `Cell ${cellIndex}: ${cellStart.toFixed(1)}-${cellEnd.toFixed(1)} [Mcm]`;
+    return cellCentral.toString();
   }
 
   /**
