@@ -1921,6 +1921,26 @@ export class ContainerVisualizationComponent implements OnInit {
     return false;
   }
 
+  // Cell tooltip state
+  cellTooltipVisible = false;
+  cellTooltipText = '';
+  cellTooltipPos = { x: 0, y: 0 };
+
+  // Show cell tooltip on hover
+  showCellTooltip(event: MouseEvent, cell: any): void {
+    this.cellTooltipText = `Cell ${cell.value} - Center: ${cell.centralWidthIndex}`;
+    this.cellTooltipPos = {
+      x: event.clientX + 10,
+      y: event.clientY - 30
+    };
+    this.cellTooltipVisible = true;
+  }
+
+  // Hide cell tooltip
+  hideCellTooltip(): void {
+    this.cellTooltipVisible = false;
+  }
+
   // NEW: Handle allocate button click
   onAllocatePackage(): void {
     // Close the modal after allocation

@@ -522,18 +522,25 @@
           <ng-container *ngFor="let section of getSelectedAreaSections(); let sectionIdx = index">
             <div *ngIf="isSectionCellsOpen(selectedConveyorArea, sectionIdx)"
               class="section-cells-row">
-              <div class="row-label">{{ section.name }} Cells (0-{{ section.cells.length - 1 }})</div>
+              <div class="row-label">{{ section.name }} Cells ({{ section.startRange }}-{{ section.endRange }})</div>
               <div class="cells-container-horizontal">
                 <div *ngFor="let cell of section.cells" 
                   class="grid-cell-horizontal"
                   [class.allocated]="cell.allocated"
                   [style.backgroundColor]="cell.color"
-                  [title]="'Cell ' + cell.value">
+                  [title]="'Cell ' + cell.value + ' - Center: ' + cell.centralWidthIndex"
+                  (mouseenter)="showCellTooltip($event, cell)"
+                  (mouseleave)="hideCellTooltip()">
                   {{ cell.value }}
                 </div>
               </div>
             </div>
           </ng-container>
+        </div>
+
+        <!-- Cell Tooltip (Global) -->
+        <div *ngIf="cellTooltipVisible" class="cell-tooltip" [style.left.px]="cellTooltipPos.x" [style.top.px]="cellTooltipPos.y">
+          {{ cellTooltipText }}
         </div>
 
         <!-- Package Info -->
