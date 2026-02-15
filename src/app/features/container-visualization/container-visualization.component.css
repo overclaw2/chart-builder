@@ -330,21 +330,48 @@
   justify-content: center;
   box-sizing: border-box;
   user-select: none;
-  min-width: 80px;
+  /* FIXED: Removed min-width: 80px to allow packages to scale to true width */
   position: relative;
   /* PROBLEM 1 FIX: Allow position badge below to be visible */
   overflow: visible;
+  /* Enable magnification effect on hover */
+  transform-origin: center center;
+  transform: scale(1);
 }
 
 .item:hover {
   box-shadow: 0 2px 8px rgba(34, 139, 34, 0.3);
-  transform: translateY(-2px);
   cursor: grab;
 }
 
 .item:active {
   cursor: grabbing;
   opacity: 0.8;
+}
+
+/* MAGNIFICATION HOVER EFFECT - For small packages below 60px width */
+/* When a package is smaller than 60px, hovering magnifies it for easier interaction */
+.item.small-package:hover {
+  /* Magnify by 3x when hovering - creates "zoom lens" effect */
+  transform: scale(3);
+  /* Position magnified box above other elements */
+  z-index: 500;
+  /* Enhanced shadow for depth during magnification */
+  box-shadow: 0 8px 24px rgba(34, 139, 34, 0.5), 
+              inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  /* Smooth transition for magnification */
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Ensure small package magnification doesn't translate */
+.item.small-package:hover {
+  /* Magnify in place without vertical movement */
+  transform: scale(3);
+}
+
+/* Smooth transition back to normal size */
+.item.small-package {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* PROBLEM 1 FIX: Improved label rendering with smart truncation and conditional display */

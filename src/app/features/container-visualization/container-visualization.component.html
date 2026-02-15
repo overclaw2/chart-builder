@@ -370,6 +370,7 @@
               
               <div
                 class="item"
+                [ngClass]="getItemMagnificationClass(item, compartment)"
                 draggable="true"
                 (dragstart)="onDragStart($event, container.id, compartment.id, item)"
                 (mouseenter)="onItemMouseEnter(item.id, $event)"
