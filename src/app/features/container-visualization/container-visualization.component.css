@@ -1558,41 +1558,152 @@
   text-transform: capitalize;
 }
 
-/* ====== CONVEYOR TREE STRUCTURE STYLES ====== */
+/* ====== CONVEYOR LAYOUT - INDEPENDENT ROWS ====== */
 
-/* Tree Container */
-.conveyor-tree {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 1rem 0;
-  border-top: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-/* Tree Title */
-.tree-title {
+/* Layout Title */
+.layout-title {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
 }
 
-.tree-title h3 {
+.layout-title h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.tree-subtitle {
+.layout-subtitle {
   font-size: 0.75rem;
   color: var(--text-secondary);
   font-style: italic;
+}
+
+/* Layout Section - Each Row */
+.layout-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.row-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 0 0.5rem 0;
+}
+
+/* Button Row - Full Width Distribution */
+.button-row {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+/* Area Buttons - Row 1 */
+.areas-row .area-button {
+  flex: 1 1 calc(25% - 0.75rem);
+  min-width: 150px;
+  padding: 0.75rem 1rem;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.areas-row .area-button:hover {
+  background: var(--hover-bg);
+  border-color: var(--info-color);
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+  transform: translateY(-2px);
+}
+
+.areas-row .area-button.active {
+  background: #2196F3;
+  color: white;
+  border-color: #1976D2;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+/* Section Buttons - Row 2 */
+.sections-row .section-button {
+  flex: 1 1 calc(25% - 0.75rem);
+  min-width: 150px;
+  padding: 0.75rem 1rem;
+  background: #f0f4f8;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sections-row .section-button:hover {
+  background: var(--hover-bg);
+  border-color: var(--info-color);
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+  transform: translateY(-2px);
+}
+
+.sections-row .section-button.active {
+  background: #4CAF50;
+  color: white;
+  border-color: #388E3C;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.button-text {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.button-range {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+/* Cells Section - Rows 3+ */
+.cells-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.cells-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 /* Tree Nodes - Base Structure */

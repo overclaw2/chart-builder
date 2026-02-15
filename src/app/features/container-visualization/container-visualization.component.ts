@@ -1898,6 +1898,29 @@ export class ContainerVisualizationComponent implements OnInit {
     return this.sectionCellsOpen[key] ?? false; // Default to closed
   }
 
+  // Get sections for the currently selected area (used in Row 2)
+  getSelectedAreaSections(): any[] {
+    if (!this.selectedConveyorArea) return [];
+    const conveyorData = this.getConveyorData(this.convPopup.item!);
+    if (!conveyorData) return [];
+    
+    const selectedArea = conveyorData.areas.find((a: any) => a.id === this.selectedConveyorArea);
+    return selectedArea?.sections || [];
+  }
+
+  // Get the first open section from the selected area (used in Rows 3+)
+  getSelectedSection(): any {
+    if (!this.selectedConveyorArea) return null;
+    
+    const sections = this.getSelectedAreaSections();
+    for (let i = 0; i < sections.length; i++) {
+      if (this.isSectionCellsOpen(this.selectedConveyorArea, i)) {
+        return sections[i];
+      }
+    }
+    return null;
+  }
+
   // NEW: Handle allocate button click
   onAllocatePackage(): void {
     // Close the modal after allocation

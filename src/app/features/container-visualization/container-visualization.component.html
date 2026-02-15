@@ -477,67 +477,57 @@
         <span class="close-icon" (click)="closeConvPopup()" title="Close">✕</span>
       </div>
 
-      <!-- Conveyor Content with Hierarchical Tree Structure -->
+      <!-- Conveyor Content with Independent Row Layout -->
       <div class="conveyor-content">
-        <!-- Tree Title -->
-        <div class="tree-title">
+        <!-- Row Title -->
+        <div class="layout-title">
           <h3>Allocation Areas & Sections</h3>
-          <span class="tree-subtitle">Expand areas to view sections</span>
+          <span class="layout-subtitle">Select an area to view sections</span>
         </div>
 
-        <!-- Hierarchical Tree Structure -->
-        <div class="conveyor-tree">
-          <!-- Area Nodes (Level 1) -->
-          <div class="tree-node tree-level-0" *ngFor="let area of conveyorData.areas">
-            <!-- Area Header with Expand/Collapse Toggle -->
-            <div class="tree-node-header" [class.selected]="selectedConveyorArea === area.id" (click)="toggleConveyorAreaExpansion(area.id)">
-              <div class="tree-expand-icon" [class.expanded]="area.expanded">
-                <span class="expand-toggle">{{ area.expanded ? '▼' : '▶' }}</span>
-              </div>
-              <div class="tree-node-content">
-                <span class="area-name" [class.highlighted]="area.highlighted">
-                  {{ area.name }}
-                </span>
-                <span class="area-range">
-                  ({{ area.startIndex }} - {{ area.endIndex }})
-                </span>
-              </div>
-              <div class="tree-node-badge">
-                {{ area.expanded ? 'Expanded' : 'Collapsed' }}
-              </div>
-            </div>
+        <!-- ROW 1: Areas (Full Width, Evenly Distributed) -->
+        <div class="layout-section">
+          <div class="row-label">Areas</div>
+          <div class="button-row areas-row">
+            <button 
+              *ngFor="let area of conveyorData.areas"
+              [class.active]="selectedConveyorArea === area.id"
+              (click)="toggleConveyorAreaExpansion(area.id)"
+              class="area-button"
+            >
+              <span class="button-text">{{ area.name }}</span>
+              <span class="button-range">{{ area.startIndex }}-{{ area.endIndex }}</span>
+            </button>
+          </div>
+        </div>
 
-            <!-- Sections (Level 1 - shown when area is expanded) -->
-            <div class="tree-children" *ngIf="area.expanded" [@slideDown]>
-              <!-- Section Nodes -->
-              <div class="tree-node tree-level-1" *ngFor="let section of area.sections; let sectionIdx = index">
-                <!-- Section Header with Toggle for Level 4 -->
-                <div class="tree-node-header section-header" (click)="toggleSectionCells(area.id, sectionIdx)">
-                  <div class="tree-expand-icon" [class.expanded]="isSectionCellsOpen(area.id, sectionIdx)">
-                    <span class="section-icon">{{ isSectionCellsOpen(area.id, sectionIdx) ? '▼' : '▶' }}</span>
-                  </div>
-                  <div class="tree-node-content">
-                    <span class="section-name">{{ section.name }}</span>
-                    <span class="section-range">
-                      ({{ section.startRange }} - {{ section.endRange }})
-                    </span>
-                  </div>
-                </div>
+        <!-- ROW 2: Sections (Full Width, Evenly Distributed, Only if Area Selected) -->
+        <div class="layout-section" *ngIf="selectedConveyorArea">
+          <div class="row-label">Sections</div>
+          <div class="button-row sections-row">
+            <button 
+              *ngFor="let section of getSelectedAreaSections(); let sectionIdx = index"
+              [class.active]="isSectionCellsOpen(selectedConveyorArea, sectionIdx)"
+              (click)="toggleSectionCells(selectedConveyorArea, sectionIdx)"
+              class="section-button"
+            >
+              <span class="button-text">{{ section.name }}</span>
+              <span class="button-range">{{ section.startRange }}-{{ section.endRange }}</span>
+            </button>
+          </div>
+        </div>
 
-                <!-- Allocation Grid (Level 4 - collapsible vertical strips) -->
-                <div class="tree-children tree-grid-container" *ngIf="isSectionCellsOpen(area.id, sectionIdx)">
-                  <div class="section-details">
-                    <div class="allocation-grid-vertical">
-                      <div *ngFor="let cell of section.cells" 
-                        class="grid-cell-strip"
-                        [class.allocated]="cell.allocated"
-                        [style.backgroundColor]="cell.color"
-                        [title]="'Cell ' + cell.value">
-                        <span class="cell-strip-label">{{ cell.value }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        <!-- ROWS 3+: Cells (Vertical Strips, Only if Section Selected) -->
+        <div class="layout-section cells-section" *ngIf="getSelectedSection() as selectedSection">
+          <div class="row-label">Cells - {{ selectedSection.name }}</div>
+          <div class="cells-container">
+            <div class="allocation-grid-vertical">
+              <div *ngFor="let cell of selectedSection.cells" 
+                class="grid-cell-strip"
+                [class.allocated]="cell.allocated"
+                [style.backgroundColor]="cell.color"
+                [title]="'Cell ' + cell.value">
+                <span class="cell-strip-label">{{ cell.value }}</span>
               </div>
             </div>
           </div>
