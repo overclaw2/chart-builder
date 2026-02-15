@@ -1,7 +1,12 @@
 <div class="conveyor-allocator-container">
   <!-- Header -->
   <div class="allocator-header">
-    <h2>Conveyor Cell Allocator <span class="mode-badge" [class.new]="uiState.mode === 'new'" [class.edit]="uiState.mode === 'edit'">{{ uiState.mode | uppercase }}</span></h2>
+    <h2>
+      <span class="conveyor-title">
+        {{ getActiveConveyorName() || 'Conveyor Cell Allocator' }}
+      </span>
+      <span class="mode-badge" [class.new]="uiState.mode === 'new'" [class.edit]="uiState.mode === 'edit'">{{ uiState.mode | uppercase }}</span>
+    </h2>
     <button class="config-btn" (click)="showConfigUpload = !showConfigUpload" title="Load configuration">
       ⚙️ Config
     </button>

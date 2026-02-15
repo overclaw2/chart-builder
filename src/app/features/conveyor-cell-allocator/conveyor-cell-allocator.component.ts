@@ -553,6 +553,15 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   /**
    * Get available areas for active conveyor
    */
+  /**
+   * Get the name of the currently active conveyor
+   */
+  getActiveConveyorName(): string | null {
+    if (!this.uiState.activeConveyor) return null;
+    const conveyor = this.conveyors.find(c => c.conveyorId === this.uiState.activeConveyor);
+    return conveyor?.conveyorName ?? null;
+  }
+
   getAvailableAreas(): ConveyorAreaAdvanced[] {
     if (!this.uiState.activeConveyor) return [];
     const conveyor = this.conveyors.find(c => c.conveyorId === this.uiState.activeConveyor);
