@@ -344,8 +344,12 @@
 /* CRITICAL: Enhance padding and content space when small package is magnified */
 .item.small-package:hover {
   padding: 1rem;
-  min-height: 200px;
-  min-width: 200px;
+  /* Cap magnified box at reasonable size - shows content without dominating screen */
+  max-width: 280px;
+  max-height: 280px;
+  /* Allow box to grow but with limits */
+  width: auto;
+  height: auto;
 }
 
 .item:hover {
@@ -377,8 +381,9 @@
   /* CRITICAL: Extremely high z-index to appear ABOVE all elements */
   z-index: 10000 !important;
   
-  /* Magnify by 2x - balanced zoom for readability without overwhelming */
-  transform: scale(2);
+  /* Moderate magnification (1.5x) + max-width constraint = reasonable size */
+  /* Capped at 280px to prevent screen domination */
+  transform: scale(1.5);
   
   /* Smooth easing for natural magnification */
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
