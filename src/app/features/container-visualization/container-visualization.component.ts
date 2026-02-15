@@ -1908,17 +1908,17 @@ export class ContainerVisualizationComponent implements OnInit {
     return selectedArea?.sections || [];
   }
 
-  // Get the first open section from the selected area (used in Rows 3+)
-  getSelectedSection(): any {
-    if (!this.selectedConveyorArea) return null;
+  // Check if any sections are open in the selected area
+  hasOpenSections(): boolean {
+    if (!this.selectedConveyorArea) return false;
     
     const sections = this.getSelectedAreaSections();
     for (let i = 0; i < sections.length; i++) {
       if (this.isSectionCellsOpen(this.selectedConveyorArea, i)) {
-        return sections[i];
+        return true;
       }
     }
-    return null;
+    return false;
   }
 
   // NEW: Handle allocate button click

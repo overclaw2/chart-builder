@@ -517,20 +517,23 @@
           </div>
         </div>
 
-        <!-- ROWS 3+: Cells (Vertical Strips, Only if Section Selected) -->
-        <div class="layout-section cells-section" *ngIf="getSelectedSection() as selectedSection">
-          <div class="row-label">Cells - {{ selectedSection.name }}</div>
-          <div class="cells-container">
-            <div class="allocation-grid-vertical">
-              <div *ngFor="let cell of selectedSection.cells" 
-                class="grid-cell-strip"
-                [class.allocated]="cell.allocated"
-                [style.backgroundColor]="cell.color"
-                [title]="'Cell ' + cell.value">
-                <span class="cell-strip-label">{{ cell.value }}</span>
+        <!-- ROWS 3+: Cells (Horizontal Row per Section, All Open Sections Displayed) -->
+        <div class="layout-section cells-section" *ngIf="selectedConveyorArea && hasOpenSections()">
+          <ng-container *ngFor="let section of getSelectedAreaSections(); let sectionIdx = index">
+            <div *ngIf="isSectionCellsOpen(selectedConveyorArea, sectionIdx)"
+              class="section-cells-row">
+              <div class="row-label">{{ section.name }} Cells (0-{{ section.cells.length - 1 }})</div>
+              <div class="cells-container-horizontal">
+                <div *ngFor="let cell of section.cells" 
+                  class="grid-cell-horizontal"
+                  [class.allocated]="cell.allocated"
+                  [style.backgroundColor]="cell.color"
+                  [title]="'Cell ' + cell.value">
+                  {{ cell.value }}
+                </div>
               </div>
             </div>
-          </div>
+          </ng-container>
         </div>
 
         <!-- Package Info -->

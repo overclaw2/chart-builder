@@ -1692,18 +1692,27 @@
 /* Cells Section - Rows 3+ */
 .cells-section {
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section-cells-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   padding: 1rem;
   background: var(--bg-tertiary);
   border-radius: 6px;
   border: 1px solid var(--border-color);
 }
 
-.cells-container {
+.cells-container-horizontal {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-height: 500px;
-  overflow-y: auto;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  align-items: center;
 }
 
 /* Tree Nodes - Base Structure */
@@ -2018,20 +2027,21 @@
   z-index: 10;
 }
 
-/* Vertical cell strip (replaces grid-cell in NEW mode conv window) */
-.grid-cell-strip {
+/* Horizontal cell button (grid cell in conv window) */
+.grid-cell-horizontal {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  width: 100%;
-  min-width: 200px;
+  justify-content: center;
+  width: 32px;
   height: 32px;
-  padding-right: 0.75rem;
-  font-size: 0.85rem;
+  min-width: 32px;
+  min-height: 32px;
+  font-size: 0.7rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
-  background-color: var(--bg-tertiary);
-  border-radius: 4px;
+  background-color: var(--bg-secondary);
+  border-radius: 3px;
   cursor: pointer;
   border: 1px solid var(--border-color);
   transition: all 0.15s ease;
@@ -2039,21 +2049,17 @@
   flex-shrink: 0;
 }
 
-.grid-cell-strip.allocated {
+.grid-cell-horizontal.allocated {
   color: white;
   font-weight: 700;
   border: 1px solid rgba(0, 0, 0, 0.2);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.grid-cell-strip:hover {
-  transform: translateX(-4px);
+.grid-cell-horizontal:hover {
+  transform: scale(1.15);
   box-shadow: 0 2px 8px var(--shadow-md);
   z-index: 10;
-}
-
-.cell-strip-label {
-  font-variant-numeric: tabular-nums;
 }
 
 /* Package Info */
