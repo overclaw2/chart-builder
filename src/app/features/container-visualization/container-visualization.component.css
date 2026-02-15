@@ -377,8 +377,8 @@
   /* CRITICAL: Extremely high z-index to appear ABOVE all elements */
   z-index: 10000 !important;
   
-  /* Magnify by 3x - creates "zoom lens" effect */
-  transform: scale(3);
+  /* Magnify by 2x - balanced zoom for readability without overwhelming */
+  transform: scale(2);
   
   /* Smooth easing for natural magnification */
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
