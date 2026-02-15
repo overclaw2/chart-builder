@@ -314,6 +314,8 @@
   /* Ensure position badge below is not clipped */
   overflow: visible;
   z-index: 10;
+  /* Allow magnified items to escape container bounds */
+  perspective: 1000px;
 }
 
 .item {
@@ -339,6 +341,13 @@
   transform: scale(1);
 }
 
+/* CRITICAL: Enhance padding and content space when small package is magnified */
+.item.small-package:hover {
+  padding: 1rem;
+  min-height: 200px;
+  min-width: 200px;
+}
+
 .item:hover {
   box-shadow: 0 2px 8px rgba(34, 139, 34, 0.3);
   cursor: grab;
@@ -349,24 +358,34 @@
   opacity: 0.8;
 }
 
-/* MAGNIFICATION HOVER EFFECT - For small packages below 60px width */
-/* When a package is smaller than 60px, hovering magnifies it for easier interaction */
-.item.small-package:hover {
-  /* Magnify by 3x when hovering - creates "zoom lens" effect */
-  transform: scale(3);
-  /* CRITICAL: Position magnified box ABOVE EVERYTHING - including tooltips, buttons, axis labels */
-  z-index: 10000 !important;
-  /* Enhanced shadow for depth during magnification */
-  box-shadow: 0 8px 24px rgba(34, 139, 34, 0.5), 
-              inset 0 1px 2px rgba(255, 255, 255, 0.3);
-  /* Smooth transition for magnification */
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+/* MAGNIFICATION HOVER EFFECT - For small packages below 8% width */
+/* When a package is smaller than 8%, hovering magnifies it for easier interaction */
+/* The magnified box breaks out of container bounds and appears above everything */
 
-/* Smooth transition back to normal size */
 .item.small-package {
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: auto;
+  /* Set transform origin to center for scaling */
+  transform-origin: center center;
+  /* Initially not magnified - keep small */
+  transform: scale(1);
+}
+
+.item.small-package:hover {
+  /* CRITICAL: Use position: fixed to break out of container constraints */
+  position: fixed !important;
+  /* CRITICAL: Extremely high z-index to appear ABOVE all elements */
+  z-index: 10000 !important;
+  
+  /* Magnify by 3x - creates "zoom lens" effect */
+  transform: scale(3);
+  
+  /* Smooth easing for natural magnification */
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* Enhanced shadow for depth perception */
+  box-shadow: 0 12px 32px rgba(34, 139, 34, 0.6), 
+              inset 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 /* CRITICAL: Hide tooltip when small package is being magnified */
@@ -394,6 +413,15 @@
   /* PROBLEM 1 FIX: Prevent text overflow and wrap text properly */
   word-wrap: break-word;
   white-space: normal;
+  overflow: visible;
+}
+
+/* CRITICAL: Expand content area when magnified to show full information */
+.item.small-package:hover .item-content {
+  max-width: 100%;
+  gap: 0.4rem;
+  padding: 0.75rem 0.5rem;
+  overflow: visible;
 }
 
 .item-name {
@@ -406,6 +434,17 @@
   font-size: 0.72rem;
 }
 
+/* CRITICAL: Reveal full text when small package is magnified */
+.item.small-package:hover .item-name {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  max-width: 100%;
+}
+
 .item-detail {
   font-size: 0.65rem;
   margin: 0;
@@ -414,6 +453,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* CRITICAL: Show all details when small package is magnified */
+.item.small-package:hover .item-detail {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
+  font-size: 0.8rem;
+  line-height: 1.1;
+  max-width: 100%;
+  display: block;
 }
 
 .item-destination {
@@ -425,6 +476,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* CRITICAL: Show destination when small package is magnified */
+.item.small-package:hover .item-destination {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
+  font-size: 0.75rem;
+  line-height: 1.1;
+  max-width: 100%;
+  display: block;
 }
 
 /* PROBLEM 1 FIX: Position indicator repositioned BELOW package rectangle */
@@ -451,6 +514,13 @@
   max-width: 90px;
   overflow: visible;
   text-overflow: clip;
+}
+
+/* CRITICAL: Scale up position badge when package is magnified */
+.item.small-package:hover .item-central-position-badge {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  transform: translateX(-50%) scale(1.2);
 }
 
 /* No connector line when badge is centered on package */
@@ -1448,8 +1518,17 @@
   border-radius: 3px;
   cursor: pointer;
   transition: all 0.2s ease;
-  opacity: 0.7;
+  /* CRITICAL: Hide buttons by default in small box state */
+  display: none;
+  opacity: 0;
   z-index: 10;
+}
+
+/* Show buttons only when small package is magnified */
+.item.small-package:hover .conv-button {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .conv-button:hover {
@@ -1478,8 +1557,17 @@
   border-radius: 3px;
   cursor: pointer;
   transition: all 0.2s ease;
-  opacity: 0.7;
+  /* CRITICAL: Hide buttons by default in small box state */
+  display: none;
+  opacity: 0;
   z-index: 10;
+}
+
+/* Show buttons only when small package is magnified */
+.item.small-package:hover .type-button {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .type-button:hover {
