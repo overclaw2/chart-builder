@@ -80,7 +80,9 @@ export class CapacityWarningService {
     compartment: Compartment
   ): { exceedsWeight: boolean; exceedsWidth: boolean } {
     const threshold = this.getThreshold(compartmentId);
-    const projectedWeightUtilization = ((compartment.weightKg + additionalWeightKg) / compartment.totalCapacity) * 100;
+    // Calculate current weight from items
+    const currentWeight = compartment.items.reduce((sum, item) => sum + item.weightKg, 0);
+    const projectedWeightUtilization = ((currentWeight + additionalWeightKg) / compartment.totalCapacity) * 100;
     const projectedWidthUtilization = ((compartment.widthMcm + additionalWidthMcm) / compartment.widthMcm) * 100; // Note: compartment.widthMcm is the range
 
     return {

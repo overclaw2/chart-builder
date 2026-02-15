@@ -38,7 +38,6 @@ export class ContainerService {
               widthindexEnd: 10150,
               widthMcm: 150,
               widthUtilization: 18,
-              weightKg: 1500,
               weightUtilization: 8.57,
               totalCapacity: 15000,
               items: [
@@ -61,7 +60,6 @@ export class ContainerService {
               widthindexEnd: 10250,
               widthMcm: 100,
               widthUtilization: 30,
-              weightKg: 1500,
               weightUtilization: 8.57,
               totalCapacity: 15000,
               items: [
@@ -91,7 +89,6 @@ export class ContainerService {
               widthindexEnd: 11200,
               widthMcm: 200,
               widthUtilization: 45,
-              weightKg: 2200,
               weightUtilization: 12.57,
               totalCapacity: 17500,
               items: [
@@ -137,7 +134,6 @@ export class ContainerService {
               widthindexEnd: 11350,
               widthMcm: 150,
               widthUtilization: 52,
-              weightKg: 1800,
               weightUtilization: 10.29,
               totalCapacity: 17500,
               items: [
@@ -527,17 +523,16 @@ export class ContainerService {
               return true;
             });
 
-            const newWeight = compartment.weightKg - removedItemWeight;
-            const newUtilization = (newWeight / compartment.totalCapacity) * 100;
+            // Recalculate weight and width utilization based on remaining items
+            const totalWeight = items.reduce((sum, item) => sum + item.weightKg, 0);
+            const newUtilization = (totalWeight / compartment.totalCapacity) * 100;
             
-            // Recalculate widthUtilization using dimensionMcm
             const totalPackageWidth = items.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
             const newWidthUtilization = (totalPackageWidth / compartment.widthMcm) * 100;
 
             return {
               ...compartment,
               items,
-              weightKg: newWeight,
               weightUtilization: parseFloat(newUtilization.toFixed(2)),
               widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
             };
@@ -591,15 +586,15 @@ export class ContainerService {
               return true;
             });
 
-            const newWeight = compartment.weightKg - itemWeight;
-            const newUtilization = (newWeight / compartment.totalCapacity) * 100;
+            // Recalculate weight and width utilization based on remaining items
+            const totalWeight = items.reduce((sum, item) => sum + item.weightKg, 0);
+            const newUtilization = (totalWeight / compartment.totalCapacity) * 100;
             const totalPackageWidth = items.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
             const newWidthUtilization = (totalPackageWidth / compartment.widthMcm) * 100;
 
             return {
               ...compartment,
               items,
-              weightKg: newWeight,
               weightUtilization: parseFloat(newUtilization.toFixed(2)),
               widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
             };
@@ -649,15 +644,14 @@ export class ContainerService {
               }
 
               const newItems = [...compartment.items, movedItem];
-              const newWeight = compartment.weightKg + itemWeight;
-              const newUtilization = (newWeight / compartment.totalCapacity) * 100;
+              const totalWeight = newItems.reduce((sum, item) => sum + item.weightKg, 0);
+              const newUtilization = (totalWeight / compartment.totalCapacity) * 100;
               const totalPackageWidth = newItems.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
               const newWidthUtilization = (totalPackageWidth / compartment.widthMcm) * 100;
 
               return {
                 ...compartment,
                 items: newItems,
-                weightKg: newWeight,
                 weightUtilization: parseFloat(newUtilization.toFixed(2)),
                 widthUtilization: parseFloat(newWidthUtilization.toFixed(1)),
               };

@@ -962,10 +962,9 @@ export class ContainerVisualizationComponent implements OnInit {
       // This ensures Angular's *ngFor binding detects the removal and re-renders
       compartment.items = compartment.items.filter((item) => item.id !== this.contextMenu.itemId);
       
-      // Recalculate compartment statistics
-      const newWeight = compartment.weightKg - itemWeight;
-      compartment.weightKg = newWeight;
-      compartment.weightUtilization = parseFloat(((newWeight / compartment.totalCapacity) * 100).toFixed(2));
+      // Recalculate compartment statistics from remaining items
+      const totalWeight = compartment.items.reduce((sum, item) => sum + item.weightKg, 0);
+      compartment.weightUtilization = parseFloat(((totalWeight / compartment.totalCapacity) * 100).toFixed(2));
       
       // Recalculate width utilization based on remaining items
       const totalPackageWidth = compartment.items.reduce((sum, item) => sum + (item.dimensionMcm || 27), 0);
@@ -1018,7 +1017,8 @@ export class ContainerVisualizationComponent implements OnInit {
     let totalContainerCapacity = 0;
 
     container.compartments.forEach((compartment) => {
-      totalWeightInContainer += compartment.weightKg;
+      // Calculate weight from items instead of using compartment.weightKg
+      totalWeightInContainer += compartment.items.reduce((sum, item) => sum + item.weightKg, 0);
       totalContainerCapacity += compartment.totalCapacity;
     });
 
@@ -1207,7 +1207,9 @@ export class ContainerVisualizationComponent implements OnInit {
 
   // NEW: Check if dropping item would exceed capacity
   wouldExceedCapacity(compartment: Compartment, itemWeight: number, itemWidth: number): boolean {
-    const projectedWeight = compartment.weightKg + itemWeight;
+    // Calculate current weight from items
+    const currentWeight = compartment.items.reduce((sum, item) => sum + item.weightKg, 0);
+    const projectedWeight = currentWeight + itemWeight;
     const projectedWeightUtil = (projectedWeight / compartment.totalCapacity) * 100;
     
     const projectedWidth = compartment.widthUtilization + ((itemWidth / compartment.widthMcm) * 100);
@@ -1669,12 +1671,10 @@ export class ContainerVisualizationComponent implements OnInit {
           // This ensures Angular's *ngFor binding detects the change and re-renders
           compartment.items = [...compartment.items, newItem];
 
-          // Recalculate compartment statistics
-          const itemWeight = newItem.weightKg;
-          const newWeight = compartment.weightKg + itemWeight;
-          compartment.weightKg = newWeight;
+          // Recalculate compartment statistics from all items
+          const totalWeight = compartment.items.reduce((sum, item) => sum + item.weightKg, 0);
           compartment.weightUtilization = parseFloat(
-            ((newWeight / compartment.totalCapacity) * 100).toFixed(2)
+            ((totalWeight / compartment.totalCapacity) * 100).toFixed(2)
           );
 
           // Recalculate width utilization
@@ -1899,9 +1899,9 @@ export class ContainerVisualizationComponent implements OnInit {
       // Recalculate compartment utilization
       const totalPackageWidth = compartment.items.reduce((sum, i) => sum + (i.dimensionMcm || 27), 0);
       compartment.widthUtilization = parseFloat(((totalPackageWidth / compartment.widthMcm) * 100).toFixed(1));
-      compartment.weightKg = compartment.items.reduce((sum, i) => sum + i.weightKg, 0);
-      compartment.weightUtilization = parseFloat(((compartment.weightKg / compartment.totalCapacity) * 100).toFixed(2));
-      console.log('📊 Compartment updated - widthUtil: ' + compartment.widthUtilization + ', weightKg: ' + compartment.weightKg);
+      const totalWeight = compartment.items.reduce((sum, i) => sum + i.weightKg, 0);
+      compartment.weightUtilization = parseFloat(((totalWeight / compartment.totalCapacity) * 100).toFixed(2));
+      console.log('📊 Compartment updated - widthUtil: ' + compartment.widthUtilization + ', weight: ' + totalWeight);
 
       // Update capacity warnings
       this.capacityWarningService.updateWarnings(this.shipData.containers);
@@ -1930,8 +1930,8 @@ export class ContainerVisualizationComponent implements OnInit {
         // Recalculate compartment statistics
         const totalPackageWidth = compartment.items.reduce((sum, i) => sum + (i.dimensionMcm || 27), 0);
         compartment.widthUtilization = parseFloat(((totalPackageWidth / compartment.widthMcm) * 100).toFixed(1));
-        compartment.weightKg = compartment.items.reduce((sum, i) => sum + i.weightKg, 0);
-        compartment.weightUtilization = parseFloat(((compartment.weightKg / compartment.totalCapacity) * 100).toFixed(2));
+        const totalWeight = compartment.items.reduce((sum, i) => sum + i.weightKg, 0);
+        compartment.weightUtilization = parseFloat(((totalWeight / compartment.totalCapacity) * 100).toFixed(2));
 
         // Add item back to available packages if it has a sourcePackageId
         if (item.sourcePackageId && this.availablePackagesComponent) {

@@ -28,7 +28,6 @@ export interface Compartment {
   widthindexEnd: number;
   widthMcm: number;
   widthUtilization: number; // percentage
-  weightKg: number;
   weightUtilization: number; // percentage
   items: Item[];
   totalCapacity: number;
