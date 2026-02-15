@@ -9,6 +9,13 @@ export interface Item {
   displayIndex?: number; // index to display below item (for Ofer's requirement)
   color?: string; // color for item visualization (default: #7dd3fc)
   sourcePackageId?: string; // tracks which available package this item came from (for syncing state)
+  materialType?: string; // material type (default: custom for user-defined packages)
+}
+
+export interface MaterialType {
+  type: string;
+  weightKg: number;
+  dimensionMcm: number;
 }
 
 export interface Compartment {

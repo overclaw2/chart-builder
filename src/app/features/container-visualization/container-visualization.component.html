@@ -35,14 +35,23 @@
             <div class="item-info">
               <div class="item-label">{{ item.name }}</div>
               <div class="item-specs">{{ item.dimensionMcm }} Mcm × {{ item.weightKg }} Kg</div>
+              <div class="item-material-type" *ngIf="item.materialType">{{ item.materialType }}</div>
             </div>
             <div class="item-location">
               <span class="location-badge">{{ item.location }}</span>
             </div>
-            <!-- Close button (X icon) to remove item from placed items -->
-            <button class="close-btn" (click)="onRemoveFromPlacedItems(item, $event)" title="Remove from chart">
-              ✕
-            </button>
+            <div class="item-actions">
+              <!-- Type button to change material type -->
+              <button class="type-btn" 
+                (click)="openTypeModal(item, item.containerId, item.compartmentId, $event)"
+                title="Change package material type">
+                Type
+              </button>
+              <!-- Close button (X icon) to remove item from placed items -->
+              <button class="close-btn" (click)="onRemoveFromPlacedItems(item, $event)" title="Remove from chart">
+                ✕
+              </button>
+            </div>
           </div>
           <div class="empty-state" *ngIf="getTotalPlacedItems() === 0">
             No packages placed yet
@@ -397,6 +406,11 @@
                 <!-- TASK 5: Conv button to open popup with package details -->
                 <button class="conv-button" (click)="openConvPopup(item, $event)" title="Open package details window">
                   conv
+                </button>
+                
+                <!-- NEW: Type button to change material type -->
+                <button class="type-button" (click)="openTypeModal(item, container.id, compartment.id, $event)" title="Change package material type">
+                  Type
                 </button>
 
               </div>

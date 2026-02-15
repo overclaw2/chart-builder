@@ -9,7 +9,8 @@ import { UndoRedoService } from '../../core/services/undo-redo.service';
 import { HelpService } from '../../core/services/help.service';
 import { CapacityWarningService } from '../../core/services/capacity-warning.service';
 import { SnapshotService } from '../../core/services/snapshot.service';
-import { ShipData, Container, Item, Compartment } from '../../core/models/container.model';
+import { ShipData, Container, Item, Compartment, MaterialType } from '../../core/models/container.model';
+import { MATERIAL_TYPES } from '../../core/models/material-types.const';
 import { AvailablePackagesComponent } from '../available-packages/available-packages.component';
 import { BulkImportComponent } from '../bulk-import/bulk-import.component';
 import { HistoryViewerComponent } from '../history-viewer/history-viewer.component';
@@ -77,6 +78,15 @@ export class ContainerVisualizationComponent implements OnInit {
 
   // TASK 5: Conv popup modal state
   convPopup: { visible: boolean; item: Item | null } = { visible: false, item: null };
+
+  // NEW: Type Selector Modal State
+  typeModal: { 
+    visible: boolean; 
+    item: Item | null; 
+    containerId: string | null; 
+    compartmentId: string | null;
+  } = { visible: false, item: null, containerId: null, compartmentId: null };
+  materialTypes: MaterialType[] = MATERIAL_TYPES;
 
   // Tooltip positioning for fixed/overlay mode
   tooltipState: { visible: boolean; x: number; y: number; item: Item | null } = { 
@@ -1121,7 +1131,9 @@ export class ContainerVisualizationComponent implements OnInit {
         compartment.items.forEach((item) => {
           placedItems.push({
             ...item,
-            location: `${container.name} (${compartment.index}/${container.compartments.length})`
+            location: `${container.name} (${compartment.index}/${container.compartments.length})`,
+            containerId: container.id,
+            compartmentId: compartment.id
           });
         });
       });
@@ -1717,6 +1729,156 @@ export class ContainerVisualizationComponent implements OnInit {
     // Close popup when clicking on the backdrop/overlay
     if (event.target === event.currentTarget) {
       this.closeConvPopup();
+    }
+  }
+
+  // ========== TYPE SELECTOR MODAL METHODS ==========
+
+  /**
+   * Open type selector modal for a package (triggered from container or placed list)
+   */
+  openTypeModal(item: Item, containerId: string, compartmentId: string, event: Event): void {
+    event.stopPropagation();
+    this.typeModal = { visible: true, item, containerId, compartmentId };
+  }
+
+  /**
+   * Close type selector modal
+   */
+  closeTypeModal(): void {
+    this.typeModal = { visible: false, item: null, containerId: null, compartmentId: null };
+  }
+
+  /**
+   * Handle type selector modal backdrop click
+   */
+  onTypeModalBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closeTypeModal();
+    }
+  }
+
+  /**
+   * Handle material type selection from dropdown
+   */
+  onMaterialTypeSelected(newMaterialType: MaterialType): void {
+    if (!this.typeModal.item || !this.shipData || !this.typeModal.containerId || !this.typeModal.compartmentId) {
+      this.closeTypeModal();
+      return;
+    }
+
+    const item = this.typeModal.item;
+    const containerId = this.typeModal.containerId;
+    const compartmentId = this.typeModal.compartmentId;
+
+    // Find the container and compartment
+    const container = this.shipData.containers.find(c => c.id === containerId);
+    if (!container) {
+      this.closeTypeModal();
+      return;
+    }
+
+    const compartment = container.compartments.find(comp => comp.id === compartmentId);
+    if (!compartment) {
+      this.closeTypeModal();
+      return;
+    }
+
+    // Calculate the new dimensions and weight based on material type
+    const oldWidth = item.dimensionMcm;
+    const oldWeight = item.weightKg;
+    const newWidth = newMaterialType.dimensionMcm;
+    const newWeight = newMaterialType.weightKg;
+
+    // Check if the new width fits in the compartment
+    const widthDifference = newWidth - oldWidth;
+    const newTotalWidth = compartment.items.reduce((sum, i) => sum + (i.dimensionMcm || 27), 0) + widthDifference;
+    const widthFits = newTotalWidth <= compartment.widthMcm;
+
+    // Check if the new weight fits in the container capacity
+    const weightDifference = newWeight - oldWeight;
+    const totalContainerWeight = this.shipData.containers.reduce((sum, c) => {
+      return sum + c.compartments.reduce((compSum, comp) => {
+        return compSum + comp.weightKg;
+      }, 0);
+    }, 0);
+    const newTotalWeight = totalContainerWeight + weightDifference;
+    
+    // Calculate total container capacity
+    const totalContainerCapacity = this.shipData.containers.reduce((sum, c) => {
+      return sum + c.compartments.reduce((compSum, comp) => compSum + comp.totalCapacity, 0);
+    }, 0);
+    
+    const weightFits = newTotalWeight <= totalContainerCapacity;
+
+    // If validation passes, update the package
+    if (widthFits && weightFits) {
+      // Update item properties
+      item.dimensionMcm = newWidth;
+      item.weightKg = newWeight;
+      item.materialType = newMaterialType.type;
+
+      // Recalculate compartment utilization
+      const totalPackageWidth = compartment.items.reduce((sum, i) => sum + (i.dimensionMcm || 27), 0);
+      compartment.widthUtilization = parseFloat(((totalPackageWidth / compartment.widthMcm) * 100).toFixed(1));
+      compartment.weightKg = compartment.items.reduce((sum, i) => sum + i.weightKg, 0);
+      compartment.weightUtilization = parseFloat(((compartment.weightKg / compartment.totalCapacity) * 100).toFixed(2));
+
+      // Update capacity warnings
+      this.capacityWarningService.updateWarnings(this.shipData.containers);
+
+      // Trigger change detection
+      this.shipData = { ...this.shipData };
+      this.applyFilters();
+      this.cdr.markForCheck();
+
+      this.showToast(`✅ Package type changed to ${newMaterialType.type}!`, 'warning');
+      this.closeTypeModal();
+    } else {
+      // Validation failed - show confirmation dialog
+      const reason = !widthFits ? 'width' : 'weight';
+      const message = `There is not enough ${reason} capacity on the container for this type. Would you like to remove the package from the container?`;
+
+      if (confirm(message)) {
+        // Remove item from compartment
+        compartment.items = compartment.items.filter(i => i.id !== item.id);
+
+        // Recalculate compartment statistics
+        const totalPackageWidth = compartment.items.reduce((sum, i) => sum + (i.dimensionMcm || 27), 0);
+        compartment.widthUtilization = parseFloat(((totalPackageWidth / compartment.widthMcm) * 100).toFixed(1));
+        compartment.weightKg = compartment.items.reduce((sum, i) => sum + i.weightKg, 0);
+        compartment.weightUtilization = parseFloat(((compartment.weightKg / compartment.totalCapacity) * 100).toFixed(2));
+
+        // Add item back to available packages if it has a sourcePackageId
+        if (item.sourcePackageId && this.availablePackagesComponent) {
+          const packageToRestore: Item = {
+            id: item.sourcePackageId,
+            name: item.name,
+            dimensionMcm: item.dimensionMcm,
+            weightKg: item.weightKg,
+            destination: item.destination,
+            position: 0,
+            length: item.length,
+            color: item.color,
+            materialType: item.materialType,
+          };
+          this.availablePackagesComponent.addPackageToAvailable(packageToRestore);
+        }
+
+        // Update capacity warnings
+        this.capacityWarningService.updateWarnings(this.shipData.containers);
+
+        // Trigger change detection
+        this.shipData = { ...this.shipData };
+        this.applyFilters();
+        this.cdr.markForCheck();
+
+        this.showToast(`⚠️ Package removed from container due to insufficient ${reason} capacity!`, 'warning');
+        this.closeTypeModal();
+      } else {
+        // User clicked Cancel - keep original type, no changes made
+        this.closeTypeModal();
+      }
     }
   }
 

@@ -53,16 +53,36 @@ export class ConveyorAdvancedService {
   }
 
   /**
-   * Normalize config: convert "conveyors" to "convayor" if needed (handle both spellings)
+   * Normalize config: convert "conveyors" to "convayor" and "Areas" to "Area" if needed
    */
   private normalizeConfig(config: any): ConveyorConfigAdvanced {
+    let normalized = config;
+    
+    // Normalize top-level property: "conveyors" → "convayor"
     if (config.conveyors && !config.convayor) {
       console.log('⚠️ Config uses "conveyors" property, normalizing to "convayor" for consistency');
-      return {
+      normalized = {
+        ...config,
         convayor: config.conveyors
       };
+      delete normalized.conveyors;
     }
-    return config as ConveyorConfigAdvanced;
+    
+    // Normalize conveyor-level property: "Areas" → "Area"
+    if (normalized.convayor && Array.isArray(normalized.convayor)) {
+      normalized.convayor = normalized.convayor.map((conveyor: any) => {
+        if (conveyor.Areas && !conveyor.Area) {
+          console.log(`⚠️ Conveyor "${conveyor.conveyorName}" uses "Areas" property, normalizing to "Area"`);
+          return {
+            ...conveyor,
+            Area: conveyor.Areas
+          };
+        }
+        return conveyor;
+      });
+    }
+    
+    return normalized as ConveyorConfigAdvanced;
   }
 
   /**
@@ -73,9 +93,10 @@ export class ConveyorAdvancedService {
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
-          const config = JSON.parse(
+          const rawConfig = JSON.parse(
             event.target?.result as string
-          ) as ConveyorConfigAdvanced;
+          );
+          const config = this.normalizeConfig(rawConfig);
           this.validateConfig(config);
           this.configSubject.next(config);
           resolve();
@@ -93,9 +114,10 @@ export class ConveyorAdvancedService {
   /**
    * Load configuration from JSON data
    */
-  loadConfigFromData(configData: ConveyorConfigAdvanced): void {
-    this.validateConfig(configData);
-    this.configSubject.next(configData);
+  loadConfigFromData(configData: any): void {
+    const normalized = this.normalizeConfig(configData);
+    this.validateConfig(normalized);
+    this.configSubject.next(normalized);
   }
 
   /**
