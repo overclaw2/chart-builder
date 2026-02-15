@@ -562,6 +562,19 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
     return conveyor?.conveyorName ?? null;
   }
 
+  /**
+   * Get the first conveyor's name for the header
+   */
+  getHeaderConveyorName(): string {
+    if (this.conveyors && this.conveyors.length > 0) {
+      return this.conveyors[0].conveyorName || 'Conveyor';
+    }
+    if (this.config && this.config.convayor && this.config.convayor.length > 0) {
+      return this.config.convayor[0].conveyorName || 'Conveyor';
+    }
+    return 'Conveyor Cell Allocator';
+  }
+
   getAvailableAreas(): ConveyorAreaAdvanced[] {
     if (!this.uiState.activeConveyor) return [];
     const conveyor = this.conveyors.find(c => c.conveyorId === this.uiState.activeConveyor);

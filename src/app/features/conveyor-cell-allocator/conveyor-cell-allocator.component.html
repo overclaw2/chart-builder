@@ -3,7 +3,7 @@
   <div class="allocator-header">
     <h2>
       <span class="conveyor-title">
-        {{ conveyors && conveyors.length > 0 ? conveyors[0].conveyorName : 'Conveyor Cell Allocator' }}
+        {{ getHeaderConveyorName() }}
       </span>
       <span class="mode-badge" [class.new]="uiState.mode === 'new'" [class.edit]="uiState.mode === 'edit'">{{ uiState.mode | uppercase }}</span>
     </h2>
