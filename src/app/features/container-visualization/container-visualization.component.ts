@@ -1759,15 +1759,47 @@ export class ContainerVisualizationComponent implements OnInit {
   }
 
   /**
+   * Handle Type button click from available packages panel
+   */
+  onAvailablePackageTypeButtonClick(data: { item: Item; event: Event }): void {
+    const { item, event } = data;
+    event.stopPropagation();
+    
+    // For available packages, we don't have a container/compartment context
+    // So we open the modal without those fields - the modal will handle this case
+    this.typeModal = { visible: true, item, containerId: null, compartmentId: null };
+  }
+
+  /**
    * Handle material type selection from dropdown
    */
   onMaterialTypeSelected(newMaterialType: MaterialType): void {
-    if (!this.typeModal.item || !this.shipData || !this.typeModal.containerId || !this.typeModal.compartmentId) {
+    if (!this.typeModal.item || !this.shipData) {
       this.closeTypeModal();
       return;
     }
 
     const item = this.typeModal.item;
+    
+    // Check if this is an available package (no container/compartment) or a placed package
+    const isAvailablePackage = !this.typeModal.containerId || !this.typeModal.compartmentId;
+    
+    if (isAvailablePackage) {
+      // For available packages, just update the material type directly
+      item.dimensionMcm = newMaterialType.dimensionMcm;
+      item.weightKg = newMaterialType.weightKg;
+      item.materialType = newMaterialType.type;
+      
+      // Trigger change detection
+      this.shipData = { ...this.shipData };
+      this.applyFilters();
+      this.cdr.markForCheck();
+      
+      this.showToast(`✅ Package type changed to ${newMaterialType.type}!`, 'warning');
+      this.closeTypeModal();
+      return;
+    }
+
     const containerId = this.typeModal.containerId;
     const compartmentId = this.typeModal.compartmentId;
 

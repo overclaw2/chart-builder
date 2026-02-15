@@ -16,6 +16,7 @@ export class AvailablePackagesComponent implements OnInit {
   @Output() dragStart = new EventEmitter<{ item: Item; event: DragEvent }>();
   @Output() packageRemoved = new EventEmitter<Item>();
   @Output() packageAdded = new EventEmitter<Item>();
+  @Output() typeButtonClicked = new EventEmitter<{ item: Item; event: Event }>();
 
   availablePackages: Item[] = [];
   draggedPackage: Item | null = null;
@@ -375,5 +376,14 @@ export class AvailablePackagesComponent implements OnInit {
       this.availablePackages.push(item);
       this.packageAdded.emit(item);
     }
+  }
+
+  /**
+   * Handle Type button click on available packages
+   * Emit event to parent component (container-visualization)
+   */
+  onTypeButtonClick(item: Item, event: Event): void {
+    event.stopPropagation();
+    this.typeButtonClicked.emit({ item, event });
   }
 }

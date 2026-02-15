@@ -55,8 +55,17 @@
             <span class="spec-item">{{ pkg.dimensionMcm }} Mcm</span>
             <span class="spec-item">{{ pkg.weightKg }} Kg</span>
             <span class="destination-badge">{{ pkg.destination }}</span>
+            <span class="material-type-badge" *ngIf="pkg.materialType">{{ pkg.materialType }}</span>
           </div>
         </div>
+
+        <!-- Type Button for Material Type Selection -->
+        <button 
+          class="type-button-small" 
+          (click)="onTypeButtonClick(pkg, $event)"
+          title="Change package material type">
+          Type
+        </button>
 
         <!-- Drag Handle Icon -->
         <div class="drag-handle">⋮⋮</div>

@@ -390,6 +390,51 @@
   font-size: 1rem;
 }
 
+/* Material Type Badge Styling */
+.material-type-badge {
+  display: inline-block;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 3px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+/* Type Button Styling for Available Packages */
+.type-button-small {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.type-button-small:hover {
+  background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+}
+
+.type-button-small:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.2);
+}
+
+.type-button-small:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 1200px) {
   .available-packages-panel {

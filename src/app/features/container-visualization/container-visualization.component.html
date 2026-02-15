@@ -70,6 +70,7 @@
         [isCollapsed]="isAvailablePackagesPanelCollapsed"
         (toggleCollapse)="onToggleAvailablePackagesPanel()"
         (dragStart)="onAvailablePackageDragStart($event)"
+        (typeButtonClicked)="onAvailablePackageTypeButtonClick($event)"
       ></app-available-packages>
 
       <!-- Main content area with charts -->
