@@ -607,6 +607,66 @@
     </div>
   </div>
 
+  <!-- Type Selector Modal -->
+  <div class="type-modal-backdrop" *ngIf="typeModal.visible" (click)="onTypeModalBackdropClick($event)">
+    <div class="type-modal" *ngIf="typeModal.item">
+      <!-- Header -->
+      <div class="type-modal-header">
+        <h2>Change Material Type</h2>
+        <span class="close-icon" (click)="closeTypeModal()" title="Close">✕</span>
+      </div>
+
+      <!-- Package Info -->
+      <div class="type-modal-info">
+        <div class="info-row">
+          <span class="info-label">Package:</span>
+          <span class="info-value">{{ typeModal.item.name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Current Type:</span>
+          <span class="info-value">{{ typeModal.item.materialType || 'Custom' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Current Size:</span>
+          <span class="info-value">{{ typeModal.item.dimensionMcm }} Mcm × {{ typeModal.item.weightKg }} Kg</span>
+        </div>
+      </div>
+
+      <!-- Material Types Table -->
+      <div class="type-modal-content">
+        <table class="material-types-table">
+          <thead>
+            <tr>
+              <th>Material Type</th>
+              <th>Weight (kg)</th>
+              <th>Width (Mcm)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let material of materialTypes" [class.current]="material.type === typeModal.item?.materialType">
+              <td>{{ material.type }}</td>
+              <td>{{ material.weightKg }}</td>
+              <td>{{ material.dimensionMcm }}</td>
+              <td>
+                <button class="select-material-btn" 
+                  (click)="onMaterialTypeSelected(material)"
+                  [disabled]="material.type === typeModal.item?.materialType">
+                  {{ material.type === typeModal.item?.materialType ? 'Current' : 'Select' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div class="type-modal-footer">
+        <button class="cancel-btn" (click)="closeTypeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Tour Overlay -->
   <app-tour-overlay></app-tour-overlay>
 
