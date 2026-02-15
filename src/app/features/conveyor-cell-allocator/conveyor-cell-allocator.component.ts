@@ -566,12 +566,21 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
    * Get the first conveyor's name for the header
    */
   getHeaderConveyorName(): string {
+    console.log('🔎 getHeaderConveyorName() called');
+    console.log('  - conveyors array:', this.conveyors);
+    console.log('  - config object:', this.config);
+    
     if (this.conveyors && this.conveyors.length > 0) {
-      return this.conveyors[0].conveyorName || 'Conveyor';
+      const name = this.conveyors[0].conveyorName || 'Conveyor';
+      console.log('  ✅ Using conveyors[0].conveyorName:', name);
+      return name;
     }
     if (this.config && this.config.convayor && this.config.convayor.length > 0) {
-      return this.config.convayor[0].conveyorName || 'Conveyor';
+      const name = this.config.convayor[0].conveyorName || 'Conveyor';
+      console.log('  ✅ Using config.convayor[0].conveyorName:', name);
+      return name;
     }
+    console.log('  ❌ No data found, using fallback');
     return 'Conveyor Cell Allocator';
   }
 

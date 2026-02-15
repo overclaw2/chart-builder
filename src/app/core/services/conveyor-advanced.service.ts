@@ -21,19 +21,26 @@ export class ConveyorAdvancedService {
   }
 
   /**
-   * Load default advanced conveyor configuration
+   * Load default advanced conveyor configuration from assets/conveyorConfig.json
    */
   private loadDefaultConfig(): void {
-    // Load from assets/conveyor-config.json
+    console.log('🔍 ConveyorAdvancedService: Attempting to load configuration...');
+    
+    // Load from assets/conveyorConfig.json (note: exact filename - "convayor" typo is in the file)
     this.http
-      .get<ConveyorConfigAdvanced>('assets/conveyor-config.json')
+      .get<ConveyorConfigAdvanced>('assets/conveyorConfig.json')
       .subscribe(
         (config) => {
+          console.log('✅ ConveyorAdvancedService: Configuration loaded successfully!', config);
+          console.log('📊 Conveyor data:', config.conveyors);
+          if (config.conveyors && config.conveyors.length > 0) {
+            console.log('📝 First conveyor name:', config.conveyors[0].conveyorName);
+          }
           this.validateConfig(config);
           this.configSubject.next(config);
         },
         (error) => {
-          console.error('Failed to load default conveyor config:', error);
+          console.error('❌ ConveyorAdvancedService: Failed to load default conveyor config from assets/conveyorConfig.json:', error);
           // Fallback to empty config
           this.configSubject.next({ convayor: [] });
         }
