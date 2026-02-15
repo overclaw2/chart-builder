@@ -354,8 +354,8 @@
 .item.small-package:hover {
   /* Magnify by 3x when hovering - creates "zoom lens" effect */
   transform: scale(3);
-  /* Position magnified box above other elements */
-  z-index: 500;
+  /* CRITICAL: Position magnified box ABOVE EVERYTHING - including tooltips, buttons, axis labels */
+  z-index: 10000 !important;
   /* Enhanced shadow for depth during magnification */
   box-shadow: 0 8px 24px rgba(34, 139, 34, 0.5), 
               inset 0 1px 2px rgba(255, 255, 255, 0.3);
@@ -363,15 +363,17 @@
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Ensure small package magnification doesn't translate */
-.item.small-package:hover {
-  /* Magnify in place without vertical movement */
-  transform: scale(3);
-}
-
 /* Smooth transition back to normal size */
 .item.small-package {
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: auto;
+}
+
+/* CRITICAL: Hide tooltip when small package is being magnified */
+/* Prevents tooltip from overlapping with magnified package box */
+.item.small-package:hover ~ .item-hover-tooltip-overlay,
+.item.small-package:hover + .item-hover-tooltip-overlay {
+  display: none !important;
 }
 
 /* PROBLEM 1 FIX: Improved label rendering with smart truncation and conditional display */

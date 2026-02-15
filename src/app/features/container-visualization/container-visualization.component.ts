@@ -878,12 +878,14 @@ export class ContainerVisualizationComponent implements OnInit {
       // TASK 2 FIX: Show global overlay tooltip at the correct position
       // Find the item data from shipData
       let foundItem: Item | null = null;
+      let compartmentForItem: Compartment | null = null;
       if (this.shipData) {
         for (const container of this.shipData.containers) {
           for (const compartment of container.compartments) {
             const item = compartment.items.find(i => i.id === itemId);
             if (item) {
               foundItem = item;
+              compartmentForItem = compartment;
               break;
             }
           }
@@ -891,7 +893,19 @@ export class ContainerVisualizationComponent implements OnInit {
         }
       }
 
-      if (foundItem) {
+      // CRITICAL FIX: Don't show tooltip for small packages being magnified
+      // Small packages magnify on hover, tooltip would be hidden behind the magnified box
+      // Only show tooltip for normal-sized packages
+      if (foundItem && compartmentForItem) {
+        const magnificationClass = this.getItemMagnificationClass(foundItem, compartmentForItem);
+        
+        // Skip tooltip for small packages that are magnifying
+        if (magnificationClass === 'small-package') {
+          // Don't show tooltip - let the magnification speak for itself
+          this.tooltipState = { visible: false, x: 0, y: 0, item: null };
+          return;
+        }
+        
         // Position tooltip BELOW the item, centered horizontally (per Avihai's requirement)
         const tooltipX = itemRect.left + itemRect.width / 2;
         const tooltipY = itemRect.bottom + 15; // 15px below the item
