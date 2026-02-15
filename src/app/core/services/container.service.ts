@@ -33,6 +33,7 @@ export class ContainerService {
           compartments: [
             {
               id: 'compartment-1',
+              name: 'Compartment 1A',
               index: 1,
               widthindexStart: 10000,
               widthindexEnd: 10150,
@@ -55,6 +56,7 @@ export class ContainerService {
             },
             {
               id: 'compartment-2',
+              name: 'Compartment 1B',
               index: 2,
               widthindexStart: 10150,
               widthindexEnd: 10250,
@@ -84,6 +86,7 @@ export class ContainerService {
           compartments: [
             {
               id: 'compartment-3',
+              name: 'Compartment 2A',
               index: 1,
               widthindexStart: 11000,
               widthindexEnd: 11200,
@@ -129,6 +132,7 @@ export class ContainerService {
             },
             {
               id: 'compartment-4',
+              name: 'Compartment 2B',
               index: 2,
               widthindexStart: 11200,
               widthindexEnd: 11350,

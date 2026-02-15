@@ -1864,7 +1864,8 @@ export class ContainerVisualizationComponent implements OnInit {
     const weightDifference = newWeight - oldWeight;
     const totalContainerWeight = this.shipData.containers.reduce((sum, c) => {
       return sum + c.compartments.reduce((compSum, comp) => {
-        return compSum + comp.weightKg;
+        // Calculate weight from items
+        return compSum + comp.items.reduce((itemSum, item) => itemSum + item.weightKg, 0);
       }, 0);
     }, 0);
     const newTotalWeight = totalContainerWeight + weightDifference;

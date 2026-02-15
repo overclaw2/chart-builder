@@ -23,6 +23,7 @@ export interface MaterialType {
 
 export interface Compartment {
   id: string;
+  name: string; // Display name for the compartment (e.g., "A1", "Deck 1")
   index: number; // 1 or 2
   widthindexStart: number;
   widthindexEnd: number;
