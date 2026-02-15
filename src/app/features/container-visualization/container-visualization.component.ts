@@ -401,16 +401,16 @@ export class ContainerVisualizationComponent implements OnInit {
   //   );
   // }
 
-  // NEW: Determine if a package should be magnified on hover (width < 60px)
+  // NEW: Determine if a package should be magnified on hover (width < 8%)
   getItemMagnificationClass(item: Item, compartment: Compartment): string {
     const { width } = this.getItemPosition(item, compartment);
     const widthPercent = parseFloat(width);
     
     // Parse the compartment's pixel width to determine absolute package size
     // A compartment typically renders at different widths; check if package appears too small
-    // If package is less than ~5-6% of compartment width (approximately 60px on 1000px compartment),
+    // If package is less than 8% of compartment width (approximately 80px on 1000px compartment),
     // it's a candidate for magnification
-    if (widthPercent < 6) {
+    if (widthPercent < 8) {
       return 'small-package';
     }
     return '';
