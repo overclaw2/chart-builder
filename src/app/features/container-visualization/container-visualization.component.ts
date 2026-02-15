@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ContainerService } from '../../core/services/container.service';
 import { ConveyorConfigService } from '../../core/services/conveyor-config.service';
@@ -134,10 +135,14 @@ export class ContainerVisualizationComponent implements OnInit {
     private undoRedoService: UndoRedoService,
     private helpService: HelpService,
     private capacityWarningService: CapacityWarningService,
-    private snapshotService: SnapshotService
+    private snapshotService: SnapshotService,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
+    // Load default configuration on app startup
+    this.loadDefaultConveyorConfig();
+
     this.containerService.getShipData().subscribe((data) => {
       this.shipData = data;
       this.applyFilters();
@@ -367,6 +372,19 @@ export class ContainerVisualizationComponent implements OnInit {
 
     reader.readAsText(file);
     input.value = '';
+  }
+
+  // Load default conveyor configuration from assets on app startup
+  loadDefaultConveyorConfig(): void {
+    this.http.get('/assets/conveyorConfig.json').subscribe(
+      (config: any) => {
+        this.conveyorConfigService.loadConfigFromData(config);
+        console.log('✅ Default conveyor config loaded successfully');
+      },
+      (error) => {
+        console.warn('⚠️ Could not load default conveyor config:', error);
+      }
+    );
   }
 
   getItemPosition(item: Item, compartment: Compartment): { left: string; width: string } {
