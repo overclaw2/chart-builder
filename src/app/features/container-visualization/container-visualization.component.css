@@ -341,15 +341,22 @@
   transform: scale(1);
 }
 
+/* When small package is magnified, ensure buttons stay visible */
+.item.small-package:hover {
+  overflow: visible;
+}
+
 /* CRITICAL: Enhance padding and content space when small package is magnified */
 .item.small-package:hover {
-  padding: 1rem;
+  padding: 0.75rem;
   /* Cap magnified box at reasonable size - shows content without dominating screen */
   max-width: 280px;
-  max-height: 280px;
+  max-height: auto; /* Let height grow naturally for content */
   /* Allow box to grow but with limits */
   width: auto;
   height: auto;
+  /* CRITICAL: Ensure buttons and content are visible */
+  overflow: visible;
 }
 
 .item:hover {
@@ -1512,9 +1519,9 @@
 /* TASK 5: Conv button on package rectangle */
 .conv-button {
   position: absolute;
-  top: 0.35rem;
-  right: 0.35rem;
-  padding: 0.35rem 0.6rem;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.4rem 0.7rem;
   font-size: 0.75rem;
   font-weight: 600;
   background: var(--info-color);
@@ -1526,7 +1533,7 @@
   /* CRITICAL: Hide buttons by default in small box state */
   display: none;
   opacity: 0;
-  z-index: 10;
+  z-index: 1000;
 }
 
 /* Show buttons only when small package is magnified */
@@ -1534,6 +1541,8 @@
   display: block;
   opacity: 1;
   pointer-events: auto;
+  /* Make button slightly larger when magnified for better interaction */
+  padding: 0.5rem 0.8rem;
 }
 
 .conv-button:hover {
@@ -1551,9 +1560,9 @@
 /* NEW: Type button styles */
 .type-button {
   position: absolute;
-  top: 0.35rem;
-  right: 3rem;
-  padding: 0.35rem 0.6rem;
+  top: 0.5rem;
+  right: 3.2rem;
+  padding: 0.4rem 0.7rem;
   font-size: 0.75rem;
   font-weight: 600;
   background: #8b5cf6;
@@ -1565,7 +1574,7 @@
   /* CRITICAL: Hide buttons by default in small box state */
   display: none;
   opacity: 0;
-  z-index: 10;
+  z-index: 1000;
 }
 
 /* Show buttons only when small package is magnified */
@@ -1573,6 +1582,8 @@
   display: block;
   opacity: 1;
   pointer-events: auto;
+  /* Make button slightly larger when magnified for better interaction */
+  padding: 0.5rem 0.8rem;
 }
 
 .type-button:hover {
