@@ -163,8 +163,8 @@ export class SnapshotService {
 
     // Calculate diffs
     compartmentMap.forEach(({ old, new: newComp }, compartmentId) => {
-      const oldWeight = old?.weightKg || 0;
-      const newWeight = newComp?.weightKg || 0;
+      const oldWeight = old?.items.reduce((sum, item) => sum + item.weightKg, 0) || 0;
+      const newWeight = newComp?.items.reduce((sum, item) => sum + item.weightKg, 0) || 0;
       const oldItemCount = old?.items.length || 0;
       const newItemCount = newComp?.items.length || 0;
 
@@ -284,7 +284,7 @@ export class SnapshotService {
 
     shipData.containers.forEach((container) => {
       container.compartments.forEach((comp) => {
-        totalWeight += comp.weightKg;
+        totalWeight += comp.items.reduce((sum, item) => sum + item.weightKg, 0);
         totalWeightCapacity += comp.totalCapacity;
         totalWidth += comp.widthMcm;
         totalWidthCapacity += comp.widthMcm;
