@@ -1720,6 +1720,9 @@ export class ContainerVisualizationComponent implements OnInit {
   // Tree structure state for conveyor window areas
   conveyorExpandedAreas: { [areaId: string]: boolean } = {};
   
+  // Track which section cells are open (Level 4 visibility)
+  sectionCellsOpen: { [key: string]: boolean } = {}; // key format: "areaId_sectionIdx"
+  
   // Track selected area for visual feedback (only one area selected at a time)
   selectedConveyorArea: string | null = null;
 
@@ -1881,6 +1884,18 @@ export class ContainerVisualizationComponent implements OnInit {
       this.conveyorExpandedAreas[areaId] = true;
       this.selectedConveyorArea = areaId;
     }
+  }
+
+  // Toggle section cells (Level 4) open/close
+  toggleSectionCells(areaId: string, sectionIdx: number): void {
+    const key = `${areaId}_${sectionIdx}`;
+    this.sectionCellsOpen[key] = !this.sectionCellsOpen[key];
+  }
+
+  // Check if section cells are open
+  isSectionCellsOpen(areaId: string, sectionIdx: number): boolean {
+    const key = `${areaId}_${sectionIdx}`;
+    return this.sectionCellsOpen[key] ?? false; // Default to closed
   }
 
   // NEW: Handle allocate button click

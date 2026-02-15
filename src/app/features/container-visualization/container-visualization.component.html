@@ -510,11 +510,11 @@
             <!-- Sections (Level 1 - shown when area is expanded) -->
             <div class="tree-children" *ngIf="area.expanded" [@slideDown]>
               <!-- Section Nodes -->
-              <div class="tree-node tree-level-1" *ngFor="let section of area.sections">
-                <!-- Section Header -->
-                <div class="tree-node-header section-header">
-                  <div class="tree-expand-icon disabled">
-                    <span class="section-icon">▸</span>
+              <div class="tree-node tree-level-1" *ngFor="let section of area.sections; let sectionIdx = index">
+                <!-- Section Header with Toggle for Level 4 -->
+                <div class="tree-node-header section-header" (click)="toggleSectionCells(area.id, sectionIdx)">
+                  <div class="tree-expand-icon" [class.expanded]="isSectionCellsOpen(area.id, sectionIdx)">
+                    <span class="section-icon">{{ isSectionCellsOpen(area.id, sectionIdx) ? '▼' : '▶' }}</span>
                   </div>
                   <div class="tree-node-content">
                     <span class="section-name">{{ section.name }}</span>
@@ -524,16 +524,16 @@
                   </div>
                 </div>
 
-                <!-- Allocation Grid (Level 2 - always shown for sections) -->
-                <div class="tree-children tree-grid-container">
+                <!-- Allocation Grid (Level 4 - collapsible vertical strips) -->
+                <div class="tree-children tree-grid-container" *ngIf="isSectionCellsOpen(area.id, sectionIdx)">
                   <div class="section-details">
-                    <div class="allocation-grid">
+                    <div class="allocation-grid-vertical">
                       <div *ngFor="let cell of section.cells" 
-                        class="grid-cell"
+                        class="grid-cell-strip"
                         [class.allocated]="cell.allocated"
                         [style.backgroundColor]="cell.color"
                         [title]="'Cell ' + cell.value">
-                        {{ cell.value }}
+                        <span class="cell-strip-label">{{ cell.value }}</span>
                       </div>
                     </div>
                   </div>
