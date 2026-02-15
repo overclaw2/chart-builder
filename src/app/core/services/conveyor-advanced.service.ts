@@ -32,9 +32,9 @@ export class ConveyorAdvancedService {
       .subscribe(
         (config) => {
           console.log('✅ ConveyorAdvancedService: Configuration loaded successfully!', config);
-          console.log('📊 Conveyor data:', config.conveyors);
-          if (config.conveyors && config.conveyors.length > 0) {
-            console.log('📝 First conveyor name:', config.conveyors[0].conveyorName);
+          console.log('📊 Conveyor data:', config.convayor);
+          if (config.convayor && config.convayor.length > 0) {
+            console.log('📝 First conveyor name:', config.convayor[0].conveyorName);
           }
           this.validateConfig(config);
           this.configSubject.next(config);
