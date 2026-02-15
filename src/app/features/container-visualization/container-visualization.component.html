@@ -471,7 +471,9 @@
     <div class="conveyor-window" *ngIf="convPopup.item && getConveyorData(convPopup.item) as conveyorData">
       <!-- Header -->
       <div class="conveyor-header">
-        <h2>{{ conveyorData.title }}</h2>
+        <div class="header-content">
+          <h2>{{ conveyorData.title }} <span class="mode-badge" [class.new]="conveyorData.mode === 'new'" [class.edit]="conveyorData.mode === 'edit'">{{ conveyorData.mode | uppercase }}</span></h2>
+        </div>
         <span class="close-icon" (click)="closeConvPopup()" title="Close">✕</span>
       </div>
 

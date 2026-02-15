@@ -1758,20 +1758,36 @@ export class ContainerVisualizationComponent implements OnInit {
       { id: '1-D', name: '1 - D', startIndex: 3550, endIndex: 4400, color: '#e0e0e0' }
     ];
 
-    // Calculate which area contains the item (for default expansion)
-    let highlightedAreaId = '1-B';
-    for (const areaDef of areaDefinitions) {
-      if (item.position >= areaDef.startIndex && item.position <= areaDef.endIndex) {
-        highlightedAreaId = areaDef.id;
-        break;
+    // Detect mode: NEW if no allocation, EDIT if allocation exists
+    const mode = (item as any).allocation ? 'edit' : 'new';
+
+    // Calculate which area contains the item (only for EDIT mode auto-expansion)
+    let highlightedAreaId: string | null = null;
+    
+    if (mode === 'edit') {
+      // In EDIT mode, find the area containing the item's current position
+      for (const areaDef of areaDefinitions) {
+        if (item.position >= areaDef.startIndex && item.position <= areaDef.endIndex) {
+          highlightedAreaId = areaDef.id;
+          break;
+        }
       }
     }
+    // In NEW mode, highlightedAreaId stays null (no auto-expansion)
 
     // Build hierarchical tree structure with areas and sections
     const areas = areaDefinitions.map((areaDef) => {
-      const isExpanded = this.conveyorExpandedAreas[areaDef.id] !== undefined 
-        ? this.conveyorExpandedAreas[areaDef.id] 
-        : (areaDef.id === highlightedAreaId); // Expand highlighted area by default
+      // Determine if area should be expanded:
+      // - If explicitly toggled by user in this.conveyorExpandedAreas, use that
+      // - In EDIT mode and area contains item, expand it
+      // - In NEW mode, don't auto-expand
+      let isExpanded = false;
+      if (this.conveyorExpandedAreas[areaDef.id] !== undefined) {
+        isExpanded = this.conveyorExpandedAreas[areaDef.id];
+      } else if (mode === 'edit' && areaDef.id === highlightedAreaId) {
+        isExpanded = true;
+      }
+      // For NEW mode, isExpanded stays false (starts collapsed)
 
       // For expanded areas, create 4 sections (B1, B2, B3, B4)
       const sections = isExpanded ? this.createAreaSections(areaDef, areaStart, areaEnd, item, compartmentIndex) : [];
@@ -1799,6 +1815,7 @@ export class ContainerVisualizationComponent implements OnInit {
 
     return {
       title: `Conveyor ${compartmentIndex + 1}`,
+      mode: mode,
       areaStart: areaStart,
       areaEnd: areaEnd,
       areas: areas,
