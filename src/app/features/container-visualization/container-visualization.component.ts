@@ -1126,15 +1126,19 @@ export class ContainerVisualizationComponent implements OnInit {
     if (!this.shipData) return placedItems;
     
     // Iterate through all containers and compartments to collect placed items
+    // CRITICAL FIX: Do NOT use spread operator (...item) as it creates a copy
+    // Instead, directly store references and add metadata properties
     this.shipData.containers.forEach((container) => {
       container.compartments.forEach((compartment) => {
         compartment.items.forEach((item) => {
-          placedItems.push({
-            ...item,
-            location: `${container.name} (${compartment.index}/${container.compartments.length})`,
-            containerId: container.id,
-            compartmentId: compartment.id
-          });
+          // Add metadata directly to the original item without creating a copy
+          // This ensures the item reference remains the same, so updates to this object
+          // will update the original item in the compartment
+          if (!item.containerId) item.containerId = container.id;
+          if (!item.compartmentId) item.compartmentId = compartment.id;
+          if (!item.location) item.location = `${container.name} (${compartment.index}/${container.compartments.length})`;
+          
+          placedItems.push(item);
         });
       });
     });
@@ -1774,21 +1778,27 @@ export class ContainerVisualizationComponent implements OnInit {
    * Handle material type selection from dropdown
    */
   onMaterialTypeSelected(newMaterialType: MaterialType): void {
+    console.log('🔵 onMaterialTypeSelected called with:', newMaterialType);
     if (!this.typeModal.item || !this.shipData) {
+      console.warn('🔴 Early return: item or shipData missing');
       this.closeTypeModal();
       return;
     }
 
     const item = this.typeModal.item;
+    console.log('📦 Item before update:', JSON.stringify(item));
     
     // Check if this is an available package (no container/compartment) or a placed package
     const isAvailablePackage = !this.typeModal.containerId || !this.typeModal.compartmentId;
+    console.log('🔍 Is available package?', isAvailablePackage, 'containerId:', this.typeModal.containerId, 'compartmentId:', this.typeModal.compartmentId);
     
     if (isAvailablePackage) {
       // For available packages, just update the material type directly
+      console.log('📝 Updating available package with new type');
       item.dimensionMcm = newMaterialType.dimensionMcm;
       item.weightKg = newMaterialType.weightKg;
       item.materialType = newMaterialType.type;
+      console.log('✅ Available package updated:', JSON.stringify(item));
       
       // Trigger change detection
       this.shipData = { ...this.shipData };
@@ -1802,25 +1812,31 @@ export class ContainerVisualizationComponent implements OnInit {
 
     const containerId = this.typeModal.containerId;
     const compartmentId = this.typeModal.compartmentId;
+    console.log('🔍 Placed package - containerId:', containerId, 'compartmentId:', compartmentId);
 
     // Find the container and compartment
     const container = this.shipData.containers.find(c => c.id === containerId);
     if (!container) {
+      console.warn('🔴 Container not found:', containerId);
       this.closeTypeModal();
       return;
     }
+    console.log('✅ Found container:', container.id);
 
     const compartment = container.compartments.find(comp => comp.id === compartmentId);
     if (!compartment) {
+      console.warn('🔴 Compartment not found:', compartmentId);
       this.closeTypeModal();
       return;
     }
+    console.log('✅ Found compartment:', compartment.id);
 
     // Calculate the new dimensions and weight based on material type
     const oldWidth = item.dimensionMcm;
     const oldWeight = item.weightKg;
     const newWidth = newMaterialType.dimensionMcm;
     const newWeight = newMaterialType.weightKg;
+    console.log('📊 Dimension change: ' + oldWidth + ' -> ' + newWidth + ', Weight change: ' + oldWeight + ' -> ' + newWeight);
 
     // Check if the new width fits in the compartment
     const widthDifference = newWidth - oldWidth;
@@ -1844,25 +1860,44 @@ export class ContainerVisualizationComponent implements OnInit {
     const weightFits = newTotalWeight <= totalContainerCapacity;
 
     // If validation passes, update the package
+    console.log('🔍 Validation: widthFits=' + widthFits + ', weightFits=' + weightFits);
     if (widthFits && weightFits) {
-      // Update item properties
-      item.dimensionMcm = newWidth;
-      item.weightKg = newWeight;
-      item.materialType = newMaterialType.type;
+      console.log('✅ Validation passed - updating item');
+      
+      // CRITICAL: Ensure we're updating the ORIGINAL item in the compartment, not a copy
+      // Find the actual item in the compartment by ID (in case item reference is a copy)
+      const actualItemInCompartment = compartment.items.find(i => i.id === item.id);
+      if (!actualItemInCompartment) {
+        console.error('🔴 Item not found in compartment! item.id:', item.id);
+        this.closeTypeModal();
+        return;
+      }
+      
+      // Update the original item properties (not the copy from modal)
+      actualItemInCompartment.dimensionMcm = newWidth;
+      actualItemInCompartment.weightKg = newWeight;
+      actualItemInCompartment.materialType = newMaterialType.type;
+      console.log('📝 Item updated:', JSON.stringify(actualItemInCompartment));
 
       // Recalculate compartment utilization
       const totalPackageWidth = compartment.items.reduce((sum, i) => sum + (i.dimensionMcm || 27), 0);
       compartment.widthUtilization = parseFloat(((totalPackageWidth / compartment.widthMcm) * 100).toFixed(1));
       compartment.weightKg = compartment.items.reduce((sum, i) => sum + i.weightKg, 0);
       compartment.weightUtilization = parseFloat(((compartment.weightKg / compartment.totalCapacity) * 100).toFixed(2));
+      console.log('📊 Compartment updated - widthUtil: ' + compartment.widthUtilization + ', weightKg: ' + compartment.weightKg);
 
       // Update capacity warnings
       this.capacityWarningService.updateWarnings(this.shipData.containers);
 
-      // Trigger change detection
+      // CRITICAL FIX: Create new references to trigger change detection
+      // The spread operator on compartment ensures Angular detects the change
+      container.compartments = [...container.compartments];
+      
+      // Trigger change detection with new shipData reference
       this.shipData = { ...this.shipData };
       this.applyFilters();
       this.cdr.markForCheck();
+      console.log('🔄 Change detection triggered');
 
       this.showToast(`✅ Package type changed to ${newMaterialType.type}!`, 'warning');
       this.closeTypeModal();
