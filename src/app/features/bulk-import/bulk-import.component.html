@@ -326,7 +326,7 @@
       <!-- Upload Step Buttons -->
       <button 
         class="btn btn-primary" 
-        (click)="proceedToValidation()"
+        (click)="proceedToMapping()"
         [disabled]="!selectedFile || !csvData.length"
         *ngIf="currentStep === 'upload'"
       >

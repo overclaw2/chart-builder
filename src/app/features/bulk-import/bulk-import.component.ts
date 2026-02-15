@@ -223,6 +223,12 @@ export class BulkImportComponent implements OnInit {
       mappedFields.includes('dimensions');
   }
 
+  proceedToMapping(): void {
+    // Simple transition from upload to mapping step
+    // No validation needed at this point
+    this.currentStep = 'mapping';
+  }
+
   proceedToValidation(): void {
     if (!this.requiredFieldsMapped) {
       alert('⚠️ Please map all required fields (Name, Weight, Destination, Dimensions)');
