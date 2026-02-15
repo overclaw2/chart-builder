@@ -26,18 +26,23 @@ export class ConveyorAdvancedService {
   private loadDefaultConfig(): void {
     console.log('🔍 ConveyorAdvancedService: Attempting to load configuration...');
     
-    // Load from assets/conveyorConfig.json (note: exact filename - "convayor" typo is in the file)
+    // Load from assets/conveyorConfig.json
     this.http
-      .get<ConveyorConfigAdvanced>('assets/conveyorConfig.json')
+      .get<any>('assets/conveyorConfig.json')
       .subscribe(
         (config) => {
           console.log('✅ ConveyorAdvancedService: Configuration loaded successfully!', config);
-          console.log('📊 Conveyor data:', config.convayor);
-          if (config.convayor && config.convayor.length > 0) {
-            console.log('📝 First conveyor name:', config.convayor[0].conveyorName);
+          
+          // Normalize config: handle both "conveyors" and "convayor" property names
+          const normalizedConfig = this.normalizeConfig(config);
+          
+          console.log('📊 Conveyor data:', normalizedConfig.convayor);
+          if (normalizedConfig.convayor && normalizedConfig.convayor.length > 0) {
+            console.log('📝 First conveyor name:', normalizedConfig.convayor[0].conveyorName);
           }
-          this.validateConfig(config);
-          this.configSubject.next(config);
+          
+          this.validateConfig(normalizedConfig);
+          this.configSubject.next(normalizedConfig);
         },
         (error) => {
           console.error('❌ ConveyorAdvancedService: Failed to load default conveyor config from assets/conveyorConfig.json:', error);
@@ -45,6 +50,19 @@ export class ConveyorAdvancedService {
           this.configSubject.next({ convayor: [] });
         }
       );
+  }
+
+  /**
+   * Normalize config: convert "conveyors" to "convayor" if needed (handle both spellings)
+   */
+  private normalizeConfig(config: any): ConveyorConfigAdvanced {
+    if (config.conveyors && !config.convayor) {
+      console.log('⚠️ Config uses "conveyors" property, normalizing to "convayor" for consistency');
+      return {
+        convayor: config.conveyors
+      };
+    }
+    return config as ConveyorConfigAdvanced;
   }
 
   /**

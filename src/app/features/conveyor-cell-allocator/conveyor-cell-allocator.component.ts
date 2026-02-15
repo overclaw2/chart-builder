@@ -68,13 +68,23 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    console.log('🪟 ConveyorCellAllocatorComponent: ngOnInit() called - component is opening');
+    
     this.configService.config$
       .pipe(takeUntil(this.destroy$))
       .subscribe((config) => {
+        console.log('🪟 ConveyorCellAllocatorComponent: Received config from service', config);
+        
         this.config = config;
         if (config) {
           this.conveyors = config.convayor || [];
+          console.log('🪟 ConveyorCellAllocatorComponent: Set conveyors array, length:', this.conveyors.length);
+          if (this.conveyors.length > 0) {
+            console.log('🪟 ConveyorCellAllocatorComponent: First conveyor name:', this.conveyors[0].conveyorName);
+          }
           this.initializeUIState();
+        } else {
+          console.log('🪟 ConveyorCellAllocatorComponent: Config is null/undefined');
         }
       });
   }
@@ -566,21 +576,27 @@ export class ConveyorCellAllocatorComponent implements OnInit, OnDestroy {
    * Get the first conveyor's name for the header
    */
   getHeaderConveyorName(): string {
-    console.log('🔎 getHeaderConveyorName() called');
-    console.log('  - conveyors array:', this.conveyors);
-    console.log('  - config object:', this.config);
+    console.log('🎯 getHeaderConveyorName() called');
+    console.log('   - this.conveyors length:', this.conveyors?.length || 0);
+    console.log('   - this.conveyors data:', this.conveyors);
+    console.log('   - this.config:', this.config);
     
+    // Priority 1: Use the loaded conveyors array (should be populated from config subscription)
     if (this.conveyors && this.conveyors.length > 0) {
       const name = this.conveyors[0].conveyorName || 'Conveyor';
-      console.log('  ✅ Using conveyors[0].conveyorName:', name);
+      console.log('   ✅ SUCCESS: Using conveyors[0].conveyorName =', name);
       return name;
     }
+    
+    // Priority 2: Fallback to config object directly
     if (this.config && this.config.convayor && this.config.convayor.length > 0) {
       const name = this.config.convayor[0].conveyorName || 'Conveyor';
-      console.log('  ✅ Using config.convayor[0].conveyorName:', name);
+      console.log('   ✅ FALLBACK: Using config.convayor[0].conveyorName =', name);
       return name;
     }
-    console.log('  ❌ No data found, using fallback');
+    
+    // Priority 3: No data available, use default
+    console.log('   ❌ ERROR: No conveyor data found! conveyors array is empty or undefined');
     return 'Conveyor Cell Allocator';
   }
 
